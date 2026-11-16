@@ -1,0 +1,11 @@
+# Derleme çıktıları
+bin/
+obj/
+
+# Derlenmiş köprü servisi ve üçüncü taraf kurulum dosyası: kaynak değil, yeniden elde edilebilir
+# (bkz. README.md, "Depoda olmayan dosyalar"). Özet listesi (kurulum/servis.sha256) depoda kalır.
+kurulum/servis/
+kurulum/usbip-win2/*.exe
+
+# Denetim betiklerinin bu bilgisayara özgü dökümleri (aygıt listesi, Bluetooth adresleri)
+kurulum/durum/

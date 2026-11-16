@@ -1,0 +1,449 @@
+<Window x:Class="PodPanel.FlyoutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:PodPanel"
+        Title="PodPanel" Width="344" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" Topmost="True" ResizeMode="NoResize"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13"
+        UseLayoutRounding="True" SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Ideal">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <local:StringToVisibilityConverter x:Key="TextToVis" />
+
+        <Style x:Key="Muted" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <!-- Bölüm etiketi: küçük, soluk -->
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}" />
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="Value" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="Icon" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- Yuvarlak kenarlı düğme -->
+        <Style x:Key="Pill" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome" CornerRadius="14" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Bölmeli seçici düğmesi; Tag seçili olduğunu bildirir -->
+        <Style x:Key="Segment" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome" CornerRadius="6" Background="Transparent" Padding="2,7">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </DataTrigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Seçici zemini -->
+        <Style x:Key="SegmentTrack" TargetType="Border">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="Padding" Value="3" />
+        </Style>
+
+        <!-- Büyük aç/kapa kutusu: simge ve tek sözcük; açıkken vurgu rengi. Tag simgeyi taşır. -->
+        <Style x:Key="Tile" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Height" Value="62" />
+            <Setter Property="Margin" Value="3,0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Chrome" CornerRadius="8" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="17"
+                                           HorizontalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+                                <ContentPresenter HorizontalAlignment="Center" Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Metin bağlantısı -->
+        <Style x:Key="Link" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" Padding="0,2">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Satır biçiminde seçilebilir öğe -->
+        <Style x:Key="Row" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome" Background="Transparent" CornerRadius="4" Padding="4,3">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Check" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Box" Width="16" Height="16" CornerRadius="4" BorderThickness="1"
+                                    BorderBrush="{DynamicResource SubTextBrush}" Background="Transparent" VerticalAlignment="Top">
+                                <TextBlock x:Name="Mark" Text="&#xE73E;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11"
+                                           Foreground="{DynamicResource OnAccentBrush}" HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" Visibility="Collapsed" />
+                            </Border>
+                            <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Top" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Input" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <!-- Gölge ayrı katmanda: içerik metni bulanıklaşmasın -->
+        <Border CornerRadius="12" Background="{DynamicResource BgBrush}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="16" ShadowDepth="3" Direction="270" Opacity="0.35" Color="Black" />
+            </Border.Effect>
+        </Border>
+        <Border CornerRadius="12" Background="{DynamicResource BgBrush}" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1">
+            <StackPanel Margin="16,16,16,10">
+
+                <!-- Başlık: ad, tek satır durum, bağlı değilken "Bağlan" -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding DeviceTitle}" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource Muted}" Margin="0,1,0,0" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource Pill}" Content="Bağlan" Command="{Binding ToggleConnectionCommand}"
+                            VerticalAlignment="Center" Margin="8,0,0,0"
+                            Visibility="{Binding ShowConnect, Converter={StaticResource BoolToVis}}" />
+                </Grid>
+
+                <!-- Pil -->
+                <Grid Margin="0,14,0,0" Background="Transparent" ToolTip="{Binding BatteryTip}"
+                      Visibility="{Binding IsFound, Converter={StaticResource BoolToVis}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Sol" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
+                            <TextBlock Text="{Binding BatteryLeftText}" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                            <TextBlock Text="&#xE945;" Style="{StaticResource Icon}" FontSize="11" Margin="3,2,0,0" Foreground="{DynamicResource OkBrush}"
+                                       Visibility="{Binding IsChargingLeft, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Sağ" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
+                            <TextBlock Text="{Binding BatteryRightText}" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                            <TextBlock Text="&#xE945;" Style="{StaticResource Icon}" FontSize="11" Margin="3,2,0,0" Foreground="{DynamicResource OkBrush}"
+                                       Visibility="{Binding IsChargingRight, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Kutu" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
+                            <TextBlock Text="{Binding BatteryCaseText}" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                            <TextBlock Text="&#xE945;" Style="{StaticResource Icon}" FontSize="11" Margin="3,2,0,0" Foreground="{DynamicResource OkBrush}"
+                                       Visibility="{Binding IsChargingCase, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Tek satırlık uyarı: yalnızca bir sorun varken -->
+                <Border CornerRadius="8" Background="{DynamicResource CardBrush}" Padding="10,7" Margin="0,12,0,0"
+                        ToolTip="{Binding BannerTip}"
+                        Visibility="{Binding BannerText, Converter={StaticResource TextToVis}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding BannerText}" Foreground="{DynamicResource WarnBrush}" FontSize="12" TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Style="{StaticResource Link}" Content="{Binding BannerAction}" Command="{Binding BannerCommand}"
+                                Foreground="{DynamicResource AccentBrush}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                Visibility="{Binding BannerAction, Converter={StaticResource TextToVis}}" />
+                    </Grid>
+                </Border>
+
+                <!-- Dinleme modu -->
+                <Border Style="{StaticResource SegmentTrack}" Margin="0,14,0,0"
+                        Visibility="{Binding ShowModes, Converter={StaticResource BoolToVis}}"
+                        ToolTip="Dinleme modu. Kulaklık yalnızca kulaktayken değiştirir.">
+                    <Grid IsEnabled="{Binding ModesEnabled}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*" />
+                            <ColumnDefinition Width="5*" />
+                            <ColumnDefinition Width="7*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Style="{StaticResource Segment}" Content="Şeffaf" Tag="{Binding IsModeTransparency}"
+                                Command="{Binding SetModeCommand}" CommandParameter="transparency" />
+                        <Button Grid.Column="1" Style="{StaticResource Segment}" Content="Uyarlanabilir" Tag="{Binding IsModeAdaptive}"
+                                Command="{Binding SetModeCommand}" CommandParameter="adaptive" />
+                        <Button Grid.Column="2" Style="{StaticResource Segment}" Content="Gürültü Engelleme" Tag="{Binding IsModeNoiseCancellation}"
+                                Command="{Binding SetModeCommand}" CommandParameter="nc" />
+                    </Grid>
+                </Border>
+
+                <!-- Gecikme -->
+                <Grid Margin="0,8,0,0" Visibility="{Binding ShowModes, Converter={StaticResource BoolToVis}}"
+                      ToolTip="Kulaklığın ses tamponu (ms). Küçüldükçe ses oyunlarda daha erken gelir; ses takılırsa bir üst değere çık.">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Gecikme" Style="{StaticResource Label}" Margin="2,0,12,0" />
+                    <Border Grid.Column="1" Style="{StaticResource SegmentTrack}">
+                        <UniformGrid Rows="1">
+                            <Button Style="{StaticResource Segment}" Content="150" Tag="{Binding IsJitterDefault}"
+                                    Command="{Binding SetJitterCommand}" CommandParameter="0" />
+                            <Button Style="{StaticResource Segment}" Content="90" Tag="{Binding IsJitter90}"
+                                    Command="{Binding SetJitterCommand}" CommandParameter="90" />
+                            <Button Style="{StaticResource Segment}" Content="60" Tag="{Binding IsJitter60}"
+                                    Command="{Binding SetJitterCommand}" CommandParameter="60" />
+                            <Button Style="{StaticResource Segment}" Content="30" Tag="{Binding IsJitter30}"
+                                    Command="{Binding SetJitterCommand}" CommandParameter="30" />
+                        </UniformGrid>
+                    </Border>
+                </Grid>
+
+                <!-- Aç/kapa kutuları -->
+                <UniformGrid Rows="1" Margin="-3,12,-3,0" Visibility="{Binding IsFound, Converter={StaticResource BoolToVis}}">
+                    <ToggleButton Style="{StaticResource Tile}" Tag="&#xE720;" Content="Mikrofon" IsChecked="{Binding BridgeMic, Mode=TwoWay}"
+                                  Visibility="{Binding ShowBridgeMic, Converter={StaticResource BoolToVis}}"
+                                  ToolTip="AirPods mikrofonunu köprü üzerinden kullanır; konuşurken ses stereo kalır." />
+                    <ToggleButton Style="{StaticResource Tile}" Tag="&#xE7F5;" Content="Uzamsal" IsChecked="{Binding SpatialOn, Mode=TwoWay}"
+                                  IsEnabled="{Binding SpatialEnabled}"
+                                  ToolTip="Windows Sonic uzamsal sesi açar." />
+                    <ToggleButton Tag="&#xE7FC;" Content="Oyun modu" IsChecked="{Binding GameMode, Mode=TwoWay}" ToolTip="{Binding GameTip}">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource Tile}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GameModeAuto}" Value="True">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                </UniformGrid>
+
+                <!-- Alt satır -->
+                <Grid Margin="0,12,0,0">
+                    <Button Style="{StaticResource Link}" Command="{Binding ToggleDetailsCommand}" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Ayarlar" />
+                            <TextBlock Text="{Binding DetailsGlyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="9" Margin="6,3,0,0" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Link}" Content="Çıkış" Command="{Binding ExitCommand}" HorizontalAlignment="Right" />
+                </Grid>
+
+                <!-- Ayarlar: kapalı gelir -->
+                <StackPanel Margin="0,8,0,4" Visibility="{Binding ShowDetails, Converter={StaticResource BoolToVis}}">
+                    <Border Height="1" Background="{DynamicResource StrokeBrush}" Margin="0,0,0,10" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="72" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Ses" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Column="1" Text="{Binding AudioModeText}" Style="{StaticResource Value}" Margin="0,2" />
+                        <TextBlock Grid.Row="1" Text="Gecikme" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DelayText}" Style="{StaticResource Value}" Margin="0,2" />
+                        <TextBlock Grid.Row="2" Text="Mikrofon" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MicText}" Style="{StaticResource Value}" Margin="0,2" />
+                    </Grid>
+                    <TextBlock Text="{Binding LinkNote}" Foreground="{DynamicResource WarnBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Visibility="{Binding LinkNote, Converter={StaticResource TextToVis}}" />
+
+                    <StackPanel Margin="0,10,0,0" Visibility="{Binding HasMics, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Oyun modunda mikrofon" Style="{StaticResource Label}" Margin="0,0,0,2" />
+                        <ItemsControl ItemsSource="{Binding Mics}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource Row}"
+                                            Command="{Binding DataContext.SelectMicCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding Id}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1" />
+                                                <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentBrush}"
+                                                         Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
+                                            </Grid>
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="250" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <CheckBox Style="{StaticResource Check}" Content="Oyun modunda AirPods mikrofonunu kilitle" IsChecked="{Binding LockMic, Mode=TwoWay}"
+                              Margin="0,10,0,0" ToolTip="Oyun modu açıkken hiçbir uygulama AirPods'un el-serbest mikrofonunu açamaz." />
+                    <CheckBox Style="{StaticResource Check}" Content="Oyun modunu şu uygulamalarla aç" IsChecked="{Binding AutoGame, Mode=TwoWay}"
+                              Margin="0,8,0,0" ToolTip="Listedeki uygulamalardan biri çalışırken oyun modu kendiliğinden açılır." />
+                    <TextBox x:Name="AutoGameBox" Style="{StaticResource Input}" Margin="24,6,0,0"
+                             Text="{Binding AutoGameList, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                    <CheckBox Style="{StaticResource Check}" Content="Windows ile başlat" IsChecked="{Binding StartWithWindows, Mode=TwoWay}"
+                              Margin="0,10,0,0" />
+                    <Button Style="{StaticResource Link}" Content="Bağlantıyı kes" Command="{Binding ToggleConnectionCommand}"
+                            HorizontalAlignment="Left" Margin="0,10,0,0"
+                            Visibility="{Binding IsConnected, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

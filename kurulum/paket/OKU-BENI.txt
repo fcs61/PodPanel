@@ -1,0 +1,55 @@
+PodPanel: AirPods için Windows görev çubuğu paneli
+==================================================
+
+Ne yapar
+--------
+Görev çubuğunun sağındaki simgeden: pil (sol / sağ / kutu), dinleme modu (Şeffaf / Uyarlanabilir / Gürültü
+Engelleme), ses gecikmesi ayarı (oyunlar için), AirPods mikrofonunu ses kalitesini düşürmeden kullanma, uzamsal ses
+ve oyun modu.
+
+Gerekenler
+----------
+- 64 bit Windows 11.
+- USB üzerinden bağlı bir Bluetooth adaptörü (anakartların üzerindeki Intel adaptörler böyledir). Kurulum bunu
+  kendisi denetler ve uygun değilse hiçbir şey kurmadan söyler.
+- Yönetici hesabı.
+- AirPods'un Windows'la önceden eşleştirilmiş olması (Ayarlar > Bluetooth ve cihazlar > Cihaz ekle).
+
+Kurulum
+-------
+1. PodPanel-Kurulum-1.0.0.exe dosyasını çalıştır.
+   Windows "Windows kişisel bilgisayarınızı korudu" derse: "Ek bilgi" > "Yine de çalıştır".
+   (Dosya imzalı değil; bu uyarı bu yüzden çıkar.)
+2. Yönetici onayını ver. Pencere bilgisayarı denetler ve ne kuracağını gösterir.
+3. "Kur" düğmesine bas. "Önce geri yükleme noktası oluştur" kutusu işaretli kalsın.
+   Kurulum sırasında fare, klavye ve Bluetooth bir an kopabilir; kendiliğinden geri gelir.
+   Windows bir sürücü için onay isterse "Yükle" de.
+4. Sonunda "Yeniden başlat" düğmesine bas. Açılışta PodPanel kendiliğinden başlar.
+5. Görev çubuğunun sağında kulaklık simgesine tıkla. Simge görünmüyorsa gizli simgeler (^) bölümüne bak; oradan
+   görev çubuğuna sürükleyebilirsin.
+
+Bilmen gerekenler
+-----------------
+- Dinleme modu yalnızca kulaklık kulaktayken değişir.
+- "Gecikme" satırı: 150 kulaklığın kendi ayarıdır. Oyunlarda 60'ı dene; ses takılırsa 90'a çık.
+- "Mikrofon" kutusu açıkken AirPods mikrofonu, Windows'ta "Headset (A2DP, ...)" adıyla görünür ve konuşurken ses
+  stereo kalır.
+- Kurulum, Bluetooth adaptörünü bir "köprü servisi" üzerinden çalıştırır. Servis adaptörü devralamazsa kendini geri
+  alır; panel bunu bir uyarıyla gösterir ve köprüsüz çalışmaya devam eder.
+
+Kaldırma
+--------
+Ayarlar > Uygulamalar > Yüklü uygulamalar > PodPanel > Kaldır.
+Bluetooth'u Windows'un kendi sürücüsüne geri verir. İstersen usbip-win2 sürücüsünü de kaldırır.
+
+Sorun olursa
+------------
+- Kurulum günlüğü: C:\ProgramData\PodPanel\kurulum.log
+- Bluetooth hiç gelmezse: Denetim Masası > Kurtarma > Sistem Geri Yükleme'yi aç ve "PodPanel kurulumu oncesi"
+  noktasını seç.
+
+Lisans
+------
+Özgür yazılımdır (GPL-3.0). Kaynak kodu ve kullanılan bileşenlerin listesi kurulumdan sonra
+C:\Program Files\PodPanel klasöründedir (kaynak.zip, LISANS.txt, UCUNCU-TARAFLAR.txt).
+AirPods, Apple Inc. şirketinin ticari markasıdır; bu yazılımın Apple ile bir ilgisi yoktur.

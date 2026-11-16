@@ -1,0 +1,42 @@
+PodPanel: lisans ve üçüncü taraf bileşenleri
+============================================
+
+PodPanel, AirPods için bir Windows görev çubuğu panelidir. Bu paket GNU Genel Kamu Lisansı sürüm 3 (GPL-3.0)
+koşullarıyla dağıtılır; lisansın tam metni LISANS.txt dosyasındadır. Yazılım olduğu gibi sunulur, hiçbir garanti
+verilmez. Paketin kaynak kodu (panel, köprü servisi, kurulum programı ve betikleri) kaynak.zip dosyasındadır.
+
+AirPods, Apple Inc. şirketinin ticari markasıdır. Bu yazılım Apple tarafından yapılmamış, onaylanmamış ya da
+desteklenmemiştir.
+
+
+Paketteki bileşenler
+--------------------
+
+1. Köprü servisi (Bridge klasörü)
+   WPods projesinin (https://github.com/FPNDev/WPods) servis bölümünün değiştirilmiş bir kopyasıdır.
+   Kaynak sürüm: f02e957d789428b64a6d715410bd71d92aa7b2d5 (v0.3.2). Lisans: GPL-3.0.
+   Yapılan değişiklikler ve tarihleri kaynak.zip içindeki bridge/CHANGES.md dosyasında listelenir; başlıcaları:
+   kendi kendini güncelleme kaldırıldı, günlük kısıtlandı, sanal mikrofonun zamanlaması düzeltildi, panel için
+   bağlantı hacmi bildirimi eklendi. Servis, Microsoft .NET 10 çalışma zamanını (MIT lisansı) içerir.
+
+2. usbip-win2 0.9.8.1 (usbip klasöründeki kurulum dosyası, değiştirilmemiş)
+   Yazarı: Vadym Hrynchyshyn. Kaynak kodu ve lisansı: https://github.com/vadimgrn/usbip-win2
+   Kurulum dosyası yayımcısının imzasını taşır; PodPanel kurulumu çalıştırmadan önce imzayı ve dosya özetini
+   denetler. usbip-win2 ayrı bir program olarak kurulur ve Uygulamalar listesinde "USBip" adıyla görünür.
+
+3. FFmpeg 8.1 kitaplıkları (App\ffmpeg klasörü: avcodec-62.dll, avutil-60.dll, swresample-6.dll; değiştirilmemiş)
+   Derleme: BtbN/FFmpeg-Builds, "win64-lgpl-shared" (https://github.com/BtbN/FFmpeg-Builds).
+   Lisans: GNU Kısıtlı Genel Kamu Lisansı sürüm 3 (LGPL-3.0); metni App\ffmpeg\LICENSE.txt dosyasındadır.
+   Kaynak kodu: https://ffmpeg.org/download.html (8.1 sürümü). Kitaplıklar panele dinamik olarak bağlanır;
+   aynı adlı başka bir derlemeyle değiştirilebilir (bkz. kaynak.zip içindeki README.md, PODPANEL_FFMPEG).
+
+4. Microsoft .NET 8 çalışma zamanı ve Windows Desktop çalışma zamanı (App klasörü)
+   Lisans: MIT (https://github.com/dotnet/runtime, https://github.com/dotnet/wpf).
+
+
+Kaynak kodundan yeniden derleme
+-------------------------------
+
+kaynak.zip içindeki README.md derleme adımlarını anlatır. Panel için .NET 8 SDK, köprü servisi için .NET 10 SDK,
+kurulum programı için .NET Framework 4.8 başvuru derlemeleri gerekir. Paketi baştan üretmek için:
+kurulum\paket\paketle.ps1

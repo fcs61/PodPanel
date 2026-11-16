@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Kurulum sihirbazı. Windows'la gelen .NET Framework 4.8 üzerinde çalışır; hedef bilgisayarda ek bir şey gerekmez.
+    Aynı kaynak iki kez derlenir:
+      Kurulum.exe  -p:Payload=<payload.zip>   kurulum dosyaları gömülü; kurar ya da günceller
+      Kaldir.exe   -p:Tur=Kaldir              gömülü dosya yok; kurulu kopyayı kaldırır
+    -p:Sinama=1 görsel deneme anahtarlarını (/goruntu, /sahne, /betik) ekler; dağıtılan derlemede bulunmaz.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>Kurulum</AssemblyName>
+    <AssemblyName Condition="'$(Tur)' == 'Kaldir'">Kaldir</AssemblyName>
+    <RootNamespace>PodPanel.Setup</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\simge\podpanel.ico</ApplicationIcon>
+    <StartupObject>PodPanel.Setup.Program</StartupObject>
+    <Version>1.0.0</Version>
+    <Product>PodPanel</Product>
+    <AssemblyTitle>PodPanel Kurulumu</AssemblyTitle>
+    <DefineConstants Condition="'$(Sinama)' == '1'">$(DefineConstants);SINAMA</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <Resource Include="..\simge\podpanel.png" Link="podpanel.png" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Payload)' != ''">
+    <EmbeddedResource Include="$(Payload)" LogicalName="payload.zip" Link="payload.zip" />
+  </ItemGroup>
+</Project>

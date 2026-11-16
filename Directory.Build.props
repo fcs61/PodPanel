@@ -1,0 +1,13 @@
+<Project>
+  <!-- Ara ve çıktı klasörlerini kökte topla: proje yolu uzun olduğundan obj/bin yollarını kısa tutar. -->
+  <PropertyGroup>
+    <!-- CiktiEki: aynı projenin farklı bir biçimde derlenen kopyası (ör. paketleme) kendi klasörlerini kullansın. -->
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(MSBuildProjectName)$(CiktiEki)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)bin\$(MSBuildProjectName)$(CiktiEki)\</BaseOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <LangVersion>12</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+</Project>

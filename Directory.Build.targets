@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Paketleme (kurulum\paket\paketle.ps1 -CalismaZamani 8.0.x): panele eklenecek .NET 8 çalışma zamanı yamasını seçer.
+    Verilmezse SDK'nın bildiği yama kullanılır; o, SDK ne kadar eskiyse o kadar eskidir.
+  -->
+  <ItemGroup Condition="'$(CalismaZamani)' != ''">
+    <KnownFrameworkReference Update="Microsoft.NETCore.App;Microsoft.WindowsDesktop.App;Microsoft.WindowsDesktop.App.WPF;Microsoft.WindowsDesktop.App.WindowsForms">
+      <LatestRuntimeFrameworkVersion Condition="'%(TargetFramework)' == 'net8.0'">$(CalismaZamani)</LatestRuntimeFrameworkVersion>
+    </KnownFrameworkReference>
+  </ItemGroup>
+</Project>
