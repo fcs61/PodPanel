@@ -33,7 +33,8 @@ function Finish([string]$message, [int]$code) {
     Write-Host ''
     Write-Host $message -ForegroundColor $(if ($code -eq 0) { 'Green' } else { 'Red' })
     Write-Host ''
-    Read-Host 'Pencereyi kapatmak için Enter''a bas' | Out-Null
+    # Başka bir betik (4-uyku-duzeltmesi.ps1) tarafından çalıştırılıyorsa beklemeden döner.
+    if ($env:PODPANEL_DEVAM -ne '1') { Read-Host 'Pencereyi kapatmak için Enter''a bas' | Out-Null }
     exit $code
 }
 

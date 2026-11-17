@@ -15,6 +15,11 @@ internal sealed class Engine
     // After a wake: how long the adapter is watched for lost state, and how long a command may wait for its answer.
     private static readonly TimeSpan ResumeWatch = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan UnansweredLimit = TimeSpan.FromSeconds(3);
+    // Local change: how long Windows may take to send the freshly attached adapter its first request, and how long to
+    // wait for a sleep or shutdown notice after Windows unplugged the adapter by itself.
+    private static readonly TimeSpan StartLimit = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan CloseSettle = TimeSpan.FromSeconds(30);
+    private const string ClosedByWindows = "USB/IP connection closed";
 
     private readonly HciProxy _hci = new();
     private readonly CancellationTokenSource _stop = new();
@@ -39,6 +44,8 @@ internal sealed class Engine
     private int _busIds;
     private bool _suspended;
     private volatile bool _resumeRestart;
+    // Local change: the last session ended without a single request from Windows; see RadioDriver.RestartVhci.
+    private volatile bool _vhciSuspect;
     private RadioLink? _link;
     private IDisposable? _removedWatch;
     // Real adapter resets requested by the vendor driver, oldest first.
@@ -514,12 +521,21 @@ internal sealed class Engine
                 continue;
             }
             SetState(ServiceState.Starting, "");
+            // Local change: never plug the virtual adapter in while Windows is going to sleep.
+            WaitWhileSuspended();
+            if (_stop.IsCancellationRequested)
+            {
+                break;
+            }
             DateTime started = DateTime.UtcNow;
             bool failed;
+            bool settle = false;
             try
             {
                 string ended = RunSession(id);
                 Log.Info("engine", $"session ended: {ended}");
+                // Local change: see WaitForShutdownNotice. Not after a replug this service asked for itself.
+                settle = ended == ClosedByWindows && !_resumeRestart;
                 // A replug after resume is no failure, however short the session was.
                 failed = DateTime.UtcNow - started < HealthySession && !_resumeRestart;
                 _resumeRestart = false;
@@ -550,7 +566,48 @@ internal sealed class Engine
                 }
             }
             SetState(ServiceState.Starting, "");
+            if (settle)
+            {
+                WaitForShutdownNotice();
+            }
             WaitRetry(TimeSpan.FromSeconds(2));
+        }
+    }
+
+    // Local change. Waits out an announced sleep; the takeover goes on once Windows is awake again. Gives up after two
+    // minutes of running time in case the resume notice never comes (the thread does not run while Windows sleeps).
+    private void WaitWhileSuspended()
+    {
+        if (!Volatile.Read(ref _suspended))
+        {
+            return;
+        }
+        Log.Info("engine", "Windows is going to sleep: not plugging the adapter in until it wakes");
+        for (int i = 0; i < 240 && Volatile.Read(ref _suspended) && !_stop.IsCancellationRequested; i++)
+        {
+            _stop.Token.WaitHandle.WaitOne(500);
+        }
+        if (Volatile.Read(ref _suspended) && !_stop.IsCancellationRequested)
+        {
+            Log.Warn("engine", "no resume notice after two minutes awake: carrying on");
+            Volatile.Write(ref _suspended, false);
+        }
+        // Give the USB stack a moment after the wake.
+        _stop.Token.WaitHandle.WaitOne(1500);
+    }
+
+    // Local change. usbip-win2 unplugs its devices when Windows starts to shut down, seconds before services hear of
+    // it; with Fast Startup that "shutdown" is a hibernation and this service keeps running. Plugging the adapter in
+    // again in that gap left the controller's port dead (2026-11-17, 13 s between the unplug and the suspend notice).
+    // So after Windows closed the connection, wait for the suspend notice; if none comes within CloseSettle, it was
+    // something else and the takeover goes on.
+    private void WaitForShutdownNotice()
+    {
+        Log.Info("engine", $"Windows unplugged the virtual adapter: waiting up to {CloseSettle.TotalSeconds:F0} s for a sleep or shutdown notice");
+        long until = Environment.TickCount64 + (long)CloseSettle.TotalMilliseconds;
+        while (Environment.TickCount64 < until && !Volatile.Read(ref _suspended) && !_stop.IsCancellationRequested && !_retry.IsSet)
+        {
+            _stop.Token.WaitHandle.WaitOne(250);
         }
     }
 
@@ -605,6 +662,7 @@ internal sealed class Engine
         var gate = new Lock();
         RadioLink? link = null;
         bool removing = false;
+        bool notStarted = false;
         using var released = new ManualResetEventSlim();
         IDisposable watch = RadioDriver.WatchRemoval(device.File, () =>
         {
@@ -644,6 +702,17 @@ internal sealed class Engine
                     Log.Info("radio", $"forgot {stale} hidden audio device nodes of older virtual adapters");
                 }
             }
+            // Local change: a controller port left dead by an earlier attach; see RadioDriver.RestartVhci.
+            RadioDriver.RecoverVhci();
+            bool requested = RadioDriver.TakeVhciRestartRequest();
+            if (_vhciSuspect || requested)
+            {
+                _vhciSuspect = false;
+                Log.Info("engine", requested
+                    ? "a restart of usbip-win2's host controller was requested: restarting it before plugging the adapter in"
+                    : "Windows did not start the virtual adapter last time: restarting usbip-win2's host controller first");
+                RadioDriver.RestartVhci();
+            }
             _server ??= new UsbIpServer();
             bus = NextBusId();
             byte[] info = UsbIp.DeviceInfo(bus, device.DeviceDescriptor, device.ConfigDescriptor, device.Speed);
@@ -664,6 +733,18 @@ internal sealed class Engine
             else
             {
                 Volatile.Write(ref _link, current);
+                // Local change: usbip reports the attach as done even when the controller's port is dead. Windows then
+                // never sends a request; end such a session so that the next one restarts the controller.
+                using var startWatch = new Timer(_ =>
+                {
+                    if (current.Started || _stop.IsCancellationRequested || Volatile.Read(ref _link) != current)
+                    {
+                        return;
+                    }
+                    Log.Warn("engine", $"Windows sent the virtual adapter no request within {StartLimit.TotalSeconds:F0} s of plugging it in");
+                    Volatile.Write(ref notStarted, true);
+                    current.Dispose();
+                }, null, StartLimit, Timeout.InfiniteTimeSpan);
                 current.ResetRequested += () =>
                 {
                     // Capped per day: a driver that keeps resetting the adapter has a problem a reset does not cure.
@@ -729,9 +810,15 @@ internal sealed class Engine
             }
             _server.StopReconnect(bus);
         }
+        // Local change: a session without a single request from Windows leaves the controller's port suspect.
+        if (link is not null && !link.Started && !_stop.IsCancellationRequested)
+        {
+            _vhciSuspect = true;
+        }
         return _stop.IsCancellationRequested ? "service stopping"
             : link is null ? "adapter removed by Windows"
-            : link.DeviceLost ? "radio lost" : "USB/IP connection closed";
+            : link.DeviceLost ? "radio lost"
+            : Volatile.Read(ref notStarted) ? "Windows did not start the virtual adapter" : ClosedByWindows;
     }
 
     // A fresh bus id per attach: usbip-win2 keeps retrying a broken import for a while, which must never match a new one.

@@ -83,6 +83,111 @@ internal static unsafe partial class RadioDriver
     public static bool IsOnWinUsb(string instanceId) =>
         string.Equals(GetService(instanceId), "WinUSB", StringComparison.OrdinalIgnoreCase);
 
+    // ---- Local change: usbip-win2's emulated USB host controller ----
+
+    private const string VhciEnumKey = @"SYSTEM\CurrentControlSet\Services\usbip2_ude\Enum";
+
+    /// <summary>
+    /// Restarts usbip-win2's emulated host controller (disable, then enable). A virtual device plugged in while Windows
+    /// was shutting down or going to sleep can leave a port of that controller dead: later attaches succeed, but
+    /// Windows' requests never reach the device, which then shows as "Unknown USB Device" (code 43). Seen on
+    /// 2026-11-17 with usbip-win2 0.9.8.1; removing the failed device node did not help, restarting the controller did.
+    /// Everything attached to the controller is unplugged by this, so nothing of this service may be attached.
+    /// The disable is not persistent: should the service die halfway, a restart of Windows brings the controller back,
+    /// and <see cref="RecoverVhci"/> finishes the job on the next takeover.
+    /// </summary>
+    public static bool RestartVhci()
+    {
+        string? id;
+        using (RegistryKey? services = Registry.LocalMachine.OpenSubKey(VhciEnumKey))
+        {
+            id = services?.GetValue("0") as string;
+        }
+        if (id is null || CM_Locate_DevNode(out uint dev, id, 0) != 0)
+        {
+            Log.Warn("usbip", "the emulated host controller was not found: not restarted");
+            return false;
+        }
+        using (RegistryKey state = Registry.LocalMachine.CreateSubKey(StateKey))
+        {
+            state.SetValue("VhciInstance", id);
+            state.SetValue("VhciDisabled", 1, RegistryValueKind.DWord);
+        }
+        uint cr = CM_Disable_DevNode(dev, 0x4 /* CM_DISABLE_UI_NOT_OK */);
+        if (cr != 0)
+        {
+            Log.Warn("usbip", $"the emulated host controller {id} could not be stopped (CR 0x{cr:X})");
+            ClearVhciDisabled();
+            return false;
+        }
+        Thread.Sleep(2000);
+        return EnableVhci(id);
+    }
+
+    /// <summary>
+    /// A one-time request to restart the controller before the next attach: registry value RestartVhciOnce = 1 under
+    /// the service's state key, which only administrators can write. Used to test the recovery and as a manual remedy.
+    /// </summary>
+    public static bool TakeVhciRestartRequest()
+    {
+        using RegistryKey? state = Registry.LocalMachine.OpenSubKey(StateKey, writable: true);
+        if (state?.GetValue("RestartVhciOnce") is int requested && requested == 1)
+        {
+            state.DeleteValue("RestartVhciOnce", throwOnMissingValue: false);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>Finishes a controller restart that was interrupted between its two halves.</summary>
+    public static void RecoverVhci()
+    {
+        string? id = null;
+        using (RegistryKey? state = Registry.LocalMachine.OpenSubKey(StateKey))
+        {
+            if (state?.GetValue("VhciDisabled") is int disabled && disabled == 1)
+            {
+                id = state.GetValue("VhciInstance") as string;
+            }
+        }
+        if (id is not null)
+        {
+            Log.Info("usbip", "an earlier restart of the emulated host controller was interrupted: enabling it");
+            EnableVhci(id);
+        }
+    }
+
+    private static bool EnableVhci(string id)
+    {
+        if (CM_Locate_DevNode(out uint dev, id, 0) != 0 && CM_Locate_DevNode(out dev, id, 1 /* CM_LOCATE_DEVNODE_PHANTOM */) != 0)
+        {
+            Log.Warn("usbip", $"the emulated host controller {id} is gone");
+            ClearVhciDisabled();
+            return false;
+        }
+        uint cr = CM_Enable_DevNode(dev, 0);
+        bool started = false;
+        for (int i = 0; i < 40 && !started; i++)
+        {
+            Thread.Sleep(250);
+            started = CM_Get_DevNode_Status(out uint status, out uint problem, dev, 0) == 0 && (status & 0x8 /* DN_STARTED */) != 0 && problem == 0;
+        }
+        if (cr == 0)
+        {
+            ClearVhciDisabled();
+        }
+        Log.Info("usbip", $"emulated host controller {id} restarted: enable CR 0x{cr:X}, started {started}");
+        // Its root hub and ports need a moment before a device can be attached.
+        Thread.Sleep(1500);
+        return cr == 0 && started;
+    }
+
+    private static void ClearVhciDisabled()
+    {
+        using RegistryKey state = Registry.LocalMachine.CreateSubKey(StateKey);
+        state.DeleteValue("VhciDisabled", throwOnMissingValue: false);
+    }
+
     /// <summary>New driver installed but not running (DN_NEED_RESTART), as something still has the adapter open.</summary>
     public static bool NeedsRestart(string instanceId) =>
         CM_Locate_DevNode(out uint dev, instanceId, 0) == 0
@@ -789,6 +894,12 @@ internal static unsafe partial class RadioDriver
 
     [LibraryImport("cfgmgr32.dll")]
     private static partial uint CM_Uninstall_DevNode(uint devInst, uint flags);
+
+    [LibraryImport("cfgmgr32.dll")]
+    private static partial uint CM_Disable_DevNode(uint devInst, uint flags);
+
+    [LibraryImport("cfgmgr32.dll")]
+    private static partial uint CM_Enable_DevNode(uint devInst, uint flags);
 
     [LibraryImport("cfgmgr32.dll")]
     private static partial uint CM_Register_Notification(void* filter, nint context, delegate* unmanaged<nint, nint, int, nint, uint, uint> callback, out nint notify);

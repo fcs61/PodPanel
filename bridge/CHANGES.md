@@ -6,7 +6,7 @@ Bu klasör, [WPods](https://github.com/FPNDev/WPods) projesinin yalnızca servis
 - Lisans: GPL-3.0 (bkz. `LICENSE`). PodPanel kurulum paketi bu servisi derlenmiş olarak içerir; paket, lisans metnini
   (`LISANS.txt`) ve bu kaynağı (`kaynak.zip`) birlikte taşır.
 - Değişiklik tarihi: 2026-11-16
-- Derlenen sürüm etiketi: `0.3.2+f02e957.noupdate.5`
+- Derlenen sürüm etiketi: `0.3.2+f02e957.noupdate.6`
 
 ## Değişiklikler
 
@@ -24,6 +24,8 @@ Bu klasör, [WPods](https://github.com/FPNDev/WPods) projesinin yalnızca servis
 | `HciProxy.cs` | (2026-11-17, `.noupdate.4`) AirPods'un Windows'a verdiği AVDTP yetenek yanıtları (bir akış ucunun desteklediği codec listesi) geçerken kopyalanır ve servis günlüğüne yazılır; bağlantı başına en çok 12 yanıt. Ses ya da kullanıcı verisi içermez; paket Windows'a değiştirilmeden iletilir. |
 | `HciProxy.cs`, `Pipes.cs`, `Protocol.cs` | (2026-11-17, `.noupdate.5`) İstemci, kulaklık kanalını AAP (0x1001) yerine AVDTP işaretleşmesine (0x0019) açtırabilir: ilk ileti 12 bayt olur ve sonunda PSM taşır. Başka PSM reddedilir; bağlantı başına yine tek kanal vardır. Kulaklığın düşük gecikmeli codec ucunu yoklamak için eklendi. |
 
+| `Engine.cs`, `RadioLink.cs`, `RadioDriver.cs` | (2026-11-17, `.noupdate.6`) Kapatma ve uyku. Hızlı Başlangıç açıkken "Kapat" bir hazırda bekletmedir ve servis çalışmaya devam eder; usbip-win2 sanal aygıtları kapanmanın başında, servise uyku bildirimi gelmeden saniyeler önce çıkarır. Özgün kod adaptörü 2 saniye sonra yeniden takıyordu; kapanma sırasında takılan adaptör usbip denetleyicisinin bağlantı noktasını ölü bırakıyor, açılışta Bluetooth gelmiyordu (Aygıt Yöneticisi'nde "Bilinmeyen Aygıt", kod 43). Üç değişiklik: (1) Windows bağlantıyı kendisi kapattıysa yeniden takmadan önce 30 saniyeye kadar uyku bildirimi beklenir; (2) uyku bildirimi geldiyse uyanana kadar adaptör takılmaz; (3) takıldıktan sonra 10 saniye içinde Windows'tan hiç istek gelmezse oturum sonlandırılır ve bir sonraki takmadan önce usbip'in sanal USB denetleyicisi kapatılıp açılır (`RadioDriver.RestartVhci`). Yönetici, `HKLM\SOFTWARE\WPods\Service\RestartVhciOnce = 1` değeriyle bu yeniden başlatmayı bir kez isteyebilir (sınama ve elle onarım için). `Directory.Build.props`: sürüm etiketine git işleme özeti eklenmez. |
+
 Bluetooth paketlerinin iletilmesi, sürücü bağlama ve USB/IP sunucusu kodunda başka değişiklik yoktur.
 
 ## Derleme
@@ -31,5 +33,5 @@ Bluetooth paketlerinin iletilmesi, sürücü bağlama ve USB/IP sunucusu kodunda
 Proje .NET 10 SDK ister; SDK kullanıcı klasörüne kurulu (`%USERPROFILE%\PodPanel\tools\dotnet10`). Çıktı kendi çalışma zamanını içerir, bu yüzden bilgisayara .NET 10 kurmak gerekmez. Derlenmiş çıktı `kurulum\servis` klasöründe, dosya özetleri `kurulum\servis.sha256` dosyasındadır.
 
 ```powershell
-& "$env:USERPROFILE\PodPanel\tools\dotnet10\dotnet.exe" publish bridge\src\WPods.Service\WPods.Service.csproj -c Release --self-contained true -o "$env:USERPROFILE\PodPanel\build\bridge-publish" --artifacts-path "$env:USERPROFILE\PodPanel\build\bridge" -p:Version=0.3.2 "-p:InformationalVersion=0.3.2+f02e957.noupdate.5"
+& "$env:USERPROFILE\PodPanel\tools\dotnet10\dotnet.exe" publish bridge\src\WPods.Service\WPods.Service.csproj -c Release --self-contained true -o "$env:USERPROFILE\PodPanel\tools\build\bridge-publish" --artifacts-path "$env:USERPROFILE\PodPanel\tools\build\bridge" -p:Version=0.3.2 "-p:InformationalVersion=0.3.2+f02e957.noupdate.6"
 ```

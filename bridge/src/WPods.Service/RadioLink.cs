@@ -28,6 +28,7 @@ internal sealed class RadioLink : IDisposable
     private readonly byte _aclOut;
     private readonly List<Thread> _workers = [];
     private int _lost;
+    private int _requests;
 
     public RadioLink(TcpClient client, WinUsbDevice device, HciProxy hci)
     {
@@ -51,6 +52,12 @@ internal sealed class RadioLink : IDisposable
 
     /// <summary>Set once a WinUSB transfer failed because the radio is gone.</summary>
     public bool DeviceLost => Volatile.Read(ref _lost) != 0;
+
+    /// <summary>
+    /// Local change: Windows sent at least one USB request, so its hub driver saw the virtual adapter and is setting it
+    /// up. A healthy attach gets the first request (GET_DESCRIPTOR) within a fraction of a second.
+    /// </summary>
+    public bool Started => Volatile.Read(ref _requests) != 0;
 
     /// <summary>Serves Windows' requests on the caller's thread until the device is detached, lost or disposed.</summary>
     public void Run()
@@ -117,6 +124,7 @@ internal sealed class RadioLink : IDisposable
         while (true)
         {
             _stream.ReadExactly(header);
+            Volatile.Write(ref _requests, 1);
             uint cmd = UsbIp.U32(header, 0);
             uint seq = UsbIp.U32(header, 4);
             uint dir = UsbIp.U32(header, 12);

@@ -195,6 +195,19 @@ yeniden başlatma.
 
 Ayarlar ve günlük: `%LOCALAPPDATA%\PodPanel` (`settings.json`, `podpanel.log`).
 
+## Kapatma ve uyku
+
+Hızlı Başlangıç açıkken Windows'ta "Kapat" bir hazırda bekletmedir: köprü servisi kapanmaz, uyur ve açılışta kaldığı
+yerden sürer. usbip-win2 sanal aygıtları kapanmanın başında çıkarır; servis adaptörü o sırada yeniden takarsa
+usbip'in sanal USB denetleyicisinin bağlantı noktası ölü kalır ve açılışta Bluetooth gelmez (Aygıt Yöneticisi'nde
+"Bilinmeyen Aygıt", kod 43). Servisin `.noupdate.6` sürümü bunu üç yolla ele alır (bkz. `bridge/CHANGES.md`): Windows
+adaptörü kendisi çıkardıysa uyku bildirimi için bekler, uyurken adaptörü takmaz, taktıktan sonra Windows'tan istek
+gelmezse usbip denetleyicisini yeniden başlatır.
+
+- `kurulum\4-uyku-duzeltmesi.ps1`: kurulu servisi bu sürüme günceller ve denetleyiciyi yeniden başlatma yolunu sınar.
+- `kurulum\bluetooth-onar.ps1`: Bluetooth yine de gelmediyse elle onarır (bozuk aygıt kaydını siler, yetmezse
+  denetleyiciyi kapatıp açar). Tam bir **Yeniden başlat** da aynı işi görür; "Kapat" görmez.
+
 ## Depoda olmayan dosyalar
 
 Depo yalnızca kaynak kodunu taşır. Kurulum paketini üretmek (`paketle.ps1`) için şu üç ikili girdi gerekir; üçü de

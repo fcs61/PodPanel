@@ -9,5 +9,7 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <LangVersion>12</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
+    <!-- Sürüm etiketine git işleme özeti eklenmesin (kurulum betikleri sürümleri karşılaştırır). -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>
