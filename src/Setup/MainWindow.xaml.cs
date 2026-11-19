@@ -139,6 +139,9 @@ public partial class MainWindow : Window
     private ScriptResult? _result;
     private bool _createdRoot;
     private bool _alreadyInstalled;
+    // Denetimden: bu kurulumda geri yükleme noktası gerekiyor mu, ve Sistem Koruması kapalı olduğu için oluşturulamaz mı.
+    private bool _restoreNeeded = true;
+    private bool _restoreUnavailable;
     private double _lastProgress;
 
     // Yalnızca deneme derlemesinde (-p:Sinama=1) doldurulur; dağıtılan derlemede hep boştur.
@@ -271,6 +274,11 @@ public partial class MainWindow : Window
                     : value == "bilinmiyor" ? "Kurulu" : value + " kurulu");
                 break;
             case "servis": AddFinding("Köprü servisi", Capitalize(value)); break;
+            case "denetim": AddFinding("Uygulama Denetimi", Capitalize(value)); break;
+            case "geriyukleme":
+                _restoreNeeded = value != "gerekmez";
+                _restoreUnavailable = value == "kapalı";
+                break;
             case "usbip": AddFinding("usbip-win2", value == "yok" ? "Kurulu değil" : Capitalize(value)); break;
             case "usbipbizim": OptionBox.IsChecked = value == "1"; break;
         }
@@ -299,9 +307,16 @@ public partial class MainWindow : Window
             foreach (Finding finding in _findings) usbip |= finding.Label == "usbip-win2" && finding.Value == "Kurulu";
             OptionBox.Visibility = usbip ? Visibility.Visible : Visibility.Collapsed;
         }
-        else if (_alreadyInstalled)
+        else
         {
-            PrimaryButton.Content = "Güncelle";
+            if (_alreadyInstalled) PrimaryButton.Content = "Güncelle";
+            if (!_restoreNeeded)
+            {
+                // Sürücü ve servis değişmeyecek: geri yükleme noktası seçeneği anlamsız.
+                OptionBox.IsChecked = false;
+                OptionBox.Visibility = Visibility.Collapsed;
+                ReadyNote.Text = "Bu kurulumda sürücülere, köprü servisine ve Bluetooth'a dokunulmayacak.";
+            }
         }
         PrimaryButton.IsEnabled = _blockers.Count == 0;
     }
@@ -350,7 +365,7 @@ public partial class MainWindow : Window
         {
             ["PODPANEL_KAYNAK"] = _stage,
             ["PODPANEL_MOD"] = _install ? "kur" : "kaldir",
-            ["PODPANEL_GERIYUKLEME"] = OptionBox.IsChecked == true ? "1" : "0",
+            ["PODPANEL_GERIYUKLEME"] = OptionBox.IsChecked == true && OptionBox.Visibility == Visibility.Visible ? "1" : "0",
             ["PODPANEL_USBIP_KALDIR"] = OptionBox.IsChecked == true && OptionBox.Visibility == Visibility.Visible ? "1" : "0",
         };
         string script = _testScript ?? ScriptPath(_install ? "kur.ps1" : "kaldir.ps1");
@@ -421,8 +436,10 @@ public partial class MainWindow : Window
         {
             // Panel kullanılabilir durumda: başlatılır, yalnızca köprü eksik.
             DoneTitle.Text = "Panel kuruldu, köprü kurulamadı";
-            DoneText.Text = result.Message;
-            DoneNote.Text = "Ayrıntılar günlükte: " + LogPath;
+            // Betik, iletinin "||" sonrasını ek açıklama olarak gönderir (ör. köprünün nasıl kurulabileceği).
+            int split = result.Message.IndexOf("||", StringComparison.Ordinal);
+            DoneText.Text = split < 0 ? result.Message : result.Message.Substring(0, split).Trim();
+            DoneNote.Text = split < 0 ? "Ayrıntılar günlükte: " + LogPath : result.Message.Substring(split + 2).Trim();
             if (result.Restart) OfferRestart();
             StartPanel();
         }
@@ -504,6 +521,17 @@ public partial class MainWindow : Window
     {
         if (_state == Stage.Ready)
         {
+            if (_install && _restoreUnavailable && OptionBox.IsChecked == true && !Testing)
+            {
+                // Sistem Koruması kapalıyken nokta oluşturulamaz; kurulum yarıda durmasın diye önce sorulur.
+                MessageBoxResult answer = MessageBox.Show(this,
+                    "Sistem Koruması kapalı olduğu için geri yükleme noktası oluşturulamaz." + Environment.NewLine + Environment.NewLine
+                    + "Geri yükleme noktası olmadan kurulsun mu?" + Environment.NewLine + Environment.NewLine
+                    + "Hayır dersen kurulum başlamaz; Sistem Koruması'nı açıp yeniden deneyebilirsin.",
+                    Title, MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+                if (answer != MessageBoxResult.Yes) return;
+                OptionBox.IsChecked = false;
+            }
             await RunAsync();
         }
         else if (_state == Stage.Done)

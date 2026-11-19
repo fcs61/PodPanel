@@ -21,6 +21,16 @@ Windows'la önceden eşleştirilmiş olmalıdır.
 4. usbip-win2 ilk kez kurulduysa sonunda **Yeniden başlat**. Köprü servisi açılışta Bluetooth adaptörünü devralır;
    panel de kendiliğinden başlar (bildirim alanında, gerekirse gizli simgeler `^` bölümünde).
 
+Kurulumun kendiliğinden ele aldığı iki durum:
+
+- **Akıllı Uygulama Denetimi açıksa** Windows imzasız programları çalıştırmaz (hata 4551, "Uygulama Denetimi ilkesi bu
+  dosyayı engelledi"); köprü servisi de imzasızdır. Kurulum bunu ilk ekranda gösterir, sürücüye ve Bluetooth'a hiç
+  dokunmaz ve yalnızca paneli kurar. Denetim kapalı görünse bile kurulum, hiçbir şeye dokunmadan önce servis programını
+  zararsız bir komutla dener; Windows çalıştırmazsa yine yalnızca panel kurulur. Köprü için denetimin kapalı olması
+  gerekir (Windows Güvenliği > Uygulama ve tarayıcı denetimi); kapatmak bilgisayarın korumasını azaltır.
+- **Sistem Koruması kapalıysa** geri yükleme noktası oluşturulamaz. Kurulum bunu ilk ekranda söyler ve "Kur" denince
+  noktasız kurmak için onay ister. Sürücü ve servis değişmeyecekse (yalnızca panel güncelleniyorsa) nokta hiç istenmez.
+
 Bir şey ters giderse:
 
 - Köprü servisi Bluetooth'u devralamazsa kendini geri alır: üç başarısız denemeden sonra adaptörü Windows'un kendi

@@ -2,7 +2,8 @@
 # PowerShell sürecinde çalıştırır ve standart çıktıyı okur:
 #   @@ADIM <n> <toplam> <metin>      n. adım başladı
 #   @@BILGI <anahtar> <değer>        denetim sonucu (yalnızca "denetim" modunda)
-#   @@SON <kod> <yeniden başlat 0|1> <metin>   iş bitti; kod 0 ise başarılı
+#   @@SON <kod> <yeniden başlat 0|1> <metin>   iş bitti; kod 0 ise başarılı. Metin "||" içeriyorsa sonrası,
+#                                              pencerede ayrı ve soluk gösterilen ek açıklamadır.
 # Öteki satırlar günlük metnidir. Her satır ayrıca %ProgramData%\PodPanel\kurulum.log dosyasına yazılır.
 
 $ErrorActionPreference = 'Stop'
@@ -63,17 +64,38 @@ function Test-Admin {
 }
 
 # Bir programı çalıştırır; çıktısını ve çıkış kodunu döndürür (hata akışı PowerShell hatasına dönüşmez).
+# Program hiç başlatılamazsa da hata fırlatmaz: Code -1 döner ve LaunchError Windows'un hata kodunu taşır
+# (bilinmiyorsa -1). Windows'un Uygulama Denetimi imzasız bir programı engellediğinde kod 4551'dir.
 function Invoke-Native([string]$file, [string]$arguments) {
     $info = New-Object Diagnostics.ProcessStartInfo $file, $arguments
     $info.UseShellExecute = $false
     $info.CreateNoWindow = $true
     $info.RedirectStandardOutput = $true
     $info.RedirectStandardError = $true
-    $process = [Diagnostics.Process]::Start($info)
+    try {
+        $process = [Diagnostics.Process]::Start($info)
+    } catch {
+        $inner = $_.Exception
+        while ($inner.InnerException) { $inner = $inner.InnerException }
+        $native = if ($inner -is [ComponentModel.Win32Exception]) { $inner.NativeErrorCode } else { -1 }
+        return [pscustomobject]@{ Code = -1; Text = "başlatılamadı: $($inner.Message)"; LaunchError = $native }
+    }
     $errorTask = $process.StandardError.ReadToEndAsync()
     $output = $process.StandardOutput.ReadToEnd()
     $process.WaitForExit()
-    [pscustomobject]@{ Code = $process.ExitCode; Text = ("$output`n$($errorTask.Result)").Trim() }
+    [pscustomobject]@{ Code = $process.ExitCode; Text = ("$output`n$($errorTask.Result)").Trim(); LaunchError = 0 }
+}
+
+# Windows'un Akıllı Uygulama Denetimi: 'açık', 'değerlendirme', 'kapalı' ya da (değer yoksa) 'bilinmiyor'.
+# Açıkken Windows, imzasız ve tanımadığı programları çalıştırmaz; köprü servisi de imzasızdır.
+function Get-AppControlState {
+    $value = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy' -Name VerifiedAndReputablePolicyState -ErrorAction SilentlyContinue).VerifiedAndReputablePolicyState
+    switch ($value) {
+        1 { 'açık' }
+        2 { 'değerlendirme' }
+        0 { 'kapalı' }
+        default { 'bilinmiyor' }
+    }
 }
 
 # Özet listesini okur: "ÖZET  göreli\yol" satırları -> yol => özet.
@@ -182,6 +204,11 @@ function Start-BridgeAndWait([int]$waitSeconds) {
     $startText = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
     $install = Invoke-Native $ServiceExe '--install'
     Note "--install çıkış kodu: $($install.Code) $($install.Text)"
+    if ($install.LaunchError -ne 0) {
+        # Windows servis programını çalıştırmadı: beklemenin anlamı yok.
+        $script:LaunchProblem = $install.Text
+        return $false
+    }
     for ($elapsed = 0; $elapsed -lt $waitSeconds; $elapsed += 3) {
         Start-Sleep -Seconds 3
         $service = Get-Service $ServiceName -ErrorAction SilentlyContinue
@@ -200,18 +227,28 @@ function Start-BridgeAndWait([int]$waitSeconds) {
 function Remove-Bridge {
     $stored = (Get-ItemProperty 'HKLM:\SOFTWARE\WPods\Service' -Name RadioInstanceId -ErrorAction SilentlyContinue).RadioInstanceId
     Note "Kayıtlı adaptör: $stored"
+    # Servis programı yoksa ya da Windows onu çalıştırmıyorsa (Uygulama Denetimi) iş Windows'un kendi araçlarıyla yapılır.
+    $manual = $true
     if (Test-Path -LiteralPath $ServiceExe) {
         $undo = Invoke-Native $ServiceExe '--uninstall'
         Note "--uninstall çıkış kodu: $($undo.Code) $($undo.Text)"
-        if ($undo.Code -ne 0) {
-            $native = Invoke-Native $ServiceExe '--restore-native'
-            Note "--restore-native çıkış kodu: $($native.Code) $($native.Text)"
+        if ($undo.LaunchError -eq 0) {
+            $manual = $false
+            if ($undo.Code -ne 0) {
+                $native = Invoke-Native $ServiceExe '--restore-native'
+                Note "--restore-native çıkış kodu: $($native.Code) $($native.Text)"
+            }
+        } else {
+            Note 'Servis programı çalıştırılamadı; servis kaydı ve adaptör Windows araçlarıyla geri alınacak.'
         }
-    } elseif (Get-Service $ServiceName -ErrorAction SilentlyContinue) {
-        Note 'Servis programı bulunamadı; servis kaydı siliniyor.'
-        & "$env:SystemRoot\System32\sc.exe" stop $ServiceName | Out-Null
-        Start-Sleep -Seconds 5
-        & "$env:SystemRoot\System32\sc.exe" delete $ServiceName | Out-Null
+    }
+    if ($manual) {
+        if (Get-Service $ServiceName -ErrorAction SilentlyContinue) {
+            Note 'Servis kaydı siliniyor.'
+            & "$env:SystemRoot\System32\sc.exe" stop $ServiceName | Out-Null
+            Start-Sleep -Seconds 5
+            & "$env:SystemRoot\System32\sc.exe" delete $ServiceName | Out-Null
+        }
     }
     for ($i = 0; $i -lt 20 -and (-not (Test-BluetoothUp) -or (Get-OnWinUsb)); $i++) { Start-Sleep -Seconds 3 }
 
@@ -223,6 +260,8 @@ function Remove-Bridge {
         for ($i = 0; $i -lt 20 -and -not (Test-BluetoothUp); $i++) { Start-Sleep -Seconds 3 }
     }
     $gone = -not (Get-Service $ServiceName -ErrorAction SilentlyContinue)
+    # Elle geri almada servisin kayıt defterindeki durumu da silinir (servis programı bunu kendisi yapardı).
+    if ($manual -and $gone -and -not (Get-OnWinUsb)) { Remove-Item -Path 'HKLM:\SOFTWARE\WPods' -Recurse -Force -ErrorAction SilentlyContinue }
     Note "Servis kaldırıldı: $gone   Bluetooth hazır: $(Test-BluetoothUp)"
     Get-AdapterNodes | ForEach-Object { Note "  $_" }
     $gone -and (Test-BluetoothUp) -and -not (Get-OnWinUsb)

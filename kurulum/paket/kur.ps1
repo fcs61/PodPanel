@@ -25,6 +25,10 @@ $UsbipSigner = '9AC56B6C76141395D74FFF6652818376E80B9C95'   # Cloudyne Systems (
 $serviceTouched = $false
 $panelInstalled = $false
 $script:Blockers = @()
+# Köprünün kurulmamasının nedeni (boşsa kurulur): Uygulama Denetimi açık ya da Windows servis programını çalıştırmadı.
+$script:BridgeBlocked = ''
+$script:LaunchProblem = ''
+$DenetimYolu = 'Köprüyü kurmak için Akıllı Uygulama Denetimi kapalı olmalıdır (Windows Güvenliği > Uygulama ve tarayıcı denetimi > Akıllı Uygulama Denetimi). Kapatmak bilgisayarın korumasını azaltır; karar senin. Kapatırsan kurulumu yeniden çalıştırman yeter.'
 
 # surum.txt: 1. satır paket sürümü, 2. satır köprü servisinin sürümü.
 $versionLines = @([IO.File]::ReadAllLines((Join-Path $Kaynak 'surum.txt'), [Text.Encoding]::UTF8))
@@ -58,19 +62,45 @@ function Find-Problems {
         if (-not $service -and -not (Test-BluetoothUp)) { $blockers += 'Bluetooth şu an çalışmıyor. Önce Bluetooth''un çalıştığından emin ol.' }
     }
 
+    # Windows'un Akıllı Uygulama Denetimi açıksa imzasız köprü servisi çalıştırılmaz (ya da her an engellenebilir);
+    # o durumda sürücüye ve Bluetooth'a hiç dokunulmaz, yalnızca panel kurulur.
+    $control = Get-AppControlState
+    Info 'denetim' $control
+    $script:BridgeBlocked = ''
+    if ($control -eq 'açık') {
+        $script:BridgeBlocked = 'Akıllı Uygulama Denetimi açık: Windows imzasız köprü servisini çalıştırmıyor.'
+        $warnings += 'Akıllı Uygulama Denetimi açık: Windows imzasız köprü servisini çalıştırmıyor. Köprü kurulmayacak; panel köprüsüz kurulur.'
+    } elseif ($control -eq 'değerlendirme') {
+        $warnings += 'Akıllı Uygulama Denetimi değerlendirme modunda: kendiliğinden açılırsa köprü servisini engelleyebilir.'
+    }
+
     $bridgeOld = if ($ours) { Get-ProductVersion (Join-Path $BridgeDir 'WPods.Service.dll') } else { '' }
     $installed = (Get-ItemProperty $StateKey -Name Version -ErrorAction SilentlyContinue).Version
     if ($installed) { Info 'kurulu' $installed }
     elseif ($ours) { Info 'kurulu' 'yalnızca köprü servisi' }
     else { Info 'kurulu' 'yok' }
-    Info 'servis' $(if (-not $ours) { 'kurulacak' } elseif ($bridgeOld -eq $BridgeNew) { 'güncel' } else { 'güncellenecek' })
+    Info 'servis' $(if ($script:BridgeBlocked) { if ($ours) { 'değiştirilmeyecek' } else { 'kurulmayacak' } } elseif (-not $ours) { 'kurulacak' } elseif ($bridgeOld -eq $BridgeNew) { 'güncel' } else { 'güncellenecek' })
 
     if (Test-Path -LiteralPath $UsbipExe) {
         $version = "$((Get-Item -LiteralPath $UsbipExe).VersionInfo.FileVersion)".Trim()
         Info 'usbip' "kurulu ($version)"
         if ($version -ne $UsbipVersion) { $warnings += "usbip-win2 $version kurulu; köprü $UsbipVersion ile denendi." }
     } else {
-        Info 'usbip' 'kurulacak'
+        Info 'usbip' $(if ($script:BridgeBlocked) { 'kurulmayacak' } else { 'kurulacak' })
+    }
+    # Geri yükleme noktası yalnızca sürücü ya da servis değişecekse gerekir. Sistem Koruması kapalıysa oluşturulamaz;
+    # pencere bunu kurulumdan önce söyler ve noktasız kurmak için onay ister.
+    $needsRestore = (-not $script:BridgeBlocked) -and ((-not (Test-Path -LiteralPath $UsbipExe)) -or (-not $ours) -or ($bridgeOld -ne $BridgeNew))
+    if (-not $needsRestore) {
+        Info 'geriyukleme' 'gerekmez'
+    } else {
+        $interval = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore' -Name RPSessionInterval -ErrorAction SilentlyContinue).RPSessionInterval
+        if ($interval -eq 0) {
+            Info 'geriyukleme' 'kapalı'
+            $warnings += 'Sistem Koruması kapalı: geri yükleme noktası oluşturulamaz. Açmak için Başlat''a "Geri yükleme noktası oluştur" yaz, C: sürücüsünü seç, Yapılandır > Sistem korumasını aç.'
+        } else {
+            Info 'geriyukleme' 'gerekir'
+        }
     }
     foreach ($w in $warnings) { Info 'uyari' $w }
     foreach ($b in $blockers) { Info 'engel' $b }
@@ -166,7 +196,19 @@ try {
     $service = Get-BridgeService
     $bridgeOld = if ($service) { Get-ProductVersion (Join-Path $BridgeDir 'WPods.Service.dll') } else { '' }
     $usbipPresent = Test-Path -LiteralPath $UsbipExe
-    $driverWork = (-not $usbipPresent) -or (-not $service) -or ($bridgeOld -ne $BridgeNew)
+
+    # Windows servis programını çalıştırıyor mu? Hiçbir şeye dokunmadan önce, yalnızca durum soran komutla denenir.
+    if (-not $script:BridgeBlocked) {
+        $probe = Invoke-Native (Join-Path $Kaynak 'bridge\WPods.Service.exe') '--status'
+        if ($probe.LaunchError -ne 0) {
+            Note "Servis programı denemesi: $($probe.Text) (Windows hata kodu $($probe.LaunchError))"
+            $script:BridgeBlocked = "Windows köprü servisinin programını çalıştırmadı ($($probe.Text -replace '^başlatılamadı: ', ''))."
+        } else {
+            Note 'Servis programı denemesi: çalışıyor.'
+        }
+    }
+    if ($script:BridgeBlocked) { Note "Köprü kurulmayacak: $($script:BridgeBlocked)" }
+    $driverWork = (-not $script:BridgeBlocked) -and ((-not $usbipPresent) -or (-not $service) -or ($bridgeOld -ne $BridgeNew))
 
     # 2. Geri yükleme noktası: yalnızca sürücü ya da servis değişecekse.
     Step 2 $Toplam 'Geri yükleme noktası'
@@ -206,6 +248,22 @@ try {
     Note "Panel kuruldu: $AppDir (Uygulamalar listesine ve Başlat menüsüne eklendi)"
     if (@(Get-WritableByUsers $Hedef).Count -gt 0) {
         Finish $Kismi $false "Kurulum klasörü yönetici olmayan kullanıcılarca yazılabiliyor; köprü servisi buraya kurulamaz. $KismiEk"
+    }
+
+    # Köprü kurulamıyorsa burada biter: sürücüye, servise ve Bluetooth'a dokunulmaz.
+    if ($script:BridgeBlocked) {
+        Step 4 $Toplam 'usbip-win2 sürücüsü'
+        Note 'Köprü kurulmayacağı için atlandı.'
+        Step 5 $Toplam 'Köprü servisi'
+        if (-not $service -and (Test-Path -LiteralPath $BridgeDir)) {
+            # Önceki bir denemeden kalan, kaydedilmemiş servis dosyaları.
+            Remove-Folder $BridgeDir | Out-Null
+            Note 'Önceki denemeden kalan servis dosyaları silindi.'
+        }
+        Note 'Köprü servisi kurulmadı.'
+        Register-Install
+        $extra = if ($usbipPresent) { ' usbip-win2 kurulu duruyor; kullanılmıyor, PodPanel kaldırılırken birlikte kaldırılabilir.' } else { '' }
+        Finish $Kismi $false "$($script:BridgeBlocked) Sürücülere ve Bluetooth'a dokunulmadı.$extra $KismiEk||$DenetimYolu"
     }
 
     # 4. usbip-win2.
@@ -252,7 +310,8 @@ try {
             if ($install.Code -ne 0) {
                 Remove-Bridge | Out-Null
                 if (-not (Get-Service $ServiceName -ErrorAction SilentlyContinue)) { Remove-Folder $BridgeDir | Out-Null }
-                Finish $Kismi $restart "Köprü servisi kaydedilemedi; Bluetooth'a dokunulmadı. $KismiEk"
+                $why = if ($install.LaunchError -ne 0) { " Windows servis programını çalıştırmadı ($($install.Text -replace '^başlatılamadı: ', ''))." } else { '' }
+                Finish $Kismi $restart "Köprü servisi kaydedilemedi; Bluetooth'a dokunulmadı.$why $KismiEk"
             }
             Note 'Servis kaydedildi; yeniden başlatmada Bluetooth adaptörünü devralacak.'
         } else {
@@ -261,7 +320,8 @@ try {
                 Note 'Servis Bluetooth''u devralamadı; geri alınıyor (bir dakika sürebilir)...'
                 $restored = Remove-Bridge
                 if (-not (Get-Service $ServiceName -ErrorAction SilentlyContinue)) { Remove-Folder $BridgeDir | Out-Null }
-                if ($restored) { Finish $Kismi $false "Köprü servisi Bluetooth'u devralamadı. Servis kaldırıldı ve Bluetooth eski hâline döndü. $KismiEk" }
+                $why = if ($script:LaunchProblem) { " Windows servis programını çalıştırmadı ($($script:LaunchProblem -replace '^başlatılamadı: ', ''))." } else { '' }
+                if ($restored) { Finish $Kismi $false "Köprü servisi Bluetooth'u devralamadı.$why Servis kaldırıldı ve Bluetooth eski hâline döndü. $KismiEk" }
                 Finish 13 $true 'Köprü servisi Bluetooth''u devralamadı ve geri alma doğrulanamadı. Bilgisayarı yeniden başlat; Bluetooth gelmezse Sistem Geri Yükleme ile "PodPanel kurulumu oncesi" noktasına dön.'
             }
         }

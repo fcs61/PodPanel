@@ -13,6 +13,9 @@ Gerekenler
 - USB üzerinden bağlı bir Bluetooth adaptörü (anakartların üzerindeki Intel adaptörler böyledir). Kurulum bunu
   kendisi denetler ve uygun değilse hiçbir şey kurmadan söyler.
 - Yönetici hesabı.
+- Windows'un Akıllı Uygulama Denetimi kapalı olmalı (Windows Güvenliği > Uygulama ve tarayıcı denetimi). Açıksa
+  Windows imzasız köprü servisini çalıştırmaz; kurulum bunu söyler ve yalnızca paneli kurar (pil, bağlantı, oyun
+  modu, uzamsal ses çalışır; dinleme modu, gecikme ve mikrofon çalışmaz).
 - AirPods'un Windows'la önceden eşleştirilmiş olması (Ayarlar > Bluetooth ve cihazlar > Cihaz ekle).
 
 Kurulum
