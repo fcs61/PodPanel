@@ -103,7 +103,7 @@ foreach ($name in 'src', 'bridge') {
 New-Item -ItemType Directory -Force (Join-Path $source 'kurulum\paket') | Out-Null
 Copy-Item -Path (Join-Path $repo 'kurulum\*.ps1') -Destination (Join-Path $source 'kurulum')
 Copy-Item -Path (Join-Path $PSScriptRoot '*') -Destination (Join-Path $source 'kurulum\paket')
-foreach ($name in 'README.md', 'LICENSE', 'Directory.Build.props', 'Directory.Build.targets') { Copy-Item -LiteralPath (Join-Path $repo $name) -Destination $source }
+foreach ($name in 'README.md', 'README.tr.md', 'LICENSE', 'Directory.Build.props', 'Directory.Build.targets') { Copy-Item -LiteralPath (Join-Path $repo $name) -Destination $source }
 [IO.Compression.ZipFile]::CreateFromDirectory($source, (Join-Path $payload 'kaynak.zip'), 'Optimal', $false)
 
 Step 'Kaldırma programı (Kaldir.exe)'
