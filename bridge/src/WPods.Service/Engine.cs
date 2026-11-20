@@ -885,22 +885,37 @@ internal sealed class Engine
     // A fresh bus id per attach: usbip-win2 keeps retrying a broken import for a while, which must never match a new one.
     private string NextBusId() => $"1-{Interlocked.Increment(ref _busIds)}";
 
+    // Local change (.noupdate.10): 45 s, was 15 s. On the first start after an install the adapter has just been
+    // moved from Windows' Bluetooth driver to WinUSB while Windows is still starting up. The old driver's device
+    // stack was still being torn down and the interface could not be opened for 17 s (error 50, then 2): the
+    // takeover was logged as failed, counted towards the "3 failed takeovers" guard, and only the retry worked.
+    private static readonly TimeSpan WinUsbWait = TimeSpan.FromSeconds(45);
+
     // WinUSB's device interface appears a moment after the bind.
     private static WinUsbDevice OpenRadio(string id, CancellationToken stop)
     {
         string path = RadioDriver.DevicePath(id);
         // A serial number from the real adapter's instance ID: stable for this adapter in this USB port.
         string serial = "WPODS" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(id.ToUpperInvariant())), 0, 8);
-        for (int i = 0; ; i++)
+        long started = Environment.TickCount64;
+        int lastError = 0;
+        while (true)
         {
             try
             {
-                return WinUsbDevice.Open(path, RadioDriver.IsFunction(id), serial);
-            }
-            catch (Win32Exception e) when (i < 30 && !stop.IsCancellationRequested)
-            {
-                if (i == 0)
+                WinUsbDevice device = WinUsbDevice.Open(path, RadioDriver.IsFunction(id), serial);
+                if (lastError != 0)
                 {
+                    Log.Info("radio", $"WinUSB ready after {(Environment.TickCount64 - started) / 1000.0:0.0} s");
+                }
+                return device;
+            }
+            catch (Win32Exception e) when (Environment.TickCount64 - started < WinUsbWait.TotalMilliseconds && !stop.IsCancellationRequested)
+            {
+                // Each new error code once: the code changes while the old driver's stack goes away.
+                if (e.NativeErrorCode != lastError)
+                {
+                    lastError = e.NativeErrorCode;
                     Log.Info("radio", $"waiting for WinUSB ({e.NativeErrorCode})");
                 }
                 Thread.Sleep(500);

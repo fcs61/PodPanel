@@ -6,7 +6,7 @@ Bu klasör, [WPods](https://github.com/FPNDev/WPods) projesinin yalnızca servis
 - Lisans: GPL-3.0 (bkz. `LICENSE`). PodPanel kurulum paketi bu servisi derlenmiş olarak içerir; paket, lisans metnini
   (`LISANS.txt`) ve bu kaynağı (`kaynak.zip`) birlikte taşır.
 - Değişiklik tarihi: 2026-11-16
-- Derlenen sürüm etiketi: `0.3.2+f02e957.noupdate.9`
+- Derlenen sürüm etiketi: `0.3.2+f02e957.noupdate.10`
 
 ## Değişiklikler
 
@@ -30,6 +30,7 @@ Bu klasör, [WPods](https://github.com/FPNDev/WPods) projesinin yalnızca servis
 | `Engine.cs` | (2026-11-20, `.noupdate.8`) Hızlı Başlangıç'la açılışta usbip-win2'nin sanal denetleyicisi, yeniden başlatılmadan takılan adaptörü çalıştırmıyordu (10 saniye beklenip denetleyici yeniden başlatılıyor, Bluetooth yaklaşık 20 saniyede geliyordu). Kapanışta adaptör çıkarıldıysa, açılışta denetleyici ilk takmadan önce hemen yeniden başlatılır. |
 
 | `UsbIp.cs`, `Engine.cs`, `Program.cs` | (2026-11-20, `.noupdate.9`) Kapatıp açınca Bluetooth'un gidip gelmesinin asıl nedeni. usbip-win2'nin kurulumu "USBip Detach All On Reboot Or Shutdown" adlı bir zamanlanmış görev ekler; kapatma istendiğinde (Sistem günlüğü: User32 1074 ya da Kernel-Power 109) `usbip detach --all=closeonly` çalıştırır. Bu, sanal aygıtların bağlantısını kapatır ama aygıtı takılı bırakır; Hızlı Başlangıç'la kapanış bir hazırda bekletme olduğu için açılışta ölü adaptör yerinde durur. ETW izlemesiyle bulundu: bağlantı kapanmadan 18 ms önce Görev Zamanlayıcı `usbip.exe` başlatıyordu. Servis başlarken bu görevi devre dışı bırakır, kaldırılırken yeniden açar (servis durdurulurken aygıtlarını zaten kendisi çıkarır). `.noupdate.7` ve `.8`'deki "kapanışta adaptörü çıkar, açılışta denetleyiciyi yeniden başlat" davranışı kaldırıldı: adaptör hazırda bekletme boyunca takılı kalır. Önceki sürümlerin beklemeleri ve denetleyici onarımı yedek olarak durur. |
+| `Engine.cs` | (2026-11-20, `.noupdate.10`) Kurulumdan sonraki ilk açılışta devralmanın bir kez başarısız görünmesi. Adaptör Windows'un Bluetooth sürücüsünden WinUSB'ye yeni geçirilmişken, Windows hâlâ açılırken eski sürücünün aygıt yığını kaldırılıyordu ve WinUSB arabirimi 17 saniye açılamadı (önce hata 50, sonra 2). Servis 15 saniye bekleyip "takeover failed" yazıyor, bu deneme "10 dakikada 3 başarısız devralma" sayacına giriyor ve ancak iki saniye sonraki yeniden deneme başarıyordu. Bekleme 45 saniyeye çıkarıldı (`OpenRadio`); hata kodu değiştikçe ve arabirim açılınca geçen süre günlüğe yazılır. Adaptör zaten WinUSB'deyken (sonraki bütün açılışlar) arabirim hemen açıldığı için açılış süresi değişmez. |
 
 Bluetooth paketlerinin iletilmesi, sürücü bağlama ve USB/IP sunucusu kodunda başka değişiklik yoktur.
 
@@ -41,4 +42,4 @@ Proje .NET 10 SDK ister; SDK kullanıcı klasörüne kurulu (`%USERPROFILE%\PodP
 powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\servis-derle.ps1
 ```
 
-Betik `dotnet publish` komutunu sürüm etiketiyle (`0.3.2+f02e957.noupdate.9`; betiğin başında yazılıdır) çalıştırır, çıktıyı `kurulum\servis` klasörüne koyar ve özet listesini yeniler. SDK'yı önce `%USERPROFILE%\PodPanel\tools\dotnet10` klasöründe, yoksa PATH'te arar. GitHub'daki otomatik derleme de aynı betiği kullanır.
+Betik `dotnet publish` komutunu sürüm etiketiyle (`0.3.2+f02e957.noupdate.10`; betiğin başında yazılıdır) çalıştırır, çıktıyı `kurulum\servis` klasörüne koyar ve özet listesini yeniler. SDK'yı önce `%USERPROFILE%\PodPanel\tools\dotnet10` klasöründe, yoksa PATH'te arar. GitHub'daki otomatik derleme de aynı betiği kullanır.
