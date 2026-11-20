@@ -9,6 +9,15 @@ Yanındaki `.sha256.txt` dosyası indirdiğin dosyanın özetini doğrulamak iç
 PodPanel bağımsız bir projedir; Apple tarafından yapılmamış, onaylanmamış ya da desteklenmemiştir. AirPods, Apple Inc.
 şirketinin ticari markasıdır.
 
+> **English summary.** PodPanel is a Windows tray panel for AirPods. It shows battery levels and in-ear state, switches
+> listening modes (Transparency, Adaptive, Noise Cancellation), sets the audio latency, lets the AirPods microphone be
+> used while audio stays in stereo, turns on a game mode when chosen games run, toggles spatial sound, and pauses media
+> when an earbud is taken out. The listening modes, latency, microphone and auto-pause need the bundled bridge service
+> (a modified copy of [WPods](https://github.com/FPNDev/WPods)' service) and the usbip-win2 driver. The interface and
+> the rest of this README are in Turkish. Download the installer from the
+> [latest release](https://github.com/fcs61/PodPanel/releases/latest); see [Code signing policy](#code-signing-policy)
+> and [Lisans](#lisans) (GPL-3.0). PodPanel is an independent project and is not affiliated with Apple.
+
 ## Kurulum
 
 `PodPanel-Kurulum-<sürüm>.exe` tek dosyadır; paneli, köprü servisini ve (kurulu değilse) usbip-win2 sürücüsünü kurar.
@@ -293,3 +302,32 @@ Köprü servisi, [WPods](https://github.com/FPNDev/WPods) projesinin (GPL-3.0) s
 kopyasıdır; yapılan değişiklikler [bridge/CHANGES.md](bridge/CHANGES.md) dosyasında listelenir. Kurulum paketindeki
 diğer bileşenler (usbip-win2, FFmpeg, .NET çalışma zamanı) ve lisansları
 [kurulum/paket/UCUNCU-TARAFLAR.txt](kurulum/paket/UCUNCU-TARAFLAR.txt) dosyasında yazılıdır.
+
+## Code signing policy
+
+Bu bölüm, kod imzalama başvurusu için İngilizce tutulmuştur.
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
+[SignPath Foundation](https://signpath.org).
+
+**Status:** an application to the SignPath Foundation programme has been made and is awaiting review. All releases so
+far (up to and including 1.0.13) are **not signed**. This section will be updated when signing starts.
+
+- Committers and reviewers: [fcs61](https://github.com/fcs61)
+- Approvers: [fcs61](https://github.com/fcs61)
+
+Since version 1.0.11 the installer is built from this repository by GitHub Actions
+([`.github/workflows/derle.yml`](.github/workflows/derle.yml)); a version tag produces a draft release, which is
+published by hand after the installer has been tested. Only binaries built this way from this repository's source are
+to be signed. Third-party files shipped inside the installer (the usbip-win2 installer, FFmpeg libraries, the .NET
+runtime) are unmodified upstream binaries and keep their own signatures.
+
+### Privacy policy
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or
+the person installing or operating it.
+
+PodPanel has no update check, telemetry or account. It talks to the paired AirPods over Bluetooth and to the usbip-win2
+driver over the local loopback address (127.0.0.1) only. Settings and logs stay on the computer
+(`%LOCALAPPDATA%\PodPanel`, `C:\ProgramData\PodPanel`, `C:\ProgramData\WPods`). The bundled third-party components
+(usbip-win2, FFmpeg libraries, .NET runtime) are used locally and are not known to send data either.
