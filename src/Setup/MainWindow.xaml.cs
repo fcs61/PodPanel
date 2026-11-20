@@ -625,11 +625,9 @@ public partial class MainWindow : Window
     private void RemoveSelfAfterExit()
     {
         string exe = Assembly.GetExecutingAssembly().Location;
-        // "Yeniden başlat" seçilirse aşağıdaki komut bitmeden bilgisayar kapanır: dosya ve boş klasör, Windows'un bir
-        // sonraki açılışında silinmek üzere de kaydedilir (önce dosya, sonra klasör). Komut önce davranırsa bu kayıtlar
-        // açılışta sessizce boşa düşer.
-        MoveFileEx(exe, null, MoveFileDelayUntilReboot);
-        MoveFileEx(_root, null, MoveFileDelayUntilReboot);
+        // Dosya Windows'un "yeniden başlatmada sil" listesine YAZILMAZ: o kayıt, kaldırmadan sonra yeniden kurulan
+        // sürümün kaldırıcısını ilk yeniden başlatmada siliyordu (1.0.3 ve 1.0.4'te böyle oldu). Kaldırmanın ardından
+        // hemen yeniden başlatılırsa bu küçük dosya kalabilir; sonraki kurulum üzerine yazar.
         string command = SelfRemovalCommand(exe, _root);
         Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "cmd.exe"), command)
         {
@@ -638,12 +636,6 @@ public partial class MainWindow : Window
             WorkingDirectory = Environment.SystemDirectory,
         })?.Dispose();
     }
-
-    private const int MoveFileDelayUntilReboot = 0x4;
-
-    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
-    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
-    private static extern bool MoveFileEx(string existingFileName, string? newFileName, int flags);
 
     /// <summary>
     /// cmd.exe için: birkaç saniye bekle, programın dosyasını sil, klasör boşsa onu da sil. Tırnaklı yollar taşıdığı
