@@ -30,6 +30,25 @@ if (command == "apps")
     return;
 }
 
+// Medya oturumları (kulaktan çıkınca durdurmanın gördüğü). "eartest": bir kulaklık çıkarılmış gibi çalanları
+// durdurur, üç saniye sonra geri takılmış gibi devam ettirir.
+if (command is "media" or "eartest")
+{
+    var earPause = new EarPause();
+    foreach (string line in earPause.Describe()) Console.WriteLine(line);
+    if (command == "eartest")
+    {
+        earPause.Update(true, 2, true);
+        earPause.Update(true, 1, true);
+        Thread.Sleep(3000);
+        foreach (string line in earPause.Describe()) Console.WriteLine("  arada: " + line);
+        earPause.Update(true, 2, true);
+        Thread.Sleep(1000);
+        foreach (string line in earPause.Describe()) Console.WriteLine("  sonra: " + line);
+    }
+    return;
+}
+
 var settings = Settings.Load();
 if (command is "bridge" or "aap" or "mode" or "aaptest" or "micdump" or "micdecode" or "micrec" or "hfp" or "a2dp" or "bitrate" or "eldprobe" or "jitter" or "latency" or "srclatency")
 {

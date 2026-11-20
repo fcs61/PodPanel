@@ -60,6 +60,9 @@ sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
   Ayarlar'da "Oyun ekle"ye bas ve açık uygulamalar listesinden seç; `.exe` adı yazmak gerekmez.
 - Uzamsal sesi açıp kapatır: Dolby Access kuruluysa (lisans ya da deneme süresi geçerliyken) Dolby Atmos for
   Headphones'u, değilse Windows Sonic'i kullanır. Açık olan biçim Ayarlar'da ve kutunun ipucunda görünür.
+- **Kulaktan çıkınca durdur:** bir kulaklık çıkarılınca çalan medyayı (Spotify, tarayıcı gibi Windows medya
+  oturumu olan oynatıcılar) durdurur; 10 dakika içinde geri takılınca yalnızca kendi durdurduklarını devam ettirir.
+  Oyunlara dokunmaz. Varsayılan açıktır, Ayarlar'dan kapatılır; köprü servisinin kontrol kanalı gerekir.
 - Bağlantı bilgisini gösterir: kullanılan codec, kulaklığın bildirdiği gecikme, mikrofonu hangi uygulamanın açtığı.
 
 Panel sade tutulur: üstte ad ve tek satır durum, pil, dinleme modu, gecikme ve üç aç/kapa kutusu (Mikrofon, Uzamsal,

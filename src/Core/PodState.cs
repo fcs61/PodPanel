@@ -107,6 +107,9 @@ public sealed class PodState
     /// <summary>Dolby Atmos for Headphones bu çıkışta kullanılabiliyor; Uzamsal kutusu onu açar.</summary>
     public bool SpatialAtmosAvailable { get; init; }
 
+    /// <summary>Kulaklık çıkınca durdur, takınca devam ettir ayarı.</summary>
+    public bool AutoPause { get; init; }
+
     // Oyun modu
     public bool GameModeManual { get; init; }
     public bool GameModeActive { get; init; }

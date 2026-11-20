@@ -308,6 +308,18 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private bool _autoPause = true;
+    public bool AutoPause
+    {
+        get => _autoPause;
+        set
+        {
+            if (!Set(ref _autoPause, value) || _applying) return;
+            _userActionAt = DateTime.Now;
+            _monitor?.SetAutoPause(value);
+        }
+    }
+
     private bool _autoGame;
     public bool AutoGame
     {
@@ -518,6 +530,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 GameMode = s.GameModeManual;
                 BridgeMic = s.BridgeMicOn;
                 LockMic = s.LockMic;
+                AutoPause = s.AutoPause;
                 AutoGame = s.AutoGame;
                 SpatialOn = s.SpatialOn;
             }

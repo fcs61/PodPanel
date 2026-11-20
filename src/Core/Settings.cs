@@ -58,6 +58,12 @@ public sealed class Settings
     public string? LastAddress { get; set; }
 
     /// <summary>
+    /// Kulaklık kulaktan çıkınca çalan medya durur, geri takılınca devam eder. Varsayılan açık; eski ayar
+    /// dosyalarında bu alan olmadığı için onlarda da açık gelir.
+    /// </summary>
+    public bool AutoPause { get; set; } = true;
+
+    /// <summary>
     /// Kulaklığın gecikme tamponu hedefi (ms): 0 = kulaklığın varsayılanı (150), yoksa 90 ya da 60.
     /// Düşük değer oyunlarda sesi öne çeker; bağlantı zayıfsa ses takılabilir.
     /// </summary>

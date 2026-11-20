@@ -495,6 +495,10 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
+                    <CheckBox Style="{StaticResource Check}" Content="Kulaktan çıkınca durdur, takınca devam ettir"
+                              IsChecked="{Binding AutoPause, Mode=TwoWay}" Margin="0,10,0,0"
+                              Visibility="{Binding ShowBridgeMic, Converter={StaticResource BoolToVis}}"
+                              ToolTip="Bir kulaklığı çıkarınca çalan müzik ya da video durur; 10 dakika içinde geri takınca devam eder." />
                     <CheckBox Style="{StaticResource Check}" Content="Windows ile başlat" IsChecked="{Binding StartWithWindows, Mode=TwoWay}"
                               Margin="0,10,0,0" />
                     <Button Style="{StaticResource Link}" Content="Bağlantıyı kes" Command="{Binding ToggleConnectionCommand}"

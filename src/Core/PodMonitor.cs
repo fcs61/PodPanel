@@ -31,6 +31,7 @@ public sealed class PodMonitor : IDisposable
     private readonly AapLink _aap = new();
     private readonly MicBridge _mic;
     private readonly BridgeStatusClient _bridgeStatus = new();
+    private readonly EarPause _earPause = new();
     private bool? _handsFreeOn;
     private DateTime _handsFreeCheckedAt = DateTime.MinValue;
     private string _bridgeMicNote = "";
@@ -102,6 +103,12 @@ public sealed class PodMonitor : IDisposable
     public void SetGameMode(bool on) => Post(() =>
     {
         _settings.GameMode = on;
+        _settings.Save();
+    });
+
+    public void SetAutoPause(bool on) => Post(() =>
+    {
+        _settings.AutoPause = on;
         _settings.Save();
     });
 
@@ -298,6 +305,7 @@ public sealed class PodMonitor : IDisposable
             _capture = null;
             _wasConnected = false;
             _aap.Update(0, false);
+            _earPause.Reset();
             _mic.Configure(false, 0, "");
             var idle = MaintainGameMode(endpoints, null);
             Publish(new PodState
@@ -306,7 +314,7 @@ public sealed class PodMonitor : IDisposable
                 GameModeManual = _settings.GameMode,
                 GameModeActive = idle.Active,
                 GameModeReason = idle.Reason,
-                LockMic = _settings.LockMic,
+                LockMic = _settings.LockMic, AutoPause = _settings.AutoPause,
                 AutoGame = _settings.AutoGame,
                 AutoGameProcesses = _settings.AutoGameProcesses.ToList(),
                 AutoGameLabels = _settings.AutoGameProcesses.Select(_settings.LabelFor).ToList(),
@@ -375,6 +383,14 @@ public sealed class PodMonitor : IDisposable
         AapSnapshot aap = _aap.Snapshot;
         bool exact = aap.Open && (aap.Left != null || aap.Right != null);
         bool aapEar = aap.Open && aap.EarKnown && aap.LeftInEar != null && aap.RightInEar != null;
+        // Kulaktan çıkınca durdur, takınca devam ettir. Yalnızca kontrol kanalındaki anlık kulak bilgisiyle çalışır;
+        // BLE yayını dakikada bir okunduğu için buna uygun değil.
+        if (!connected) _earPause.Reset();
+        else
+        {
+            int? inEar = aapEar ? (aap.LeftInEar == true ? 1 : 0) + (aap.RightInEar == true ? 1 : 0) : null;
+            _earPause.Update(_settings.AutoPause, inEar, defaultRender != null && defaultRender == render.Id);
+        }
         if (aap.Open != _aapWasOpen)
         {
             _aapWasOpen = aap.Open;
@@ -541,7 +557,7 @@ public sealed class PodMonitor : IDisposable
             GameModeManual = _settings.GameMode,
             GameModeActive = game.Active,
             GameModeReason = game.Reason,
-            LockMic = _settings.LockMic,
+            LockMic = _settings.LockMic, AutoPause = _settings.AutoPause,
             AutoGame = _settings.AutoGame,
             AutoGameProcesses = _settings.AutoGameProcesses.ToList(),
             AutoGameLabels = _settings.AutoGameProcesses.Select(_settings.LabelFor).ToList(),
