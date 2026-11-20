@@ -94,6 +94,12 @@ public sealed class Settings
     /// Kurulu kopya ilk çalıştığında "Windows ile başlat" bir kez açılır; sonrasında kullanıcının seçimi geçerlidir.
     /// </summary>
     public bool AutostartOffered { get; set; }
+
+    /// <summary>
+    /// Kurulum programındaki "Windows ile başlat" seçiminin en son uygulanan damgası: her kurulumun seçimi bir kez
+    /// uygulanır, sonrasında kullanıcının paneldeki seçimi geçerlidir.
+    /// </summary>
+    public string AutostartStamp { get; set; } = "";
     public SavedGameState? Saved { get; set; }
     public Dictionary<string, CachedLink> Links { get; set; } = new();
 

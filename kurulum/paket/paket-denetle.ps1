@@ -82,6 +82,60 @@ $usbip = Get-ChildItem -LiteralPath (Join-Path $payload 'usbip') -Filter *.exe |
 $signature = Get-AuthenticodeSignature -LiteralPath $usbip.FullName
 Check 'usbip-win2 imzası' ($signature.Status -eq 'Valid' -and $signature.SignerCertificate.Thumbprint -eq $UsbipSigner) "$($signature.Status)"
 
+# 5. Kurulum penceresinin İngilizce çeviri tablosu (src\Setup\ceviri-en.txt) betiklerin Türkçe iletilerini karşılıyor mu?
+#    Betiklerdeki her metin, pencerenin yaptığı gibi tablodan geçirilir; içinde Türkçeye özgü harf kalan metin eksiktir.
+$repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$exact = New-Object Collections.Hashtable ([StringComparer]::Ordinal)
+$rules = New-Object Collections.ArrayList
+$section = 'tam'
+foreach ($line in [IO.File]::ReadAllLines((Join-Path $repo 'src\Setup\ceviri-en.txt'), [Text.Encoding]::UTF8)) {
+    $line = $line.Trim()
+    if (-not $line -or $line.StartsWith('#')) { continue }
+    if ($line -eq '[tam]' -or $line -eq '[parca]') { $section = $line.Trim('[', ']'); continue }
+    $split = $line.IndexOf(' => ')
+    if ($split -le 0) { continue }
+    $source = $line.Substring(0, $split).Trim()
+    $target = $line.Substring($split + 4).Trim()
+    if ($section -eq 'tam') { $exact[$source] = $target; continue }
+    # Ceviri.cs'teki ToPattern ile aynı: metin harfi harfine, {0} bir yakalama grubu.
+    $pattern = [regex]::Escape($source)
+    $pattern = [regex]::Replace($pattern, '\\\{(\d)}$', '(?<g$1>.+)')
+    $pattern = [regex]::Replace($pattern, '\\\{(\d)}', '(?<g$1>.+?)')
+    [void]$rules.Add(@{ Pattern = [regex]$pattern; Target = [regex]::Replace($target, '\{(\d)\}', '${g$1}') })
+}
+function Convert-Message([string]$text) {
+    $trimmed = $text.Trim()
+    if ($exact.ContainsKey($trimmed)) { return $exact[$trimmed] }
+    foreach ($rule in $rules) { $text = $rule.Pattern.Replace($text, $rule.Target) }
+    $text
+}
+$turkish = [regex]'[çğıöşüÇĞİÖŞÜ]'
+$missing = @()
+foreach ($name in 'ortak.ps1', 'kur.ps1', 'kaldir.ps1') {
+    # Betikler BOM'suz UTF-8'dir (pencere onları UTF-8 olarak okur); ParseFile ANSI sanacağı için metin UTF-8 okunur.
+    $code = [IO.File]::ReadAllText((Join-Path $PSScriptRoot $name), [Text.Encoding]::UTF8)
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput($code, [ref]$null, [ref]$null)
+    $strings = $ast.FindAll({ param($node)
+            $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
+            $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst] }, $true)
+    foreach ($string in $strings) {
+        $value = $string.Value
+        if ($string -is [System.Management.Automation.Language.ExpandableStringExpressionAst]) {
+            # Değişen parçalar örnek bir değerle doldurulur.
+            $value = [regex]::Replace($value, '\$\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)', 'X')
+            $value = [regex]::Replace($value, '\$(?:script:|env:)?\w+', 'X')
+        }
+        $value = [regex]::Replace($value, '\{(\d),[^}]*\}', '{$1}')
+        if (-not $turkish.IsMatch($value)) { continue }
+        foreach ($part in $value -split '\|\|') {
+            $translated = Convert-Message $part
+            if ($turkish.IsMatch($translated)) { $missing += "$name satır $($string.Extent.StartLineNumber): $($translated.Trim())" }
+        }
+    }
+}
+Check "İngilizce çeviri tablosu betiklerin iletilerini karşılıyor ($($rules.Count) kural)" ($missing.Count -eq 0) ''
+$missing | Select-Object -First 12 | ForEach-Object { Write-Host "        çevrilmemiş: $_" }
+
 Write-Host ''
 Write-Host $(if ($failures -eq 0) { 'Tüm denetimler geçti.' } else { "$failures denetim başarısız." })
 exit $failures

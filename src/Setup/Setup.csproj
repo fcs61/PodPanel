@@ -26,6 +26,8 @@
   <ItemGroup>
     <Reference Include="System.IO.Compression" />
     <Resource Include="..\simge\podpanel.png" Link="podpanel.png" />
+    <!-- Pencerenin İngilizce çeviri tablosu (bkz. Ceviri.cs). -->
+    <EmbeddedResource Include="ceviri-en.txt" LogicalName="ceviri-en.txt" />
   </ItemGroup>
   <ItemGroup Condition="'$(Payload)' != ''">
     <EmbeddedResource Include="$(Payload)" LogicalName="payload.zip" Link="payload.zip" />

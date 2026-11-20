@@ -15,8 +15,8 @@ PodPanel bağımsız bir projedir; Apple tarafından yapılmamış, onaylanmamı
 > when an earbud is taken out. The listening modes, latency, microphone and auto-pause need the bundled bridge service
 > (a modified copy of [WPods](https://github.com/FPNDev/WPods)' service) and the usbip-win2 driver. The panel follows
 > the Windows display language and can be switched in its settings (English, Türkçe, Deutsch, Español, Français,
-> Italiano, Nederlands, Polski, Português, Русский, 日本語, 한국어, 简体中文); the installer and the rest of this README
-> are still in Turkish. Download the installer from the
+> Italiano, Nederlands, Polski, Português, Русский, 日本語, 한국어, 简体中文). The installer is shown in English unless
+> Windows is set to Turkish. The rest of this README is in Turkish. Download the installer from the
 > [latest release](https://github.com/fcs61/PodPanel/releases/latest); see [Code signing policy](#code-signing-policy)
 > and [Lisans](#lisans) (GPL-3.0). PodPanel is an independent project and is not affiliated with Apple.
 
@@ -32,7 +32,8 @@ Windows'la önceden eşleştirilmiş olmalıdır.
 1. Dosyayı çalıştır. İmzasız olduğu için Windows "Windows kişisel bilgisayarınızı korudu" uyarısını gösterebilir:
    **Ek bilgi > Yine de çalıştır**. Ardından yönetici onayı istenir.
 2. Pencere bilgisayarı denetler (Windows sürümü, Bluetooth adaptörü, kurulu sürümler) ve ne yapacağını gösterir.
-   "Önce geri yükleme noktası oluştur" kutusu işaretli kalsın.
+   "Önce geri yükleme noktası oluştur" kutusu işaretli kalsın. İlk kurulumda "Windows ile başlat" kutusu da çıkar:
+   işaretliyse panel Windows açılırken kendiliğinden başlar; sonradan panelin Ayarlar'ından değiştirilebilir.
 3. **Kur**. Sıra: geri yükleme noktası, panel, usbip-win2, köprü servisi. usbip-win2 kurulurken USB aygıtlar bir an
    kopabilir; Windows sürücü için onay isterse **Yükle** de.
 4. usbip-win2 ilk kez kurulduysa sonunda **Yeniden başlat**. Köprü servisi açılışta Bluetooth adaptörünü devralır;
@@ -59,7 +60,10 @@ Bir şey ters giderse:
 - Bluetooth hiç geri gelmezse: Sistem Geri Yükleme ile "PodPanel kurulumu oncesi" noktasına dön.
 
 Kurulum programı her adımı `kurulum\paket\kur.ps1` betiğiyle yapar; kaldırma `kaldir.ps1` ile. İkisi de kurulumdan
-sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
+sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir. Betikler ve günlük dosyası
+(`kurulum.log`) hep Türkçedir; pencere, Windows'un dili Türkçe değilse gösterdiği her metni `src/Setup/ceviri-en.txt`
+tablosuyla İngilizceye çevirir. Betiklere yeni bir ileti eklenirse tabloya da eklenmelidir; `paket-denetle.ps1`
+tabloda karşılığı olmayan iletileri bildirir.
 
 ## Ne yapar
 
@@ -86,7 +90,7 @@ sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
   İngilizcedir ve bir çeviride eksik kalan metin İngilizce gösterilir. Çeviriler `src/Core/Diller` klasöründeki
   `kod.txt` dosyalarıdır (`anahtar = metin`); İngilizce ve Türkçe dışındakiler makine çevirisidir ve ana dili o olan
   biri tarafından gözden geçirilmemiştir. Düzeltmeler için dosyayı düzenleyip çekme isteği göndermek yeterlidir.
-  Kurulum programı şimdilik yalnızca Türkçedir.
+  Kurulum ve kaldırma programı iki dillidir: Windows'un dili Türkçeyse Türkçe, değilse İngilizce açılır.
 - Bağlantı bilgisini gösterir: kullanılan codec, kulaklığın bildirdiği gecikme, mikrofonu hangi uygulamanın açtığı.
 
 Panel sade tutulur: üstte ad ve tek satır durum, pil, dinleme modu, gecikme ve üç aç/kapa kutusu (Mikrofon, Uzamsal,

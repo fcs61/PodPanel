@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using Microsoft.Win32;
 
 namespace PodPanel.Setup;
 
@@ -139,6 +140,7 @@ public partial class MainWindow : Window
     private ScriptResult? _result;
     private bool _createdRoot;
     private bool _alreadyInstalled;
+    private bool _usbipInstalled;
     // Denetimden: bu kurulumda geri yükleme noktası gerekiyor mu, ve Sistem Koruması kapalı olduğu için oluşturulamaz mı.
     private bool _restoreNeeded = true;
     private bool _restoreUnavailable;
@@ -172,10 +174,19 @@ public partial class MainWindow : Window
                 case "/bekle": _testShotDelay = int.Parse(next ?? "0"); break;
                 case "/kur": install = true; break;
                 case "/kaldir": install = false; break;
+                case "/dil": Tr.English = next != "tr"; break;
             }
         }
 #endif
         _install = install;
+        // Pencerenin XAML'deki sabit metinleri (Windows Türkçe değilse İngilizce).
+        Title = Tr.T("PodPanel Kurulumu");
+        HeaderSub.Text = Tr.T("AirPods için görev çubuğu paneli");
+        ReadyWait.Text = Tr.T("Bilgisayar denetleniyor…");
+        DetailsButton.Content = Tr.T("Ayrıntılar");
+        LogButton.Content = Tr.T("Günlüğü aç");
+        SecondaryButton.Content = Tr.T("Vazgeç");
+        PrimaryButton.Content = Tr.T("Kur");
         string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         _root = _install ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "PodPanel") : exeDir;
         _stage = _testStage ?? (_install ? Path.Combine(_root, "_kurulum") : _root);
@@ -184,21 +195,22 @@ public partial class MainWindow : Window
         FindingList.ItemsSource = _findings;
         if (_install)
         {
-            ReadyIntro.Text = "PodPanel, köprü servisi ve (kurulu değilse) usbip-win2 sürücüsü kurulur. Köprü servisi Bluetooth adaptörünü kendi "
-                + "üzerinden çalıştırır; dinleme modu, gecikme ayarı ve AirPods mikrofonu bu sayede çalışır.";
-            OptionBox.Content = "Önce geri yükleme noktası oluştur (önerilir)";
-            ReadyNote.Text = "Kurulum sırasında Bluetooth birkaç saniyeliğine kesilebilir. usbip-win2 ilk kez kuruluyorsa sonunda bilgisayarın "
-                + "yeniden başlatılması gerekir.";
+            ReadyIntro.Text = Tr.T("PodPanel, köprü servisi ve (kurulu değilse) usbip-win2 sürücüsü kurulur. Köprü servisi Bluetooth adaptörünü kendi "
+                + "üzerinden çalıştırır; dinleme modu, gecikme ayarı ve AirPods mikrofonu bu sayede çalışır.");
+            OptionBox.Content = Tr.T("Önce geri yükleme noktası oluştur (önerilir)");
+            AutostartBox.Content = Tr.T("Windows ile başlat");
+            ReadyNote.Text = Tr.T("Kurulum sırasında Bluetooth birkaç saniyeliğine kesilebilir. usbip-win2 ilk kez kuruluyorsa sonunda bilgisayarın "
+                + "yeniden başlatılması gerekir.");
         }
         else
         {
-            Title = "PodPanel'i Kaldır";
-            HeaderSub.Text = "Kaldırma";
-            ReadyIntro.Text = "PodPanel ve köprü servisi kaldırılır; Bluetooth adaptörü Windows'un kendi sürücüsüne geri verilir.";
-            OptionBox.Content = "usbip-win2 sürücüsünü de kaldır";
+            Title = Tr.T("PodPanel'i Kaldır");
+            HeaderSub.Text = Tr.T("Kaldırma");
+            ReadyIntro.Text = Tr.T("PodPanel ve köprü servisi kaldırılır; Bluetooth adaptörü Windows'un kendi sürücüsüne geri verilir.");
+            OptionBox.Content = Tr.T("usbip-win2 sürücüsünü de kaldır");
             OptionBox.IsChecked = false;
-            ReadyNote.Text = "Kaldırma sırasında Bluetooth birkaç saniyeliğine kesilir. Kişisel ayarların silinmez.";
-            PrimaryButton.Content = "Kaldır";
+            ReadyNote.Text = Tr.T("Kaldırma sırasında Bluetooth birkaç saniyeliğine kesilir. Kişisel ayarların silinmez.");
+            PrimaryButton.Content = Tr.T("Kaldır");
         }
         Loaded += async (_, _) => await CheckAsync();
         Closing += OnClosing;
@@ -224,11 +236,11 @@ public partial class MainWindow : Window
             if (_install)
             {
                 string[] version = File.ReadAllLines(Path.Combine(_stage, "surum.txt"), Encoding.UTF8);
-                HeaderSub.Text = "Sürüm " + version[0].Trim();
+                HeaderSub.Text = Tr.T("Sürüm {0}", version[0].Trim());
                 if (version.Length >= 3 && version[2].Trim() == "koprusuz")
                 {
-                    ReadyIntro.Text = "PodPanel paneli kurulur. Bu sürüm köprü servisi ve sürücü kurmaz, Bluetooth'a dokunmaz: pil, bağlantı, "
-                        + "oyun modu ve uzamsal ses çalışır; dinleme modu, gecikme ayarı ve köprü mikrofonu yoktur.";
+                    ReadyIntro.Text = Tr.T("PodPanel paneli kurulur. Bu sürüm köprü servisi ve sürücü kurmaz, Bluetooth'a dokunmaz: pil, bağlantı, "
+                        + "oyun modu ve uzamsal ses çalışır; dinleme modu, gecikme ayarı ve köprü mikrofonu yoktur.");
                     ReadyNote.Text = "";
                 }
             }
@@ -237,11 +249,11 @@ public partial class MainWindow : Window
 
             var environment = new Dictionary<string, string> { ["PODPANEL_KAYNAK"] = _stage, ["PODPANEL_MOD"] = "denetim" };
             ScriptResult result = await ScriptRunner.RunAsync(script, environment, line => Dispatcher.BeginInvoke(new Action(() => OnCheckLine(line))));
-            if (!result.Reported || result.Code != 0) _blockers.Add("Denetim çalıştırılamadı. " + result.Message);
+            if (!result.Reported || result.Code != 0) _blockers.Add(Tr.Line("Denetim çalıştırılamadı. " + result.Message));
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidOperationException or InvalidDataException)
         {
-            _blockers.Add("Kurulum hazırlanamadı: " + e.Message);
+            _blockers.Add(Tr.Line("Kurulum hazırlanamadı: " + e.Message));
         }
         ShowReady();
 #if SINAMA
@@ -262,7 +274,7 @@ public partial class MainWindow : Window
     {
         if (!line.StartsWith("@@BILGI ", StringComparison.Ordinal))
         {
-            if (!line.StartsWith("@@", StringComparison.Ordinal)) _log.AppendLine(line);
+            if (!line.StartsWith("@@", StringComparison.Ordinal)) _log.AppendLine(Tr.Line(line));
             return;
         }
         string[] parts = line.Split(new[] { ' ' }, 3);
@@ -270,36 +282,40 @@ public partial class MainWindow : Window
         string key = parts[1], value = parts[2];
         switch (key)
         {
-            case "engel": _blockers.Add(value); break;
-            case "uyari": _warnings.Add(value); break;
+            // Değerler betiklerin Türkçe sözcükleridir: karşılaştırmalar onlarla yapılır, gösterilirken çevrilir.
+            case "engel": _blockers.Add(Tr.Line(value)); break;
+            case "uyari": _warnings.Add(Tr.Line(value)); break;
             case "windows": AddFinding("Windows", value); break;
-            case "bluetooth": AddFinding("Bluetooth", value == "bulunamadı" ? "Bulunamadı" : value); break;
+            case "bluetooth": AddFinding("Bluetooth", value == "bulunamadı" ? Tr.T("Bulunamadı") : value); break;
             case "kurulu":
                 _alreadyInstalled = value != "yok";
-                AddFinding("PodPanel", value == "yok" ? "Kurulu değil" : value == "yalnızca köprü servisi" ? "Yalnızca köprü servisi kurulu"
-                    : value == "bilinmiyor" ? "Kurulu" : value + " kurulu");
+                AddFinding("PodPanel", value == "yok" ? Tr.T("Kurulu değil") : value == "yalnızca köprü servisi" ? Tr.T("Yalnızca köprü servisi kurulu")
+                    : value == "bilinmiyor" ? Tr.T("Kurulu") : Tr.T("{0} kurulu", value));
                 break;
-            case "servis": AddFinding("Köprü servisi", Capitalize(value)); break;
-            case "denetim": AddFinding("Uygulama Denetimi", Capitalize(value)); break;
+            case "servis": AddFinding(Tr.T("Köprü servisi"), Tr.Capitalize(Tr.T(value))); break;
+            case "denetim": AddFinding(Tr.T("Uygulama Denetimi"), Tr.Capitalize(Tr.T(value))); break;
             case "geriyukleme":
                 _restoreNeeded = value != "gerekmez";
                 _restoreUnavailable = value == "kapalı";
                 break;
-            case "usbip": AddFinding("usbip-win2", value == "yok" ? "Kurulu değil" : Capitalize(value)); break;
+            case "usbip":
+                _usbipInstalled = value.StartsWith("kurulu", StringComparison.Ordinal);
+                // "kurulu (0.9.8.1)": sözcük çevrilir, sürüm olduğu gibi kalır.
+                AddFinding("usbip-win2", value == "yok" ? Tr.T("Kurulu değil")
+                    : value.StartsWith("kurulu (", StringComparison.Ordinal) ? Tr.Capitalize(Tr.T("kurulu")) + value.Substring(6)
+                    : Tr.Capitalize(Tr.T(value)));
+                break;
             case "usbipbizim": OptionBox.IsChecked = value == "1"; break;
         }
     }
 
     private void AddFinding(string label, string value) => _findings.Add(new Finding { Label = label, Value = value });
 
-    private static string Capitalize(string text) =>
-        text.Length == 0 ? text : char.ToUpper(text[0], System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) + text.Substring(1);
-
     private void ShowReady()
     {
         _state = Stage.Ready;
         ReadyWait.Visibility = _findings.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        if (_findings.Count == 0) ReadyWait.Text = "Denetim sonucu alınamadı.";
+        if (_findings.Count == 0) ReadyWait.Text = Tr.T("Denetim sonucu alınamadı.");
         if (_blockers.Count > 0 || _warnings.Count > 0)
         {
             ReadyProblems.Text = string.Join("\n", _blockers.Count > 0 ? _blockers : _warnings);
@@ -309,19 +325,19 @@ public partial class MainWindow : Window
         if (!_install)
         {
             // usbip-win2 kurulu değilse seçenek anlamsız.
-            bool usbip = false;
-            foreach (Finding finding in _findings) usbip |= finding.Label == "usbip-win2" && finding.Value == "Kurulu";
-            OptionBox.Visibility = usbip ? Visibility.Visible : Visibility.Collapsed;
+            OptionBox.Visibility = _usbipInstalled ? Visibility.Visible : Visibility.Collapsed;
         }
         else
         {
-            if (_alreadyInstalled) PrimaryButton.Content = "Güncelle";
+            if (_alreadyInstalled) PrimaryButton.Content = Tr.T("Güncelle");
+            // Güncellemede sorulmaz: kullanıcının panelde yaptığı seçim olduğu gibi kalır.
+            AutostartBox.Visibility = _alreadyInstalled ? Visibility.Collapsed : Visibility.Visible;
             if (!_restoreNeeded)
             {
                 // Sürücü ve servis değişmeyecek: geri yükleme noktası seçeneği anlamsız.
                 OptionBox.IsChecked = false;
                 OptionBox.Visibility = Visibility.Collapsed;
-                ReadyNote.Text = "Bu kurulumda sürücülere, köprü servisine ve Bluetooth'a dokunulmayacak.";
+                ReadyNote.Text = Tr.T("Bu kurulumda sürücülere, köprü servisine ve Bluetooth'a dokunulmayacak.");
             }
         }
         PrimaryButton.IsEnabled = _blockers.Count == 0;
@@ -340,7 +356,7 @@ public partial class MainWindow : Window
         string[] names = _install
             ? new[] { "Dosyalar açılıyor", "Denetimler", "Geri yükleme noktası", "Panel dosyaları", "usbip-win2 sürücüsü", "Köprü servisi" }
             : new[] { "Panel kapatılıyor", "Köprü servisi kaldırılıyor", "usbip-win2 sürücüsü", "Dosyalar siliniyor" };
-        foreach (string name in names) _steps.Add(new StepItem(name));
+        foreach (string name in names) _steps.Add(new StepItem(Tr.T(name)));
         SetStep(0);
 #if SINAMA
         if (_testShot != null && _testShotDelay > 0)
@@ -355,7 +371,7 @@ public partial class MainWindow : Window
 #endif
         if (_install && !Testing)
         {
-            StatusLine.Text = "Dosyalar açılıyor…";
+            StatusLine.Text = Tr.T("Dosyalar açılıyor…");
             try
             {
                 await Task.Run(() => Payload.Extract(_stage, _ => true, ReportProgress));
@@ -396,6 +412,7 @@ public partial class MainWindow : Window
             return;
         }
         if (line.StartsWith("@@", StringComparison.Ordinal)) return;
+        line = Tr.Line(line);
         _log.AppendLine(line);
         if (LogBox.Visibility == Visibility.Visible)
         {
@@ -420,8 +437,12 @@ public partial class MainWindow : Window
     {
         _result = result;
         _state = Stage.Done;
+        // Betiğin iletisi Türkçedir; gösterilmeden önce çevrilir.
+        string message = Tr.Line(result.Message);
         bool ok = result.Reported && result.Code == 0;
         bool partial = _install && result.Reported && result.Code == PartialCode;
+        // Panel kurulduysa (köprüyle ya da köprüsüz) başlangıç seçimi, panel başlatılmadan önce kaydedilir.
+        if (_install && (ok || partial) && AutostartBox.Visibility == Visibility.Visible && !Testing) SaveAutostartChoice();
         ExitCode = ok ? 0 : result.Code == 0 ? 1 : result.Code;
         foreach (StepItem step in _steps)
         {
@@ -432,7 +453,7 @@ public partial class MainWindow : Window
         DonePage.Visibility = Visibility.Visible;
         PrimaryButton.IsEnabled = true;
         SecondaryButton.IsEnabled = true;
-        PrimaryButton.Content = "Kapat";
+        PrimaryButton.Content = Tr.T("Kapat");
         SecondaryButton.Visibility = Visibility.Collapsed;
         LogButton.Visibility = Visibility.Visible;
 
@@ -441,44 +462,44 @@ public partial class MainWindow : Window
         if (partial)
         {
             // Panel kullanılabilir durumda: başlatılır, yalnızca köprü eksik.
-            DoneTitle.Text = "Panel kuruldu, köprü kurulamadı";
+            DoneTitle.Text = Tr.T("Panel kuruldu, köprü kurulamadı");
             // Betik, iletinin "||" sonrasını ek açıklama olarak gönderir (ör. köprünün nasıl kurulabileceği).
-            int split = result.Message.IndexOf("||", StringComparison.Ordinal);
-            DoneText.Text = split < 0 ? result.Message : result.Message.Substring(0, split).Trim();
-            DoneNote.Text = split < 0 ? "Ayrıntılar günlükte: " + LogPath : result.Message.Substring(split + 2).Trim();
+            int split = message.IndexOf("||", StringComparison.Ordinal);
+            DoneText.Text = split < 0 ? message : message.Substring(0, split).Trim();
+            DoneNote.Text = split < 0 ? Tr.T("Ayrıntılar günlükte: {0}", LogPath) : message.Substring(split + 2).Trim();
             if (result.Restart) OfferRestart();
             StartPanel();
         }
         else if (!ok)
         {
-            DoneTitle.Text = _install ? "Kurulum tamamlanamadı" : "Kaldırma tamamlanamadı";
-            DoneText.Text = result.Message;
-            DoneNote.Text = "Ayrıntılar günlükte: " + LogPath;
+            DoneTitle.Text = Tr.T(_install ? "Kurulum tamamlanamadı" : "Kaldırma tamamlanamadı");
+            DoneText.Text = message;
+            DoneNote.Text = Tr.T("Ayrıntılar günlükte: {0}", LogPath);
             if (result.Restart) OfferRestart();
         }
         else if (_install)
         {
-            DoneTitle.Text = "Kurulum tamamlandı";
+            DoneTitle.Text = Tr.T("Kurulum tamamlandı");
             if (result.Restart)
             {
-                DoneText.Text = "Köprünün devreye girmesi için bilgisayarı yeniden başlat. Açılışta PodPanel kendiliğinden başlar.";
-                DoneNote.Text = "PodPanel görev çubuğunun sağındaki bildirim alanında durur. Simgeyi göremezsen gizli simgeler (^) bölümüne bak; "
-                    + "oradan görev çubuğuna sürükleyebilirsin.";
+                DoneText.Text = Tr.T("Köprünün devreye girmesi için bilgisayarı yeniden başlat. Açılışta PodPanel kendiliğinden başlar.");
+                DoneNote.Text = Tr.T("PodPanel görev çubuğunun sağındaki bildirim alanında durur. Simgeyi göremezsen gizli simgeler (^) bölümüne bak; "
+                    + "oradan görev çubuğuna sürükleyebilirsin.");
                 OfferRestart();
             }
             else
             {
-                DoneText.Text = "PodPanel çalışıyor: görev çubuğunun sağındaki bildirim alanında kulaklık simgesine tıkla.";
-                DoneNote.Text = "Simgeyi göremezsen gizli simgeler (^) bölümüne bak; oradan görev çubuğuna sürükleyebilirsin.";
+                DoneText.Text = Tr.T("PodPanel çalışıyor: görev çubuğunun sağındaki bildirim alanında kulaklık simgesine tıkla.");
+                DoneNote.Text = Tr.T("Simgeyi göremezsen gizli simgeler (^) bölümüne bak; oradan görev çubuğuna sürükleyebilirsin.");
             }
             StartPanel();
         }
         else
         {
-            DoneTitle.Text = "PodPanel kaldırıldı";
-            DoneText.Text = result.Restart
+            DoneTitle.Text = Tr.T("PodPanel kaldırıldı");
+            DoneText.Text = Tr.T(result.Restart
                 ? "usbip-win2 sürücüsünün tamamen kalkması için bilgisayarı yeniden başlat."
-                : "Bluetooth adaptörü Windows'un kendi sürücüsüyle çalışıyor.";
+                : "Bluetooth adaptörü Windows'un kendi sürücüsüyle çalışıyor.");
             DoneNote.Text = "";
             if (result.Restart) OfferRestart();
         }
@@ -494,10 +515,31 @@ public partial class MainWindow : Window
 #endif
     }
 
+    /// <summary>
+    /// "Windows ile başlat" seçimini panele bırakır. Başlangıç kaydı kullanıcıya özeldir ve kurulum yönetici olarak
+    /// (başka bir hesapla da) çalışabildiği için burada yazılmaz: seçim ve bir kurulum damgası HKLM'ye yazılır, panel
+    /// ilk çalıştığında oturumdaki kullanıcı için uygular. Sonradan panelin Ayarlar'ından değiştirilebilir.
+    /// </summary>
+    private void SaveAutostartChoice()
+    {
+        try
+        {
+            using RegistryKey machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using RegistryKey? key = machine.OpenSubKey(@"SOFTWARE\PodPanel", writable: true);
+            if (key == null) return;
+            key.SetValue("AutostartChoice", AutostartBox.IsChecked == true ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue("AutostartStamp", DateTime.UtcNow.Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture), RegistryValueKind.String);
+        }
+        catch (Exception e) when (e is UnauthorizedAccessException or IOException or System.Security.SecurityException)
+        {
+            _log.AppendLine(Tr.Line("Başlangıç seçimi kaydedilemedi: " + e.Message));
+        }
+    }
+
     private void OfferRestart()
     {
-        PrimaryButton.Content = "Yeniden başlat";
-        SecondaryButton.Content = "Sonra";
+        PrimaryButton.Content = Tr.T("Yeniden başlat");
+        SecondaryButton.Content = Tr.T("Sonra");
         SecondaryButton.Visibility = Visibility.Visible;
     }
 
@@ -517,7 +559,7 @@ public partial class MainWindow : Window
         }
         catch (Exception e) when (e is Win32Exception or InvalidOperationException)
         {
-            _log.AppendLine("Panel başlatılamadı: " + e.Message);
+            _log.AppendLine(Tr.Line("Panel başlatılamadı: " + e.Message));
         }
     }
 
@@ -531,9 +573,9 @@ public partial class MainWindow : Window
             {
                 // Sistem Koruması kapalıyken nokta oluşturulamaz; kurulum yarıda durmasın diye önce sorulur.
                 MessageBoxResult answer = MessageBox.Show(this,
-                    "Sistem Koruması kapalı olduğu için geri yükleme noktası oluşturulamaz." + Environment.NewLine + Environment.NewLine
-                    + "Geri yükleme noktası olmadan kurulsun mu?" + Environment.NewLine + Environment.NewLine
-                    + "Hayır dersen kurulum başlamaz; Sistem Koruması'nı açıp yeniden deneyebilirsin.",
+                    Tr.T("Sistem Koruması kapalı olduğu için geri yükleme noktası oluşturulamaz.") + Environment.NewLine + Environment.NewLine
+                    + Tr.T("Geri yükleme noktası olmadan kurulsun mu?") + Environment.NewLine + Environment.NewLine
+                    + Tr.T("Hayır dersen kurulum başlamaz; Sistem Koruması'nı açıp yeniden deneyebilirsin."),
                     Title, MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
                 if (answer != MessageBoxResult.Yes) return;
                 OptionBox.IsChecked = false;
@@ -550,7 +592,7 @@ public partial class MainWindow : Window
                 }
                 catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
                 {
-                    MessageBox.Show(this, "Yeniden başlatılamadı: " + ex.Message + "\nBilgisayarı Başlat menüsünden yeniden başlat.", Title);
+                    MessageBox.Show(this, Tr.T("Yeniden başlatılamadı: {0}", ex.Message) + "\n" + Tr.T("Bilgisayarı Başlat menüsünden yeniden başlat."), Title);
                 }
             }
             Close();
@@ -563,7 +605,7 @@ public partial class MainWindow : Window
     {
         bool show = LogBox.Visibility != Visibility.Visible;
         LogBox.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        DetailsButton.Content = show ? "Ayrıntıları gizle" : "Ayrıntılar";
+        DetailsButton.Content = Tr.T(show ? "Ayrıntıları gizle" : "Ayrıntılar");
         if (show)
         {
             LogBox.Text = _log.ToString();
@@ -586,7 +628,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex) when (ex is Win32Exception or IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            MessageBox.Show(this, "Günlük açılamadı: " + ex.Message, Title);
+            MessageBox.Show(this, Tr.T("Günlük açılamadı: {0}", ex.Message), Title);
         }
     }
 

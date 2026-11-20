@@ -1,0 +1,227 @@
+# Kurulum penceresinin İngilizce çevirisi. Windows'un dili Türkçe değilse kullanılır.
+# Kurulum betikleri (kurulum\paket\*.ps1) hep Türkçe yazar; pencere gösterirken çevirir. Günlük dosyası Türkçe kalır.
+# Biçim: "Türkçe metin => English text". {0}, {1} değişen parçaların yeridir.
+#   [tam]    metnin tamamı eşleşmelidir (düğmeler, etiketler, betiklerin tek sözcüklük değerleri).
+#   [parca]  metnin içinde geçen her yerde değiştirilir; sırayla uygulanır, uzun cümleler kısa parçalardan önce gelir.
+# Betiklere yeni bir ileti eklendiğinde buraya da eklenmelidir; paket-denetle.ps1 eksikleri bildirir.
+
+[tam]
+PodPanel Kurulumu => PodPanel Setup
+PodPanel'i Kaldır => Uninstall PodPanel
+AirPods için görev çubuğu paneli => Tray panel for AirPods
+Kaldırma => Uninstall
+Sürüm {0} => Version {0}
+Bilgisayar denetleniyor… => Checking this computer…
+Denetim sonucu alınamadı. => The check returned no result.
+Ayrıntılar => Details
+Ayrıntıları gizle => Hide details
+Günlüğü aç => Open log
+Vazgeç => Cancel
+Kur => Install
+Güncelle => Update
+Kaldır => Uninstall
+Kapat => Close
+Yeniden başlat => Restart
+Sonra => Later
+PodPanel, köprü servisi ve (kurulu değilse) usbip-win2 sürücüsü kurulur. Köprü servisi Bluetooth adaptörünü kendi üzerinden çalıştırır; dinleme modu, gecikme ayarı ve AirPods mikrofonu bu sayede çalışır. => This installs PodPanel, the bridge service and (if it is not installed yet) the usbip-win2 driver. The bridge service runs the Bluetooth adapter through itself; that is what makes the listening modes, the latency setting and the AirPods microphone work.
+Önce geri yükleme noktası oluştur (önerilir) => Create a restore point first (recommended)
+Kurulum sırasında Bluetooth birkaç saniyeliğine kesilebilir. usbip-win2 ilk kez kuruluyorsa sonunda bilgisayarın yeniden başlatılması gerekir. => Bluetooth may drop for a few seconds during setup. If usbip-win2 is installed for the first time, the computer must be restarted at the end.
+PodPanel ve köprü servisi kaldırılır; Bluetooth adaptörü Windows'un kendi sürücüsüne geri verilir. => This removes PodPanel and the bridge service; the Bluetooth adapter is given back to Windows' own driver.
+usbip-win2 sürücüsünü de kaldır => Also remove the usbip-win2 driver
+Windows ile başlat => Start with Windows
+Kaldırma sırasında Bluetooth birkaç saniyeliğine kesilir. Kişisel ayarların silinmez. => Bluetooth drops for a few seconds while uninstalling. Your personal settings are kept.
+PodPanel paneli kurulur. Bu sürüm köprü servisi ve sürücü kurmaz, Bluetooth'a dokunmaz: pil, bağlantı, oyun modu ve uzamsal ses çalışır; dinleme modu, gecikme ayarı ve köprü mikrofonu yoktur. => This installs the PodPanel panel. This edition installs no bridge service or driver and does not touch Bluetooth: battery, connection, game mode and spatial sound work; listening modes, the latency setting and the bridge microphone are not included.
+Bu kurulumda sürücülere, köprü servisine ve Bluetooth'a dokunulmayacak. => This setup will not touch the drivers, the bridge service or Bluetooth.
+Köprü servisi => Bridge service
+Uygulama Denetimi => Smart App Control
+Kurulu değil => Not installed
+Yalnızca köprü servisi kurulu => Only the bridge service is installed
+Kurulu => Installed
+{0} kurulu => {0} installed
+Bulunamadı => Not found
+kurulu => installed
+kurulacak => will be installed
+kurulmayacak => will not be installed
+güncel => up to date
+güncellenecek => will be updated
+değiştirilmeyecek => will not be changed
+kurulu (kaldırılmalı) => installed (must be removed)
+açık => on
+kapalı => off
+değerlendirme => evaluation mode
+bilinmiyor => unknown
+bulunamadı => not found
+yalnızca köprü servisi => only the bridge service
+köprüsüz sürüm => edition without the bridge
+Dosyalar açılıyor => Extracting files
+Dosyalar açılıyor… => Extracting files…
+Denetimler => Checks
+Geri yükleme noktası => Restore point
+Panel dosyaları => Panel files
+usbip-win2 sürücüsü => usbip-win2 driver
+Panel kapatılıyor => Closing the panel
+Köprü servisi kaldırılıyor => Removing the bridge service
+Dosyalar siliniyor => Deleting files
+Panel kuruldu, köprü kurulamadı => Panel installed, bridge not installed
+Kurulum tamamlanamadı => Setup could not be completed
+Kaldırma tamamlanamadı => Uninstall could not be completed
+Kurulum tamamlandı => Setup complete
+PodPanel kaldırıldı => PodPanel was removed
+Ayrıntılar günlükte: {0} => Details are in the log: {0}
+Köprünün devreye girmesi için bilgisayarı yeniden başlat. Açılışta PodPanel kendiliğinden başlar. => Restart the computer for the bridge to take effect. PodPanel starts by itself when Windows starts.
+PodPanel görev çubuğunun sağındaki bildirim alanında durur. Simgeyi göremezsen gizli simgeler (^) bölümüne bak; oradan görev çubuğuna sürükleyebilirsin. => PodPanel sits in the notification area at the right end of the taskbar. If you cannot see its icon, look under hidden icons (^); you can drag it onto the taskbar from there.
+PodPanel çalışıyor: görev çubuğunun sağındaki bildirim alanında kulaklık simgesine tıkla. => PodPanel is running: click the earbuds icon in the notification area at the right end of the taskbar.
+Simgeyi göremezsen gizli simgeler (^) bölümüne bak; oradan görev çubuğuna sürükleyebilirsin. => If you cannot see the icon, look under hidden icons (^); you can drag it onto the taskbar from there.
+usbip-win2 sürücüsünün tamamen kalkması için bilgisayarı yeniden başlat. => Restart the computer to finish removing the usbip-win2 driver.
+Bluetooth adaptörü Windows'un kendi sürücüsüyle çalışıyor. => The Bluetooth adapter is running on Windows' own driver.
+Sistem Koruması kapalı olduğu için geri yükleme noktası oluşturulamaz. => A restore point cannot be created because System Protection is off.
+Geri yükleme noktası olmadan kurulsun mu? => Install without a restore point?
+Hayır dersen kurulum başlamaz; Sistem Koruması'nı açıp yeniden deneyebilirsin. => If you choose No, setup does not start; you can turn on System Protection and try again.
+Yeniden başlatılamadı: {0} => Could not restart: {0}
+Bilgisayarı Başlat menüsünden yeniden başlat. => Restart the computer from the Start menu.
+Günlük açılamadı: {0} => The log could not be opened: {0}
+
+[parca]
+# --- kurulum penceresinin kendi iletileri
+Kurulum betikleri bulunamadı: => Setup scripts not found:
+Denetim çalıştırılamadı. => The check could not be run.
+Kurulum hazırlanamadı: => Setup could not be prepared:
+Kurulum dosyaları açılamadı: => The setup files could not be extracted:
+Kurulum dosyaları bu programın içinde yok. => This program does not contain the setup files.
+Geçersiz dosya adı: => Invalid file name:
+Windows PowerShell başlatılamadı: => Windows PowerShell could not be started:
+İşlem beklenmedik biçimde durdu (çıkış kodu {0}). => The process stopped unexpectedly (exit code {0}).
+Panel başlatılamadı: => The panel could not be started:
+Başlangıç seçimi kaydedilemedi: => The startup choice could not be saved:
+
+# --- denetim: engeller ve uyarılar (kur.ps1)
+Bu sürüm yalnızca 64 bit (x64) Windows içindir. => This version is for 64-bit (x64) Windows only.
+Windows 10 sürüm 2004 ya da daha yenisi gerekir. => Windows 10 version 2004 or later is required.
+Yalnızca Windows 11'de denendi. => Tested on Windows 11 only.
+Bu bilgisayarda köprü servisi kurulu. Önce Ayarlar > Uygulamalar > PodPanel > Kaldır ile kaldır ("usbip-win2 sürücüsünü de kaldır" kutusu işaretli), sonra bu kurulumu yeniden çalıştır. => The bridge service is installed on this computer. Remove it first with Settings > Apps > PodPanel > Uninstall (with "Also remove the usbip-win2 driver" ticked), then run this setup again.
+Bu bilgisayarda WPods uygulamasının servisi kurulu. İkisi aynı anda çalışamaz; önce WPods'u kaldır. => The WPods app's service is installed on this computer. The two cannot run together; uninstall WPods first.
+USB üzerinden bağlı bir Bluetooth adaptörü bulunamadı. Köprü yalnızca USB adaptörlerle çalışır. => No Bluetooth adapter connected over USB was found. The bridge works with USB adapters only.
+Bluetooth şu an çalışmıyor. Önce Bluetooth'un çalıştığından emin ol. => Bluetooth is not working right now. Make sure Bluetooth works first.
+Akıllı Uygulama Denetimi açık: Windows imzasız köprü servisini çalıştırmıyor. => Smart App Control is on: Windows does not run the unsigned bridge service.
+Köprü kurulmayacak; panel köprüsüz kurulur. => The bridge will not be installed; the panel is installed without it.
+Akıllı Uygulama Denetimi değerlendirme modunda: kendiliğinden açılırsa köprü servisini engelleyebilir. => Smart App Control is in evaluation mode: if it turns itself on, it may block the bridge service.
+usbip-win2 {0} kurulu; köprü {1} ile denendi. => usbip-win2 {0} is installed; the bridge was tested with {1}.
+Sistem Koruması kapalı: geri yükleme noktası oluşturulamaz. Açmak için Başlat'a "Geri yükleme noktası oluştur" yaz, C: sürücüsünü seç, Yapılandır > Sistem korumasını aç. => System Protection is off: a restore point cannot be created. To turn it on, type "Create a restore point" into Start, select drive C:, then Configure > Turn on system protection.
+Köprüyü kurmak için Akıllı Uygulama Denetimi kapalı olmalıdır (Windows Güvenliği > Uygulama ve tarayıcı denetimi > Akıllı Uygulama Denetimi). Kapatmak bilgisayarın korumasını azaltır; karar senin. Kapatırsan kurulumu yeniden çalıştırman yeter. => To install the bridge, Smart App Control must be off (Windows Security > App & browser control > Smart App Control). Turning it off reduces the computer's protection; the decision is yours. If you turn it off, just run this setup again.
+Panel kuruldu ve köprüsüz çalışır: pil, bağlantı, oyun modu ve uzamsal ses kullanılabilir; dinleme modu, gecikme ve mikrofon köprüsü kullanılamaz. => The panel is installed and works without the bridge: battery, connection, game mode and spatial sound are available; listening modes, latency and the microphone bridge are not.
+
+# --- kurulum: sonuç iletileri (kur.ps1)
+Kurulum yönetici olarak çalıştırılmalı. => Setup must be run as administrator.
+Kurulum dosyaları özet listesiyle eşleşmiyor. Hiçbir şey kurulmadı. => The setup files do not match the hash list. Nothing was installed.
+Geri yükleme noktası oluşturulamadı (Sistem Koruması kapalı olabilir). Hiçbir şey kurulmadı. İstersen kutunun işaretini kaldırıp yeniden dene. => The restore point could not be created (System Protection may be off). Nothing was installed. You can untick the box and try again.
+Eski panel dosyaları silinemedi (bir dosya kullanımda olabilir). Bilgisayarı yeniden başlatıp kurulumu yeniden çalıştır. => The old panel files could not be deleted (a file may be in use). Restart the computer and run setup again.
+Kopyalanan panel dosyaları özet listesiyle eşleşmiyor. Panel kurulmadı. => The copied panel files do not match the hash list. The panel was not installed.
+Kurulum klasörü yönetici olmayan kullanıcılarca yazılabiliyor; köprü servisi buraya kurulamaz. => The install folder is writable by non-administrators; the bridge service cannot be installed there.
+Windows köprü servisinin programını çalıştırmadı ({0}). => Windows did not run the bridge service's program ({0}).
+Windows servis programını çalıştırmadı ({0}). => Windows did not run the service program ({0}).
+Sürücülere ve Bluetooth'a dokunulmadı. => The drivers and Bluetooth were not touched.
+usbip-win2 kurulu duruyor; kullanılmıyor, PodPanel kaldırılırken birlikte kaldırılabilir. => usbip-win2 stays installed; it is not used and can be removed together with PodPanel.
+usbip-win2 kurulum dosyasının özeti beklenenle eşleşmiyor; sürücü kurulmadı. => The hash of the usbip-win2 installer does not match the expected one; the driver was not installed.
+usbip-win2 kurulum dosyasının imzası geçerli değil ya da beklenen imzacıya ait değil; sürücü kurulmadı. => The signature of the usbip-win2 installer is not valid or not from the expected signer; the driver was not installed.
+usbip-win2 kurulamadı (çıkış kodu {0}; ayrıntı: {1}). => usbip-win2 could not be installed (exit code {0}; details: {1}).
+Eski servis klasörü silinemedi. => The old service folder could not be deleted.
+Kopyalanan servis dosyaları özet listesiyle eşleşmiyor. => The copied service files do not match the hash list.
+Servis klasörü yönetici olmayan kullanıcılarca yazılabiliyor. => The service folder is writable by non-administrators.
+Köprü servisi kurulmadı; Bluetooth'a dokunulmadı. => The bridge service was not installed; Bluetooth was not touched.
+Köprü servisi kaydedilemedi; Bluetooth'a dokunulmadı. => The bridge service could not be registered; Bluetooth was not touched.
+Köprü servisi Bluetooth'u devralamadı ve geri alma doğrulanamadı. Bilgisayarı yeniden başlat; Bluetooth gelmezse Sistem Geri Yükleme ile "PodPanel kurulumu oncesi" noktasına dön. => The bridge service could not take over Bluetooth and the rollback could not be verified. Restart the computer; if Bluetooth does not come back, use System Restore to go back to the "PodPanel kurulumu oncesi" point.
+Köprü servisi Bluetooth'u devralamadı. => The bridge service could not take over Bluetooth.
+Servis kaldırıldı ve Bluetooth eski hâline döndü. => The service was removed and Bluetooth is back as it was.
+Köprü servisi kurulu ama başlatılamadı. Bilgisayarı yeniden başlat; köprü yine çalışmazsa PodPanel'i kaldırıp yeniden kur. => The bridge service is installed but could not be started. Restart the computer; if the bridge still does not work, uninstall PodPanel and install it again.
+Köprü servisi durdurulamadı; servis dosyalarına dokunulmadı. Bluetooth çalışmıyorsa bilgisayarı yeniden başlat. => The bridge service could not be stopped; the service files were not touched. If Bluetooth is not working, restart the computer.
+Köprü servisi güncellenemedi; eski sürümü yeniden çalışıyor ve Bluetooth geri geldi. Panel yeni sürüme güncellendi. => The bridge service could not be updated; its old version is running again and Bluetooth is back. The panel was updated to the new version.
+Köprü servisi güncellenemedi ve kaldırıldı; Bluetooth Windows'un kendi sürücüsüne döndü. => The bridge service could not be updated and was removed; Bluetooth is back on Windows' own driver.
+Köprü servisi güncellenemedi ve Bluetooth'un geri geldiği doğrulanamadı. Bilgisayarı yeniden başlat; Bluetooth gelmezse PodPanel'i Uygulamalar listesinden kaldır. => The bridge service could not be updated and it could not be verified that Bluetooth came back. Restart the computer; if Bluetooth does not come back, uninstall PodPanel from the Apps list.
+Kurulum tamamlandı. => Setup complete.
+Köprünün devreye girmesi için bilgisayarı yeniden başlat. => Restart the computer for the bridge to take effect.
+Köprü servisi kurulurken hata oluştu ({0}); servis kaldırıldı ve Bluetooth eski hâlinde. => An error occurred while installing the bridge service ({0}); the service was removed and Bluetooth is as it was.
+Köprü servisi geri alınamadı; bilgisayarı yeniden başlat. Bluetooth gelmezse PodPanel'i Uygulamalar listesinden kaldır. => The bridge service could not be rolled back; restart the computer. If Bluetooth does not come back, uninstall PodPanel from the Apps list.
+Köprü kurulurken hata oluştu: => An error occurred while installing the bridge:
+Sürücülere, köprü servisine ve Bluetooth'a dokunulmadı. => The drivers, the bridge service and Bluetooth were not touched.
+Bluetooth'a dokunulmadı. => Bluetooth was not touched.
+Kurulum yarıda kaldı: => Setup stopped midway:
+
+# --- kurulum: ayrıntı satırları (kur.ps1)
+PodPanel {0} kurulumu başladı (köprü servisi {1}). => PodPanel {0} setup started (bridge service {1}).
+Kurulum dosyaları doğrulandı ({0} dosya). => Setup files verified ({0} files).
+Kurulumdan önce adaptör: => Adapter before setup:
+Kurulumdan sonra adaptör: => Adapter after setup:
+Servis programı denemesi: çalışıyor. => Service program test: it runs.
+Servis programı denemesi: {0} (Windows hata kodu {1}) => Service program test: {0} (Windows error code {1})
+Köprü kurulmayacak: => The bridge will not be installed:
+Sürücü ve servis değişmeyecek; geri yükleme noktası gerekmiyor. => The driver and the service will not change; no restore point is needed.
+Geri yükleme noktası istenmedi; atlandı. => No restore point was requested; skipped.
+Geri yükleme noktası oluşturuluyor (bir dakika kadar sürebilir)... => Creating a restore point (this can take about a minute)...
+Geri yükleme noktası hatası: => Restore point error:
+Geri yükleme noktası: => Restore point:
+Panel kuruldu: {0} (Uygulamalar listesine ve Başlat menüsüne eklendi) => Panel installed: {0} (added to the Apps list and the Start menu)
+Köprüsüz sürüm: atlandı. => Edition without the bridge: skipped.
+Köprü kurulmayacağı için atlandı. => Skipped because the bridge will not be installed.
+Önceki denemeden kalan servis dosyaları silindi. => Service files left over from an earlier attempt were deleted.
+Köprü servisi kurulmadı. => The bridge service was not installed.
+usbip-win2 kurulum dosyası: SHA-256 {0}, imza {1}, => usbip-win2 installer: SHA-256 {0}, signature {1},
+usbip-win2 kuruluyor. USB aygıtların (klavye ve fare dahil) bir an kopabilir; bu beklenen bir durum. => Installing usbip-win2. Your USB devices (including keyboard and mouse) may disconnect for a moment; this is expected.
+usbip-win2 kurulumu çıkış kodu: => usbip-win2 setup exit code:
+usbip-win2 zaten kurulu; sürücü durumu: => usbip-win2 is already installed; driver state:
+usbip-win2 sürücüsü henüz çalışmıyor: servis yeniden başlatmada devreye girecek. => The usbip-win2 driver is not running yet: the service will take effect after the restart.
+Servis kaydedildi; yeniden başlatmada Bluetooth adaptörünü devralacak. => The service was registered; it will take over the Bluetooth adapter after the restart.
+Servis kuruluyor. Bluetooth birkaç saniyeliğine kesilecek ve kendiliğinden geri gelecek. => Installing the service. Bluetooth will drop for a few seconds and come back by itself.
+Servis Bluetooth'u devralamadı; geri alınıyor (bir dakika sürebilir)... => The service could not take over Bluetooth; rolling back (this can take a minute)...
+Servis güncel ({0}), durumu: => The service is up to date ({0}), state:
+Servis yeniden başlatmayı bekliyor. => The service is waiting for the restart.
+Servis güncelleniyor: {0} -> {1}. Bluetooth 10-20 saniye kesilecek ve kendiliğinden geri gelecek. => Updating the service: {0} -> {1}. Bluetooth will drop for 10-20 seconds and come back by itself.
+Eski sürüme dönülüyor. => Going back to the old version.
+Yeni sürüm Bluetooth'u geri getiremedi; eski sürüme dönülüyor. => The new version could not bring Bluetooth back; going back to the old version.
+Eski sürüm de başlatılamadı; servis kaldırılıyor ve adaptör Windows'a geri veriliyor. => The old version could not be started either; removing the service and giving the adapter back to Windows.
+Geri alma hatası: => Rollback error:
+Beklenmeyen hata: => Unexpected error:
+
+# --- kaldırma (kaldir.ps1)
+Kaldırma yönetici olarak çalıştırılmalı. => Uninstall must be run as administrator.
+PodPanel kaldırılıyor. => Uninstalling PodPanel.
+Panel zorla kapatıldı. AirPods mikrofonu Windows'ta görünmezse: Denetim Masası > Aygıtlar ve Yazıcılar > AirPods > Özellikler > Hizmetler sekmesinde "El-serbest Telefon" kutusunu işaretle. => The panel was closed by force. If the AirPods microphone does not show up in Windows: Control Panel > Devices and Printers > AirPods > Properties > Services tab, tick "Handsfree Telephony".
+Kurulu servis bu kuruluma ait değil (WPods uygulaması); ona dokunulmadı. => The installed service does not belong to this installation (WPods app); it was not touched.
+Bluetooth birkaç saniyeliğine kesilecek (bir dakika sürebilir)... => Bluetooth will drop for a few seconds (this can take a minute)...
+Servisin kaldırıldığı ve Bluetooth'un geri geldiği doğrulanamadı; dosyalar silinmedi. Bilgisayarı yeniden başlatıp kaldırmayı yeniden çalıştır. Bluetooth gelmezse Sistem Geri Yükleme ile "PodPanel kurulumu oncesi" noktasına dön. => It could not be verified that the service was removed and Bluetooth came back; no files were deleted. Restart the computer and run the uninstaller again. If Bluetooth does not come back, use System Restore to go back to the "PodPanel kurulumu oncesi" point.
+Servis kaldırıldı ve Bluetooth Windows'un kendi sürücüsüne döndü. => The service was removed and Bluetooth is back on Windows' own driver.
+Köprü servisi kurulu değil. => The bridge service is not installed.
+usbip-win2 bırakıldı (Uygulamalar listesinden "USBip" olarak kaldırılabilir). => usbip-win2 was kept (it can be removed from the Apps list as "USBip").
+usbip-win2 kurulu değil. => usbip-win2 is not installed.
+usbip-win2 kaldırılıyor. USB aygıtların bir an kopabilir. => Removing usbip-win2. Your USB devices may disconnect for a moment.
+usbip-win2 kaldırıcısı çıkış kodu: => usbip-win2 uninstaller exit code:
+usbip-win2 kaldırılamadı; Uygulamalar listesinden elle kaldırılabilir. Ayrıntı: => usbip-win2 could not be removed; it can be removed by hand from the Apps list. Details:
+usbip-win2 kaldırıldı. => usbip-win2 was removed.
+Servis günlüğü saklandı: => Service log kept:
+Servis günlüğü saklanamadı: => The service log could not be kept:
+Silinemeyen klasörler (yeniden başlatmadan sonra elle silinebilir): => Folders that could not be deleted (they can be deleted by hand after a restart):
+Kayıtlar ve dosyalar silindi. Kişisel ayarlar (%LOCALAPPDATA%\PodPanel) yerinde bırakıldı. => Registry entries and files were deleted. Personal settings (%LOCALAPPDATA%\PodPanel) were left in place.
+PodPanel kaldırıldı. => PodPanel was removed.
+usbip-win2 sürücüsünün tamamen kalkması için bilgisayarı yeniden başlat. => Restart the computer to finish removing the usbip-win2 driver.
+Kaldırma yarıda kaldı: => Uninstall stopped midway:
+Bluetooth çalışmıyorsa bilgisayarı yeniden başlat ve kaldırmayı yeniden çalıştır. => If Bluetooth is not working, restart the computer and run the uninstaller again.
+
+# --- ortak (ortak.ps1)
+Çalışan panel kapatılıyor: => Closing the running panel:
+çık komutu gönderilemedi: => the exit command could not be sent:
+Panel kendiliğinden kapanmadı; zorla kapatılıyor. => The panel did not close by itself; closing it by force.
+{0} sn: servis {1}, adaptör WinUSB'de {2}, oturum çalışıyor {3}, Bluetooth hazır {4} => {0} s: service {1}, adapter on WinUSB {2}, session running {3}, Bluetooth ready {4}
+Servisin kendi koruması devreye girdi (üç başarısız deneme). => The service's own guard tripped (three failed attempts).
+Kayıtlı adaptör: => Stored adapter:
+Servis programı çalıştırılamadı; servis kaydı ve adaptör Windows araçlarıyla geri alınacak. => The service program could not be run; the service entry and the adapter will be restored with Windows tools.
+Servis kaydı siliniyor. => Deleting the service entry.
+Adaptör hâlâ WinUSB'de, elle geri veriliyor: => The adapter is still on WinUSB; giving it back by hand:
+Servis kaldırıldı: {0}   Bluetooth hazır: => Service removed: {0}   Bluetooth ready:
+listede olmayan dosya: => file not in the list:
+özeti farklı: => hash differs:
+eksik dosya: => missing file:
+özet listesinde bu klasör için girdi yok => the hash list has no entries for this folder
+
+# --- kısa parçalar (en sonda)
+başlatılamadı: => could not be started:
+çıkış kodu: => exit code:
+, sürücü => , driver
