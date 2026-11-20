@@ -29,10 +29,36 @@ public sealed class Settings
     public string? PreferredMicId { get; set; }
     public bool AutoGame { get; set; }
     public List<string> AutoGameProcesses { get; set; } = new() { "cs2", "TslGame" };
+
+    /// <summary>Listedeki süreç adlarının panelde gösterilen adları (süreç adı -> ad). Adı olmayan süreç adıyla görünür.</summary>
+    public Dictionary<string, string> AutoGameLabels { get; set; } = new()
+    {
+        ["cs2"] = "Counter-Strike 2",
+        ["TslGame"] = "PUBG: BATTLEGROUNDS",
+    };
+
+    /// <summary>Bir süreç adının gösterilecek adı; kayıtlı değilse süreç adının kendisi.</summary>
+    public string LabelFor(string process)
+    {
+        foreach (var pair in AutoGameLabels)
+        {
+            if (string.Equals(pair.Key, process, StringComparison.OrdinalIgnoreCase) && pair.Value.Length > 0) return pair.Value;
+        }
+        return process;
+    }
+
+    public void SetLabel(string process, string? label)
+    {
+        foreach (string key in AutoGameLabels.Keys.Where(k => string.Equals(k, process, StringComparison.OrdinalIgnoreCase)).ToList())
+        {
+            AutoGameLabels.Remove(key);
+        }
+        if (!string.IsNullOrWhiteSpace(label)) AutoGameLabels[process] = label.Trim();
+    }
     public string? LastAddress { get; set; }
 
     /// <summary>
-    /// Kulaklığın gecikme tamponu hedefi (ms): 0 = kulaklığın varsayılanı (150), yoksa 90, 60 ya da 30.
+    /// Kulaklığın gecikme tamponu hedefi (ms): 0 = kulaklığın varsayılanı (150), yoksa 90 ya da 60.
     /// Düşük değer oyunlarda sesi öne çeker; bağlantı zayıfsa ses takılabilir.
     /// </summary>
     public int JitterMs { get; set; }

@@ -128,6 +128,25 @@ public sealed class PodMonitor : IDisposable
         _settings.Save();
     });
 
+    /// <summary>Listeye bir oyun ekler (süreç adı ve gösterilecek ad) ve kendiliğinden açmayı etkinleştirir.</summary>
+    public void AddAutoGame(string process, string label) => Post(() =>
+    {
+        string name = process.Trim();
+        if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) name = name[..^4];
+        if (name.Length == 0) return;
+        if (!_settings.AutoGameProcesses.Contains(name, StringComparer.OrdinalIgnoreCase)) _settings.AutoGameProcesses.Add(name);
+        _settings.SetLabel(name, label);
+        _settings.AutoGame = true;
+        _settings.Save();
+    });
+
+    public void RemoveAutoGame(string process) => Post(() =>
+    {
+        _settings.AutoGameProcesses.RemoveAll(p => string.Equals(p, process, StringComparison.OrdinalIgnoreCase));
+        _settings.SetLabel(process, null);
+        _settings.Save();
+    });
+
     public void SetSpatial(bool on) => Post(() =>
     {
         if (_render == null) return;
@@ -290,6 +309,7 @@ public sealed class PodMonitor : IDisposable
                 LockMic = _settings.LockMic,
                 AutoGame = _settings.AutoGame,
                 AutoGameProcesses = _settings.AutoGameProcesses.ToList(),
+                AutoGameLabels = _settings.AutoGameProcesses.Select(_settings.LabelFor).ToList(),
             });
             return;
         }
@@ -523,6 +543,7 @@ public sealed class PodMonitor : IDisposable
             LockMic = _settings.LockMic,
             AutoGame = _settings.AutoGame,
             AutoGameProcesses = _settings.AutoGameProcesses.ToList(),
+            AutoGameLabels = _settings.AutoGameProcesses.Select(_settings.LabelFor).ToList(),
             Mics = micOptions,
             GameMicName = game.Alt?.Name,
         });
@@ -709,7 +730,7 @@ public sealed class PodMonitor : IDisposable
     {
         string? running = _settings.AutoGame ? FindRunning(_settings.AutoGameProcesses) : null;
         bool want = _settings.GameMode || running != null;
-        string reason = _settings.GameMode ? "elle açıldı" : running != null ? running + " çalışıyor" : "";
+        string reason = _settings.GameMode ? "elle açıldı" : running != null ? _settings.LabelFor(running) + " çalışıyor" : "";
         EndpointInfo? alt = capture != null ? PickAltMic(endpoints, capture) : null;
 
         if (want) ApplyGameMode(capture, alt);

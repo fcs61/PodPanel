@@ -431,10 +431,67 @@
 
                     <CheckBox Style="{StaticResource Check}" Content="Oyun modunda AirPods mikrofonunu kilitle" IsChecked="{Binding LockMic, Mode=TwoWay}"
                               Margin="0,10,0,0" ToolTip="Oyun modu açıkken hiçbir uygulama AirPods'un el-serbest mikrofonunu açamaz." />
-                    <CheckBox Style="{StaticResource Check}" Content="Oyun modunu şu uygulamalarla aç" IsChecked="{Binding AutoGame, Mode=TwoWay}"
-                              Margin="0,8,0,0" ToolTip="Listedeki uygulamalardan biri çalışırken oyun modu kendiliğinden açılır." />
-                    <TextBox x:Name="AutoGameBox" Style="{StaticResource Input}" Margin="24,6,0,0"
-                             Text="{Binding AutoGameList, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                    <CheckBox Style="{StaticResource Check}" Content="Bu oyunlar açılınca oyun modunu aç" IsChecked="{Binding AutoGame, Mode=TwoWay}"
+                              Margin="0,8,0,0" ToolTip="Listedeki oyunlardan biri çalışırken oyun modu kendiliğinden açılır, oyun kapanınca kapanır." />
+                    <StackPanel Margin="24,4,0,0">
+                        <!-- Eklenmiş oyunlar: ad ve çıkarma düğmesi -->
+                        <ItemsControl ItemsSource="{Binding Games}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Background="Transparent" ToolTip="{Binding Exe}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Label}" Style="{StaticResource Value}" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Style="{StaticResource Link}" ToolTip="Listeden çıkar"
+                                                Command="{Binding DataContext.RemoveGameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding Name}">
+                                            <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10"
+                                                       Margin="10,3,4,3" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="Henüz oyun eklenmedi" Style="{StaticResource Muted}" Margin="0,2"
+                                   Visibility="{Binding NoGames, Converter={StaticResource BoolToVis}}" />
+
+                        <Button Style="{StaticResource Link}" Command="{Binding TogglePickerCommand}" HorizontalAlignment="Left"
+                                Foreground="{DynamicResource AccentBrush}" Margin="0,3,0,0"
+                                ToolTip="Oyunu aç, sonra buradan seç.">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE710;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10" Margin="0,3,6,0" />
+                                <TextBlock Text="Oyun ekle" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Seçici: penceresi açık uygulamalar, en son kullanılan başta -->
+                        <Border CornerRadius="8" Background="{DynamicResource CardBrush}" Padding="6,6,6,5" Margin="0,5,0,0"
+                                Visibility="{Binding ShowPicker, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock Text="Açık uygulamalar" Style="{StaticResource Label}" Margin="4,0,0,3" />
+                                <ItemsControl ItemsSource="{Binding OpenApps}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource Row}"
+                                                    Command="{Binding DataContext.AddGameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                                                               TextTrimming="CharacterEllipsis" MaxWidth="160" />
+                                                    <TextBlock Text="{Binding Exe}" Style="{StaticResource Muted}" FontSize="11" Margin="8,1,0,0"
+                                                               TextTrimming="CharacterEllipsis" MaxWidth="90" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Önce oyunu aç, sonra buradan seç." Style="{StaticResource Muted}" Margin="4,0,4,2" TextWrapping="Wrap"
+                                           Visibility="{Binding PickerEmpty, Converter={StaticResource BoolToVis}}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                     <CheckBox Style="{StaticResource Check}" Content="Windows ile başlat" IsChecked="{Binding StartWithWindows, Mode=TwoWay}"
                               Margin="0,10,0,0" />
                     <Button Style="{StaticResource Link}" Content="Bağlantıyı kes" Command="{Binding ToggleConnectionCommand}"

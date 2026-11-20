@@ -112,6 +112,8 @@ public sealed class PodState
     public bool LockMic { get; init; }
     public bool AutoGame { get; init; }
     public IReadOnlyList<string> AutoGameProcesses { get; init; } = Array.Empty<string>();
+    /// <summary>AutoGameProcesses ile aynı sırada, panelde gösterilecek adlar.</summary>
+    public IReadOnlyList<string> AutoGameLabels { get; init; } = Array.Empty<string>();
     public IReadOnlyList<MicOption> Mics { get; init; } = Array.Empty<MicOption>();
     public string? GameMicName { get; init; }
 }

@@ -26,7 +26,6 @@ public partial class FlyoutWindow : Window
         PreviewKeyDown += (_, e) =>
         {
             if (e.Key == Key.Escape) HideFlyout();
-            else if (e.Key == Key.Enter && Keyboard.FocusedElement is TextBox) CommitText();
         };
         SourceInitialized += (_, _) =>
         {
@@ -47,13 +46,11 @@ public partial class FlyoutWindow : Window
     public void HideFlyout()
     {
         if (StayOpen || !IsVisible) return;
-        CommitText();
+        // Açık kalmış "Oyun ekle" listesi bir sonraki açılışta eski uygulamaları göstermesin.
+        (DataContext as MainViewModel)?.ClosePicker();
         Hide();
         Hidden?.Invoke();
     }
-
-    /// <summary>Metin kutusundaki değişikliği odak değişmeden de kaydet.</summary>
-    private void CommitText() => AutoGameBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
 
     /// <summary>Paneli çalışma alanının sağ alt köşesine (görev çubuğunun üstüne) yerleştirir.</summary>
     private void Reposition()

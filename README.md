@@ -56,7 +56,8 @@ sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
 - **Mikrofon (köprü):** mikrofon sesini el-serbest profili yerine kontrol kanalından alır ve servisin sanal
   mikrofonuna ("Headset (A2DP, …)") verir; konuşurken ses stereo kalır (köprü servisi ve FFmpeg gerekir).
 - **Oyun modu:** varsayılan mikrofonu AirPods'tan uzak tutar, böylece kulaklık stereo kalır. İstenirse AirPods
-  mikrofonunu tamamen kilitler ve belirli uygulamalar (ör. `cs2`, `TslGame`) çalışırken kendiliğinden açılır.
+  mikrofonunu tamamen kilitler ve seçilen oyunlar çalışırken kendiliğinden açılır. Oyun eklemek için oyunu aç,
+  Ayarlar'da "Oyun ekle"ye bas ve açık uygulamalar listesinden seç; `.exe` adı yazmak gerekmez.
 - Windows Sonic uzamsal sesi açıp kapatır.
 - Bağlantı bilgisini gösterir: kullanılan codec, kulaklığın bildirdiği gecikme, mikrofonu hangi uygulamanın açtığı.
 

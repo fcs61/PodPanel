@@ -19,6 +19,17 @@ string argument = args.Length > 1 ? args[1] : "";
 var json = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 Log.Echo = true;
 
+// Paneldeki "Oyun ekle" listesinin gördüğü açık uygulamalar.
+if (command == "apps")
+{
+    var watch = System.Diagnostics.Stopwatch.StartNew();
+    var apps = RunningApps.List();
+    watch.Stop();
+    foreach (var app in apps) Console.WriteLine($"{app.Process}.exe  |  {app.Label}");
+    Console.WriteLine($"{apps.Count} uygulama, {watch.ElapsedMilliseconds} ms");
+    return;
+}
+
 var settings = Settings.Load();
 if (command is "bridge" or "aap" or "mode" or "aaptest" or "micdump" or "micdecode" or "micrec" or "hfp" or "a2dp" or "bitrate" or "eldprobe" or "jitter" or "latency" or "srclatency")
 {

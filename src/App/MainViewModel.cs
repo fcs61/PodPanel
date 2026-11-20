@@ -19,6 +19,15 @@ public sealed class MicItem
     public bool IsSelected { get; init; }
 }
 
+/// <summary>Oyun modu listesindeki ya da eklenebilecek açık uygulamalardaki bir satır.</summary>
+public sealed class GameItem
+{
+    /// <summary>Süreç adı, uzantısız (ör. cs2).</summary>
+    public string Name { get; init; } = "";
+    public string Label { get; init; } = "";
+    public string Exe => Name + ".exe";
+}
+
 /// <summary>Panelin bağlandığı görünüm modeli: PodState'i metne çevirir, tıklamaları izleyiciye iletir.</summary>
 public sealed class MainViewModel : INotifyPropertyChanged
 {
@@ -35,7 +44,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private DateTime _modeActionAt = DateTime.MinValue;
     private DateTime _jitterActionAt = DateTime.MinValue;
     private string _micSignature = "";
-    private string _lastStateList = "";
+    private string _lastGames = "";
     private bool _bridgeInstalled;
     private DateTime _bridgeCheckedAt = DateTime.MinValue;
 
@@ -53,7 +62,24 @@ public sealed class MainViewModel : INotifyPropertyChanged
             if (_bannerKind == BannerKind.OtherOutput) _monitor?.MakeDefaultOutput();
             else if (_bannerKind == BannerKind.BridgeGaveUp) _monitor?.RetryBridge();
         });
-        ToggleDetailsCommand = new RelayCommand(_ => ShowDetails = !ShowDetails);
+        ToggleDetailsCommand = new RelayCommand(_ =>
+        {
+            ShowDetails = !ShowDetails;
+            if (!ShowDetails) ClosePicker();
+        });
+        TogglePickerCommand = new RelayCommand(_ =>
+        {
+            if (ShowPicker) ClosePicker();
+            else OpenPicker();
+        });
+        AddGameCommand = new RelayCommand(parameter =>
+        {
+            if (parameter is GameItem item) AddGame(item);
+        });
+        RemoveGameCommand = new RelayCommand(parameter =>
+        {
+            if (parameter is string name) RemoveGame(name);
+        });
         SelectMicCommand = new RelayCommand(parameter =>
         {
             if (parameter is string id) _monitor?.SetPreferredMic(id);
@@ -96,6 +122,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public ICommand SelectMicCommand { get; }
     public ICommand SetModeCommand { get; }
     public ICommand SetJitterCommand { get; }
+    public ICommand TogglePickerCommand { get; }
+    public ICommand AddGameCommand { get; }
+    public ICommand RemoveGameCommand { get; }
 
     private ICommand? _exitCommand;
     public ICommand? ExitCommand
@@ -283,15 +312,90 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private string _autoGameList = "";
-    public string AutoGameList
+    // ---- Oyun modunu kendiliğinden açan oyunlar ----
+
+    /// <summary>Çalışırken oyun modunu açan oyunlar.</summary>
+    public ObservableCollection<GameItem> Games { get; } = new();
+
+    /// <summary>"Oyun ekle" açıkken: penceresi açık olan ve listede olmayan uygulamalar.</summary>
+    public ObservableCollection<GameItem> OpenApps { get; } = new();
+
+    private bool _noGames;
+    public bool NoGames { get => _noGames; private set => Set(ref _noGames, value); }
+
+    private bool _showPicker;
+    public bool ShowPicker { get => _showPicker; private set => Set(ref _showPicker, value); }
+
+    private bool _pickerEmpty;
+    public bool PickerEmpty { get => _pickerEmpty; private set => Set(ref _pickerEmpty, value); }
+
+    private void OpenPicker()
     {
-        get => _autoGameList;
-        set
+        IReadOnlyList<RunningApp> apps;
+        try
         {
-            if (!Set(ref _autoGameList, value) || _applying) return;
-            _monitor?.SetAutoGame(_autoGame, value.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries));
+            apps = RunningApps.List();
         }
+        catch (Exception ex)
+        {
+            Log.Write("Açık uygulamalar listelenemedi: " + ex.Message);
+            apps = Array.Empty<RunningApp>();
+        }
+        ShowApps(apps);
+    }
+
+    /// <summary>Seçiciyi verilen uygulamalarla açar; listede zaten olanlar gösterilmez.</summary>
+    public void ShowApps(IReadOnlyList<RunningApp> apps)
+    {
+        OpenApps.Clear();
+        foreach (var app in apps)
+        {
+            if (Games.Any(g => string.Equals(g.Name, app.Process, StringComparison.OrdinalIgnoreCase))) continue;
+            OpenApps.Add(new GameItem { Name = app.Process, Label = app.Label });
+        }
+        PickerEmpty = OpenApps.Count == 0;
+        ShowPicker = true;
+    }
+
+    public void ClosePicker()
+    {
+        ShowPicker = false;
+        OpenApps.Clear();
+    }
+
+    private void AddGame(GameItem item)
+    {
+        ClosePicker();
+        if (Games.Any(g => string.Equals(g.Name, item.Name, StringComparison.OrdinalIgnoreCase))) return;
+        Games.Add(item);
+        NoGames = false;
+        // Oyun ekleyen kişi bunun çalışmasını bekler: kutucuk kapalıysa açılır.
+        _userActionAt = DateTime.Now;
+        AutoGame = true;
+        _monitor?.AddAutoGame(item.Name, item.Label);
+    }
+
+    private void RemoveGame(string name)
+    {
+        var item = Games.FirstOrDefault(g => string.Equals(g.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (item == null) return;
+        Games.Remove(item);
+        NoGames = Games.Count == 0;
+        _monitor?.RemoveAutoGame(name);
+    }
+
+    private void UpdateGames(PodState s)
+    {
+        var items = s.AutoGameProcesses
+            .Select((name, index) => new GameItem { Name = name, Label = index < s.AutoGameLabels.Count ? s.AutoGameLabels[index] : name })
+            .ToList();
+        // Yalnızca izleyicinin bildirdiği liste değişince yenile: az önce eklenen oyun, komut işlenene kadar silinmesin.
+        string signature = string.Join("|", items.Select(i => i.Name + "=" + i.Label));
+        if (signature == _lastGames) return;
+        _lastGames = signature;
+        Games.Clear();
+        foreach (var item in items) Games.Add(item);
+        NoGames = Games.Count == 0;
     }
 
     private bool _bridgeMic;
@@ -404,12 +508,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 SpatialOn = s.SpatialOn;
             }
 
-            string list = string.Join(", ", s.AutoGameProcesses);
-            if (list != _lastStateList)
-            {
-                _lastStateList = list;
-                AutoGameList = list;
-            }
+            UpdateGames(s);
 
             UpdateMics(s.Mics);
 

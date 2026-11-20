@@ -13,15 +13,23 @@ namespace PodPanel;
 /// Görsel doğrulama modu: paneli ekran dışında oluşturur ve PNG olarak kaydeder.
 ///   PodPanel.exe --snapshot dosya.png [--mock live|normal|mono|game|disconnected|nodevice] [--theme dark|light]
 /// "live" gerçek durumu okur; diğerleri arayüz durumlarını denemek için örnek veri kullanır. Adın sonuna "+ayarlar"
-/// eklenirse Ayarlar bölümü açık çizilir (ör. --mock normal+ayarlar).
+/// eklenirse Ayarlar bölümü açık çizilir (ör. --mock normal+ayarlar); "+secici" eklenirse "Oyun ekle" listesi de açılır;
+/// "+eklendi" listeden ilk uygulamayı ekleyip bir oyunu çıkardıktan sonraki durumu çizer (komutların denemesi).
 /// </summary>
 internal static class Snapshot
 {
     public static void Run(App app, string path, string mock, string theme)
     {
         var viewModel = new MainViewModel(null, app.Dispatcher);
-        const string detailsSuffix = "+ayarlar";
-        if (mock.EndsWith(detailsSuffix, StringComparison.Ordinal))
+        const string detailsSuffix = "+ayarlar", pickerSuffix = "+secici", addedSuffix = "+eklendi";
+        bool added = mock.EndsWith(addedSuffix, StringComparison.Ordinal);
+        bool picker = added || mock.EndsWith(pickerSuffix, StringComparison.Ordinal);
+        if (picker)
+        {
+            mock = mock[..^(added ? addedSuffix : pickerSuffix).Length];
+            viewModel.ShowDetails = true;
+        }
+        else if (mock.EndsWith(detailsSuffix, StringComparison.Ordinal))
         {
             mock = mock[..^detailsSuffix.Length];
             viewModel.ShowDetails = true;
@@ -59,6 +67,21 @@ internal static class Snapshot
         if (mock != "live")
         {
             viewModel.Apply(Mock(mock));
+            if (picker)
+            {
+                viewModel.ShowApps(new List<RunningApp>
+                {
+                    new("RocketLeague", "Rocket League"),
+                    new("chrome", "Google Chrome"),
+                    new("Spotify", "Spotify"),
+                    new("cs2", "Counter-Strike 2"),
+                });
+            }
+            if (added)
+            {
+                viewModel.AddGameCommand.Execute(viewModel.OpenApps[0]);
+                viewModel.RemoveGameCommand.Execute("tslgame");
+            }
             Render();
             return;
         }
@@ -112,17 +135,18 @@ internal static class Snapshot
             new() { Id = "b", Name = "Mikrofon (USB masa mikrofonu)" },
         };
         var processes = new List<string> { "cs2", "TslGame" };
+        var labels = new List<string> { "Counter-Strike 2", "PUBG: BATTLEGROUNDS" };
 
         return name switch
         {
-            "nodevice" => new PodState { TelemetryAvailable = true, AutoGameProcesses = processes },
+            "nodevice" => new PodState { TelemetryAvailable = true, AutoGameProcesses = processes, AutoGameLabels = labels },
             "disconnected" => new PodState
             {
                 DeviceFound = true, DeviceName = "Fatih (AirPods Pro)", ModelName = "AirPods Pro 3", Connected = false,
                 HasMic = true, DefaultOutputName = "Hoparlör", DefaultMicName = "Mikrofon (Arctis Nova 7P)",
                 BatteryKnown = true, BatteryLeft = 80, BatteryRight = 70, BatteryCase = 60, ChargingLeft = true, ChargingRight = true,
                 BothInCase = true, BatteryAgeSeconds = 400, TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000, DelayMs = 150,
-                LinkFromCache = true, SpatialSupported = true, AutoGameProcesses = processes, Mics = mics, BridgeAvailable = true,
+                LinkFromCache = true, SpatialSupported = true, AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics, BridgeAvailable = true,
             },
             "normal" => new PodState
             {
@@ -131,7 +155,7 @@ internal static class Snapshot
                 BatteryKnown = true, BatteryLeft = 96, BatteryRight = 94, BatteryCase = 71, ChargingCase = true,
                 InEarLeft = true, InEarRight = true, BatteryAgeSeconds = 1, Activity = "Ses çalıyor", TelemetryAvailable = true,
                 Codec = "AAC", SampleRate = 48000, DelayMs = 60, SpatialSupported = true, SpatialOn = true, SpatialFormat = "Windows Sonic",
-                AutoGame = true, AutoGameProcesses = processes, Mics = mics,
+                AutoGame = true, AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics,
                 BridgeAvailable = true, ControlOpen = true, BatteryExact = true, Worn = true,
                 ListeningMode = PodPanel.Core.Bridge.ListeningMode.NoiseCancellation,
                 BridgeMicOn = true, BridgeMicReady = true, BridgeMicIsDefault = true, AudioKbps = 265, JitterMs = 60,
@@ -142,7 +166,7 @@ internal static class Snapshot
                 IsDefaultOutput = true, HasMic = true, IsDefaultMic = true, MicUsers = new[] { "cs2", "Discord" }, Playing = true,
                 BatteryKnown = true, BatteryLeft = 90, BatteryRight = 80, InEarLeft = true, InEarRight = true, BatteryAgeSeconds = 2,
                 Activity = "Arama", TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000, DelayMs = 150, HfpCodec = "mSBC (16 kHz)",
-                LinkTroubleCount = 3, SpatialSupported = true, AutoGameProcesses = processes, Mics = mics,
+                LinkTroubleCount = 3, SpatialSupported = true, AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics,
                 BridgeAvailable = true, ControlOpen = true, BatteryExact = true, Worn = true,
                 ListeningMode = PodPanel.Core.Bridge.ListeningMode.Transparency,
             },
@@ -155,7 +179,7 @@ internal static class Snapshot
                 BatteryAgeSeconds = 1, Activity = "Ses çalıyor", TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000,
                 DelayMs = 150, SpatialSupported = true, SpatialOn = true, SpatialFormat = "Windows Sonic",
                 GameModeManual = false, GameModeActive = true, GameModeReason = "cs2 çalışıyor", LockMic = true, AutoGame = true,
-                AutoGameProcesses = processes, Mics = mics, GameMicName = "Mikrofon (Arctis Nova 7P)",
+                AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics, GameMicName = "Mikrofon (Arctis Nova 7P)",
                 BridgeAvailable = true, ControlOpen = true, BatteryExact = true, Worn = false,
                 ListeningMode = PodPanel.Core.Bridge.ListeningMode.NoiseCancellation,
                 BridgeMicOn = true, BridgeMicReady = true, BridgeMicCapturing = true, BridgeMicStreaming = true, BridgeMicIsDefault = true,
