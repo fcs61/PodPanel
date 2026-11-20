@@ -51,8 +51,8 @@ sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
 - **Dinleme modu:** Şeffaf / Uyarlanabilir / Gürültü Engelleme arasında panelden ya da simgenin sağ tık menüsünden
   geçiş (köprü servisi gerekir). Kulaklık modu yalnızca kulaktayken değiştirir; değilken düğmeler soluk görünür.
 - Ses profillerini bağlar ya da keser; ses başka aygıta kaydıysa tek tıkla AirPods'a alır.
-- **Gecikme:** kulaklığın ses tamponunu 150 ms'den 90, 60 ya da 30 ms'ye indirir (köprü servisi gerekir). Oyunlarda
-  ses daha erken gelir; bağlantı zayıfsa küçük değerlerde ses takılabilir.
+- **Gecikme:** kulaklığın ses tamponunu 150 ms'den 90 ya da 60 ms'ye indirir (köprü servisi gerekir). Oyunlarda
+  ses daha erken gelir; bağlantı zayıfsa 60'ta ses takılabilir, o zaman 90 seçilir.
 - **Mikrofon (köprü):** mikrofon sesini el-serbest profili yerine kontrol kanalından alır ve servisin sanal
   mikrofonuna ("Headset (A2DP, …)") verir; konuşurken ses stereo kalır (köprü servisi ve FFmpeg gerekir).
 - **Oyun modu:** varsayılan mikrofonu AirPods'tan uzak tutar, böylece kulaklık stereo kalır. İstenirse AirPods
@@ -88,7 +88,8 @@ kapatır (güncelleme öncesinde kullanışlı).
 AirPods, gelen sesi çalmadan önce bir tamponda bekletir ve bu süreyi bağlı cihaza bildirir; varsayılanı 150 ms'dir.
 Tampon, kontrol kanalından tek bir komutla küçültülür (kontrol komutu `0x0B`, değer milisaniye). Komutun tanımı
 [USBPods](https://github.com/wasdwasd0105/USBPods-Pico2W) projesinin kaynağından; bu kulaklıkta 30, 60, 90 ve 150
-denendi ve her birinde kulaklık Windows'a aynı değeri bildirdi. Codec'i değiştirmek tek başına bu süreyi değiştirmez:
+denendi ve her birinde kulaklık Windows'a aynı değeri bildirdi. Panel 30'u sunmaz: Windows'un AAC paketleri yaklaşık
+21 ms'lik ses taşıdığı için 30 ms'lik tampon tek bir gecikmiş pakette boşalıyor ve ses kesik kesik geliyordu. Codec'i değiştirmek tek başına bu süreyi değiştirmez:
 AAC, SBC ve Apple'ın AAC-ELD ucu için bildirilen değer aynıdır (150 ms).
 
 Panel seçilen değeri kanal her açıldığında yeniden gönderir ve çıkışta 150'ye geri alır. Bu yalnızca kulaklığın

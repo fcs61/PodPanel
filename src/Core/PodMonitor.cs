@@ -79,6 +79,12 @@ public sealed class PodMonitor : IDisposable
     public PodMonitor(Settings settings, string instanceTag = "")
     {
         _settings = settings;
+        // Eski sürümlerde seçilmiş 30 ms, en yakın sunulan değere çekilir.
+        if (_settings.JitterMs is > 0 and < 60)
+        {
+            _settings.JitterMs = 60;
+            _settings.Save();
+        }
         _instanceTag = instanceTag;
         _thread = new Thread(Run) { IsBackground = true, Name = "PodPanel.Monitor" };
         _aap.Changed += () => _wake.Set();
@@ -160,7 +166,9 @@ public sealed class PodMonitor : IDisposable
     /// <summary>Kulaklığın gecikme tamponu hedefini seçer (ms; 0 = varsayılan). Kontrol kanalı açıkken uygulanır.</summary>
     public void SetJitter(int milliseconds) => Post(() =>
     {
-        _settings.JitterMs = milliseconds is 30 or 60 or 90 ? milliseconds : 0;
+        // 30 ms sunulmaz: Windows'un gönderdiği AAC paketleri yaklaşık 21 ms'lik ses taşır; 30 ms'lik tampon tek bir
+        // gecikmiş pakette boşalır ve ses kesik kesik gelir (2026-11-20'de bu kulaklıkta böyle oldu).
+        _settings.JitterMs = milliseconds is 60 or 90 ? milliseconds : 0;
         if (_settings.JitterMs != 0) _settings.JitterTouched = true;
         _settings.Save();
         Log.Write(_settings.JitterMs == 0 ? "Gecikme tamponu: varsayılan" : $"Gecikme tamponu: {_settings.JitterMs} ms");

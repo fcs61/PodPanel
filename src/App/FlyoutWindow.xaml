@@ -346,8 +346,6 @@
                                     Command="{Binding SetJitterCommand}" CommandParameter="90" />
                             <Button Style="{StaticResource Segment}" Content="60" Tag="{Binding IsJitter60}"
                                     Command="{Binding SetJitterCommand}" CommandParameter="60" />
-                            <Button Style="{StaticResource Segment}" Content="30" Tag="{Binding IsJitter30}"
-                                    Command="{Binding SetJitterCommand}" CommandParameter="30" />
                         </UniformGrid>
                     </Border>
                 </Grid>

@@ -213,15 +213,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private bool _isJitter60;
     public bool IsJitter60 { get => _isJitter60; private set => Set(ref _isJitter60, value); }
 
-    private bool _isJitter30;
-    public bool IsJitter30 { get => _isJitter30; private set => Set(ref _isJitter30, value); }
 
     private void ShowJitter(int milliseconds)
     {
         IsJitterDefault = milliseconds == 0;
         IsJitter90 = milliseconds == 90;
         IsJitter60 = milliseconds == 60;
-        IsJitter30 = milliseconds == 30;
     }
 
     // ---- Dinleme modu ----
