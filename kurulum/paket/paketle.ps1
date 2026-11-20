@@ -7,6 +7,8 @@
 #   kurulum\servis + servis.sha256  derlenmiş köprü servisi (özet listesiyle doğrulanır)
 #   kurulum\usbip-win2              usbip-win2 kurulum dosyası (özeti doğrulanır)
 #   kurulum\paket\*.ps1             kurulum ve kaldırma betikleri
+# Depoda olmayan girdiler: bagimliliklar.ps1 (FFmpeg, usbip-win2) ve servis-derle.ps1 (köprü servisi) hazırlar.
+# Sonuç paket-denetle.ps1 ile denetlenir. GitHub'daki otomatik derleme (.github\workflows\derle.yml) aynı sırayı izler.
 # Çıktı: %USERPROFILE%\PodPanel\dagitim
 param(
     [string]$Surum = '1.0.0',
@@ -19,7 +21,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$work = Join-Path $env:USERPROFILE 'PodPanel\tools\build\paket'
+# dotnet, SDK sürümünü çalışılan klasörden yukarı doğru aradığı global.json ile seçer: depo kökünden çalış.
+Set-Location -LiteralPath $repo
+$work =Join-Path $env:USERPROFILE 'PodPanel\tools\build\paket'
 $payload = Join-Path $work 'payload'
 $UsbipSetup = 'USBip-0.9.8.1-x64.exe'
 $UsbipSha256 = '38CAD6D4432B52D5BB9409D9AD03B72FDFFC4ADA4CD3A48FBECA1A2752A8518A'

@@ -38,5 +38,7 @@ Bluetooth paketlerinin iletilmesi, sürücü bağlama ve USB/IP sunucusu kodunda
 Proje .NET 10 SDK ister; SDK kullanıcı klasörüne kurulu (`%USERPROFILE%\PodPanel\tools\dotnet10`). Çıktı kendi çalışma zamanını içerir, bu yüzden bilgisayara .NET 10 kurmak gerekmez. Derlenmiş çıktı `kurulum\servis` klasöründe, dosya özetleri `kurulum\servis.sha256` dosyasındadır.
 
 ```powershell
-& "$env:USERPROFILE\PodPanel\tools\dotnet10\dotnet.exe" publish bridge\src\WPods.Service\WPods.Service.csproj -c Release --self-contained true -o "$env:USERPROFILE\PodPanel\tools\build\bridge-publish" --artifacts-path "$env:USERPROFILE\PodPanel\tools\build\bridge" -p:Version=0.3.2 "-p:InformationalVersion=0.3.2+f02e957.noupdate.9"
+powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\servis-derle.ps1
 ```
+
+Betik `dotnet publish` komutunu sürüm etiketiyle (`0.3.2+f02e957.noupdate.9`; betiğin başında yazılıdır) çalıştırır, çıktıyı `kurulum\servis` klasörüne koyar ve özet listesini yeniler. SDK'yı önce `%USERPROFILE%\PodPanel\tools\dotnet10` klasöründe, yoksa PATH'te arar. GitHub'daki otomatik derleme de aynı betiği kullanır.

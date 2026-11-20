@@ -1,0 +1,112 @@
+# Kurulum paketini depodaki kaynaktan derler.
+#   - main dalına her gönderimde, çekme isteklerinde ve elle çalıştırıldığında: paketi derler, denetler ve
+#     çalıştırmanın "Artifacts" bölümüne koyar (sürüm numarası 0.0.<çalıştırma sırası>).
+#   - "v1.2.3" biçiminde bir etiket gönderildiğinde: aynı paketi 1.2.3 sürümüyle derler ve Releases'ta bir TASLAK
+#     sürüme ekler. Taslağı yayımlamak elle yapılır (önce kurulum dosyası bir bilgisayarda denenmeli).
+name: Derleme
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: derleme-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Panele eklenen .NET 8 çalışma zamanı yaması (paketle.ps1 -CalismaZamani).
+  CALISMA_ZAMANI: '8.0.34'
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+jobs:
+  paket:
+    name: Kurulum paketi
+    runs-on: windows-latest
+    timeout-minutes: 30
+    outputs:
+      surum: ${{ steps.surum.outputs.surum }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Panel ve kurulum programı .NET 8 SDK ile (kökteki global.json), köprü servisi .NET 10 SDK ile
+      # (bridge/global.json) derlenir.
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.4xx
+
+      - name: Sürüm numarası
+        id: surum
+        shell: powershell
+        run: |
+          if ($env:GITHUB_REF -match '^refs/tags/v(\d+\.\d+\.\d+)$') { $surum = $Matches[1] }
+          elseif ($env:GITHUB_REF -like 'refs/tags/*') { throw "Etiket 'v1.2.3' biciminde olmali: $env:GITHUB_REF" }
+          else { $surum = "0.0.$env:GITHUB_RUN_NUMBER" }
+          [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "surum=$surum`n")
+          Write-Host "Surum: $surum"
+
+      - name: Dış bağımlılıklar (FFmpeg, usbip-win2)
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\bagimliliklar.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Köprü servisi
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\servis-derle.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Kurulum paketi
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\paketle.ps1 -Surum '${{ steps.surum.outputs.surum }}' -CalismaZamani $env:CALISMA_ZAMANI -Cikti "$env:GITHUB_WORKSPACE\dagitim"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Paketi denetle
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\paket-denetle.ps1 -Surum '${{ steps.surum.outputs.surum }}' -Cikti "$env:GITHUB_WORKSPACE\dagitim"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: PodPanel-Kurulum-${{ steps.surum.outputs.surum }}
+          path: |
+            dagitim/PodPanel-Kurulum-*.exe
+            dagitim/PodPanel-Kurulum-*.sha256.txt
+          if-no-files-found: error
+          # Kurulum dosyasının içi zaten sıkıştırılmış.
+          compression-level: 0
+          retention-days: 30
+
+  taslak-surum:
+    name: Taslak sürüm
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: paket
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: PodPanel-Kurulum-${{ needs.paket.outputs.surum }}
+          path: dagitim
+
+      - name: Taslak sürümü oluştur
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SURUM: ${{ needs.paket.outputs.surum }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dagitim/PodPanel-Kurulum-* \
+            --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
+            --title "PodPanel $SURUM" --generate-notes

@@ -154,10 +154,22 @@ Ayarlar bölümü açık çizilir.
 ## Kurulum paketini üretmek
 
 ```
+powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\bagimliliklar.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\servis-derle.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\paketle.ps1 -Surum 1.0.0 -CalismaZamani 8.0.34
+powershell -NoProfile -ExecutionPolicy Bypass -File kurulum\paket\paket-denetle.ps1 -Surum 1.0.0
 ```
 
-Betik paneli kendi .NET çalışma zamanıyla yayımlar, `kurulum\servis` klasöründeki derlenmiş servisi özet listesiyle
+İlk betik depoda olmayan iki dış dosyayı (FFmpeg kitaplıkları, usbip-win2 kurulum dosyası) indirip özetleriyle
+doğrular; ikincisi köprü servisini derler (.NET 10 SDK); sonuncusu üretilen paketi kurmadan denetler. Hiçbiri yönetici
+gerektirmez.
+
+**Otomatik derleme:** GitHub Actions (`.github/workflows/derle.yml`) aynı dört adımı `main` dalına her gönderimde
+ve çekme isteklerinde çalıştırır; kurulum dosyası çalıştırmanın "Artifacts" bölümünde durur (sürüm numarası
+`0.0.<çalıştırma sırası>`). `v1.2.3` biçiminde bir etiket gönderildiğinde paket o sürüm numarasıyla derlenir ve
+Releases'ta bir **taslak** sürüme eklenir; taslak, kurulum dosyası denendikten sonra elle yayımlanır.
+
+`paketle.ps1` paneli kendi .NET çalışma zamanıyla yayımlar, `kurulum\servis` klasöründeki derlenmiş servisi özet listesiyle
 doğrular, usbip-win2 kurulum dosyasının özetini denetler, kaynak kodunu `kaynak.zip` olarak ekler, hepsinin özet
 listesini (`dosyalar.sha256`) yazar ve tek dosyalık kurulum programını `%USERPROFILE%\PodPanel\dagitim` klasörüne
 koyar. `-CalismaZamani` verilmezse SDK'nın bildiği (çoğu zaman eski) .NET 8 yaması eklenir.
@@ -250,9 +262,9 @@ derlenmiş olarak kurulum dosyasının (`PodPanel-Kurulum-<sürüm>.exe`) içind
 
 | Yer | Ne | Nasıl elde edilir |
 |---|---|---|
-| `kurulum\servis\` | Derlenmiş köprü servisi | `bridge/CHANGES.md` içindeki "Derleme" komutu (.NET 10 SDK); çıktıyı bu klasöre kopyala |
-| `kurulum\usbip-win2\USBip-0.9.8.1-x64.exe` | usbip-win2 kurulum dosyası | <https://github.com/vadimgrn/usbip-win2/releases/download/v.0.9.8.1/USBip-0.9.8.1-x64.exe>; SHA-256 özeti `paketle.ps1` ve `kur.ps1` içinde yazılıdır, ikisi de denetler |
-| `%USERPROFILE%\PodPanel\app\ffmpeg\` | `avcodec-62.dll`, `avutil-60.dll`, `swresample-6.dll`, `LICENSE.txt` | <https://github.com/BtbN/FFmpeg-Builds/releases> içindeki `ffmpeg-n8.1-latest-win64-lgpl-shared-8.1.zip` (`bin` klasörü ve `LICENSE.txt`) |
+| `kurulum\servis\` | Derlenmiş köprü servisi | `kurulum\paket\servis-derle.ps1` (.NET 10 SDK); özet listesini de yeniler |
+| `kurulum\usbip-win2\USBip-0.9.8.1-x64.exe` | usbip-win2 kurulum dosyası | <https://github.com/vadimgrn/usbip-win2/releases/download/v.0.9.8.1/USBip-0.9.8.1-x64.exe>; `kurulum\paket\bagimliliklar.ps1` indirir; SHA-256 özeti o betikte, `paketle.ps1` ve `kur.ps1` içinde yazılıdır |
+| `%USERPROFILE%\PodPanel\app\ffmpeg\` | `avcodec-62.dll`, `avutil-60.dll`, `swresample-6.dll`, `LICENSE.txt` | `kurulum\paket\bagimliliklar.ps1` bu deponun `bagimlilik-ffmpeg-8.1` sürümündeki sabit kopyayı indirir ve özetlerini denetler. Aslı: <https://github.com/BtbN/FFmpeg-Builds/releases> içindeki `ffmpeg-n8.1-latest-win64-lgpl-shared-8.1.zip` (`bin` klasörü ve `LICENSE.txt`) |
 
 Servis yeniden derlendiyse özet listesi de yenilenmelidir (depodaki liste, 1.0.0 paketine giren derlemeye aittir):
 
