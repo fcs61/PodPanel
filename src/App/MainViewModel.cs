@@ -383,7 +383,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 : s.LinkTroubleCount > 0 ? $"Bağlantıda {s.LinkTroubleCount} tıkanma görüldü"
                 : "";
 
-            ShowBridgeMic = s.DeviceFound && (s.BridgeAvailable || s.BridgeMicOn);
+            ShowBridgeMic = s.DeviceFound && s.BridgeAvailable;
             GameModeAuto = s.GameModeActive && !s.GameModeManual;
             GameTip = GameModeAuto ? "Kendiliğinden açık: " + s.GameModeReason : GameTipDefault;
             SpatialEnabled = s.Connected && s.SpatialSupported;

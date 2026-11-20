@@ -58,6 +58,16 @@ internal sealed class WPodsService : ServiceBase
         CanShutdown = true;
         CanStop = true;
         CanHandlePowerEvent = true;
+        // Local change: a logoff right before a suspend means Windows is shutting down with Fast Startup.
+        CanHandleSessionChangeEvent = true;
+    }
+
+    protected override void OnSessionChange(SessionChangeDescription changeDescription)
+    {
+        if (changeDescription.Reason == SessionChangeReason.SessionLogoff)
+        {
+            _engine?.OnLogoff(changeDescription.SessionId);
+        }
     }
 
     protected override bool OnPowerEvent(PowerBroadcastStatus powerStatus)
@@ -78,7 +88,10 @@ internal sealed class WPodsService : ServiceBase
     protected override void OnStart(string[] args)
     {
         Timing.BeginPeriod();
-        Log.Info("service", $"start, version {typeof(WPodsService).Assembly.GetName().Version}");
+        // Local change: the full version label, so a log shows which build ran.
+        string version = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(typeof(WPodsService).Assembly)?.InformationalVersion
+            ?? typeof(WPodsService).Assembly.GetName().Version?.ToString() ?? "";
+        Log.Info("service", $"start, version {version}");
         _engine = new Engine();
         _engine.Start();
     }
@@ -180,6 +193,8 @@ internal static class ServiceSetup
     {
         Engine.Uninstalling = true;
         int stopped = Stop(keepAdapter: false);
+        // Local change: usbip-win2 may stay installed without this service; give it its shutdown task back.
+        UsbIpServer.SetDetachTask(enabled: true);
         bool exists = ServiceController.GetServices().Any(s => s.ServiceName == Name);
         if (exists && Sc("delete", Name) != 0)
         {

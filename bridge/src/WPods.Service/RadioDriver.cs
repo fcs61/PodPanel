@@ -83,6 +83,23 @@ internal static unsafe partial class RadioDriver
     public static bool IsOnWinUsb(string instanceId) =>
         string.Equals(GetService(instanceId), "WinUSB", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Local change: whether a device node is present, and its problem code (0 when it has none). Used to see whether
+    /// Windows' Bluetooth driver runs on the virtual adapter.
+    /// </summary>
+    public static (bool Present, uint Problem) DevnodeState(string instanceId)
+    {
+        if (CM_Locate_DevNode(out uint dev, instanceId, 0) != 0)
+        {
+            return (false, 0);
+        }
+        if (CM_Get_DevNode_Status(out uint status, out uint problem, dev, 0) != 0)
+        {
+            return (true, 0);
+        }
+        return (true, (status & 0x400 /* DN_HAS_PROBLEM */) != 0 ? problem : 0);
+    }
+
     // ---- Local change: usbip-win2's emulated USB host controller ----
 
     private const string VhciEnumKey = @"SYSTEM\CurrentControlSet\Services\usbip2_ude\Enum";

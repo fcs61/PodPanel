@@ -12,7 +12,9 @@ param(
     [string]$Surum = '1.0.0',
     # Panele eklenecek .NET 8 çalışma zamanı sürümü; boşsa SDK'nın bildiği sürüm kullanılır.
     [string]$CalismaZamani = '',
-    [string]$Cikti = (Join-Path $env:USERPROFILE 'PodPanel\dagitim')
+    [string]$Cikti = (Join-Path $env:USERPROFILE 'PodPanel\dagitim'),
+    # Köprüsüz paket: köprü servisi ve usbip-win2 olmadan, yalnızca panel.
+    [switch]$Koprusuz
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -45,6 +47,10 @@ foreach ($name in 'avcodec-62.dll', 'avutil-60.dll', 'swresample-6.dll', 'LICENS
 New-Item -ItemType Directory -Force (Join-Path $payload 'app\ffmpeg') | Out-Null
 Copy-Item -Path (Join-Path $ffmpeg '*') -Destination (Join-Path $payload 'app\ffmpeg') -Force
 
+if ($Koprusuz) {
+    Step 'Köprüsüz paket: köprü servisi ve usbip-win2 eklenmiyor'
+    $bridgeVersion = '-'
+} else {
 Step 'Köprü servisi doğrulanıyor ve kopyalanıyor'
 $service = Join-Path $repo 'kurulum\servis'
 $expected = @{}
@@ -65,13 +71,15 @@ $usbip = Join-Path $repo "kurulum\usbip-win2\$UsbipSetup"
 if ((Get-FileHash -LiteralPath $usbip -Algorithm SHA256).Hash -ne $UsbipSha256) { throw 'usbip-win2 kurulum dosyasının özeti beklenenle eşleşmiyor.' }
 New-Item -ItemType Directory -Force (Join-Path $payload 'usbip') | Out-Null
 Copy-Item -LiteralPath $usbip -Destination (Join-Path $payload 'usbip')
+}
 
 Step 'Betikler, sürüm, lisanslar ve kaynak kodu'
 New-Item -ItemType Directory -Force (Join-Path $payload 'kurulum') | Out-Null
 foreach ($name in 'ortak.ps1', 'kur.ps1', 'kaldir.ps1') {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $payload 'kurulum')
 }
-[IO.File]::WriteAllText((Join-Path $payload 'surum.txt'), "$Surum`r`n$bridgeVersion`r`n", (New-Object Text.UTF8Encoding $false))
+$kind = if ($Koprusuz) { "koprusuz`r`n" } else { '' }
+[IO.File]::WriteAllText((Join-Path $payload 'surum.txt'), "$Surum`r`n$bridgeVersion`r`n$kind", (New-Object Text.UTF8Encoding $false))
 Copy-Item -LiteralPath (Join-Path $repo 'bridge\LICENSE') -Destination (Join-Path $payload 'LISANS.txt')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UCUNCU-TARAFLAR.txt') -Destination $payload
 
@@ -115,10 +123,11 @@ Write-Host ("   payload.zip: {0:N0} MB" -f ((Get-Item $zip).Length / 1MB))
 Step 'Kurulum programı (Kurulum.exe)'
 Invoke-Dotnet @('build', (Join-Path $repo 'src\Setup\Setup.csproj'), '-c', 'Release', "-p:Payload=$zip", '-p:CiktiEki=-kur', "-p:Version=$Surum",
     '-p:DebugType=none', '-o', (Join-Path $work 'kur'), '-nologo', '-v', 'q')
-$final = Join-Path $Cikti "PodPanel-Kurulum-$Surum.exe"
+$name = if ($Koprusuz) { "PodPanel-Kurulum-$Surum-koprusuz" } else { "PodPanel-Kurulum-$Surum" }
+$final = Join-Path $Cikti "$name.exe"
 Copy-Item -LiteralPath (Join-Path $work 'kur\Kurulum.exe') -Destination $final -Force
 $hash = (Get-FileHash -LiteralPath $final -Algorithm SHA256).Hash
-[IO.File]::WriteAllText((Join-Path $Cikti "PodPanel-Kurulum-$Surum.sha256.txt"), "$hash  PodPanel-Kurulum-$Surum.exe`r`n", (New-Object Text.UTF8Encoding $false))
+[IO.File]::WriteAllText((Join-Path $Cikti "$name.sha256.txt"), "$hash  $name.exe`r`n", (New-Object Text.UTF8Encoding $false))
 
 # Paketi alacak kişi için kısa kullanım notu (Not Defteri doğru okusun diye BOM ile).
 [IO.File]::WriteAllText((Join-Path $Cikti 'OKU-BENI.txt'), [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'OKU-BENI.txt'), [Text.Encoding]::UTF8).Replace('1.0.0', $Surum), (New-Object Text.UTF8Encoding $true))

@@ -215,6 +215,51 @@ internal sealed class UsbIpServer : IDisposable
 
     public static bool ClientInstalled => File.Exists(UsbipExe);
 
+    private const string DetachTask = "USBip Detach All On Reboot Or Shutdown";
+
+    /// <summary>
+    /// Local change. usbip-win2's installer registers the scheduled task "USBip Detach All On Reboot Or Shutdown": on a
+    /// shutdown request (System log, User32 1074 or Kernel-Power 109) it runs "usbip detach --all=closeonly", which
+    /// closes every imported device's connection but leaves the device plugged in. With Fast Startup that "shutdown" is
+    /// a hibernation: the dead virtual adapter is still there at power-on, Windows' Bluetooth driver fails on it and the
+    /// controller's port stays unusable until the controller is restarted (found 2026-11-20 with an ETW trace: the Task
+    /// Scheduler started usbip.exe 18 ms before the connection closed). This service detaches its devices itself when
+    /// it stops, so the task is disabled while the service is installed and enabled again on uninstall.
+    /// </summary>
+    public static void SetDetachTask(bool enabled)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "schtasks.exe"))
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            foreach (string a in (string[])["/Change", "/TN", DetachTask, enabled ? "/ENABLE" : "/DISABLE"])
+            {
+                psi.ArgumentList.Add(a);
+            }
+            using Process? p = Process.Start(psi);
+            if (p is null)
+            {
+                return;
+            }
+            Task<string> output = p.StandardOutput.ReadToEndAsync();
+            Task<string> errors = p.StandardError.ReadToEndAsync();
+            if (!p.WaitForExit(15000))
+            {
+                p.Kill();
+            }
+            Log.Info("usbip", $"scheduled task \"{DetachTask}\" {(enabled ? "enabled" : "disabled")}: exit {(p.HasExited ? p.ExitCode : -1)} {(output.Result + errors.Result).Trim()}");
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)
+        {
+            Log.Warn("usbip", $"scheduled task \"{DetachTask}\" not changed: {e.Message}");
+        }
+    }
+
     /// <summary>Local change: version of the installed usbip-win2 client ("0.9.8.1"), or "" when it cannot be read.</summary>
     public static string ClientVersion
     {

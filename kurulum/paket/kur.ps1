@@ -34,6 +34,8 @@ $DenetimYolu = 'Köprüyü kurmak için Akıllı Uygulama Denetimi kapalı olmal
 $versionLines = @([IO.File]::ReadAllLines((Join-Path $Kaynak 'surum.txt'), [Text.Encoding]::UTF8))
 $Surum = $versionLines[0].Trim()
 $BridgeNew = $versionLines[1].Trim()
+# Köprüsüz paket: köprü servisi ve usbip-win2 içermez; yalnızca panel kurulur, Bluetooth'a dokunulmaz.
+$Koprusuz = $versionLines.Count -ge 3 -and $versionLines[2].Trim() -eq 'koprusuz'
 
 # Ön koşullar. Engelleri $script:Blockers içine koyar, bulguları @@BILGI satırlarıyla yazar; hiçbir şeyi değiştirmez.
 function Find-Problems {
@@ -48,6 +50,21 @@ function Find-Problems {
 
     $service = Get-BridgeService
     $ours = Test-OurService $service
+    if ($Koprusuz) {
+        Info 'surumturu' 'koprusuz'
+        $installed = (Get-ItemProperty $StateKey -Name Version -ErrorAction SilentlyContinue).Version
+        Info 'kurulu' $(if ($installed) { $installed } elseif ($ours) { 'yalnızca köprü servisi' } else { 'yok' })
+        if ($service) {
+            Info 'servis' 'kurulu (kaldırılmalı)'
+            $blockers += 'Bu bilgisayarda köprü servisi kurulu. Önce Ayarlar > Uygulamalar > PodPanel > Kaldır ile kaldır ("usbip-win2 sürücüsünü de kaldır" kutusu işaretli), sonra bu kurulumu yeniden çalıştır.'
+        }
+        Info 'geriyukleme' 'gerekmez'
+        foreach ($w in $warnings) { Info 'uyari' $w }
+        foreach ($b in $blockers) { Info 'engel' $b }
+        $script:BridgeBlocked = 'köprüsüz sürüm'
+        $script:Blockers = $blockers
+        return
+    }
     if ($service -and -not $ours) {
         $blockers += 'Bu bilgisayarda WPods uygulamasının servisi kurulu. İkisi aynı anda çalışamaz; önce WPods''u kaldır.'
     }
@@ -248,6 +265,15 @@ try {
     Note "Panel kuruldu: $AppDir (Uygulamalar listesine ve Başlat menüsüne eklendi)"
     if (@(Get-WritableByUsers $Hedef).Count -gt 0) {
         Finish $Kismi $false "Kurulum klasörü yönetici olmayan kullanıcılarca yazılabiliyor; köprü servisi buraya kurulamaz. $KismiEk"
+    }
+
+    if ($Koprusuz) {
+        Step 4 $Toplam 'usbip-win2 sürücüsü'
+        Note 'Köprüsüz sürüm: atlandı.'
+        Step 5 $Toplam 'Köprü servisi'
+        Note 'Köprüsüz sürüm: atlandı.'
+        Register-Install
+        Finish 0 $false 'Kurulum tamamlandı.'
     }
 
     # Köprü kurulamıyorsa burada biter: sürücüye, servise ve Bluetooth'a dokunulmaz.

@@ -91,8 +91,20 @@ try {
     foreach ($name in 'LISANS.txt', 'UCUNCU-TARAFLAR.txt', 'kaynak.zip', 'surum.txt') {
         Remove-Item -LiteralPath (Join-Path $Hedef $name) -Force -ErrorAction SilentlyContinue
     }
-    # Servisin günlük klasörü (servis bu kuruluma aitti).
-    if (-not (Get-Service $ServiceName -ErrorAction SilentlyContinue)) { Remove-Folder (Join-Path $env:ProgramData 'WPods') | Out-Null }
+    # Servisin günlük klasörü (servis bu kuruluma aitti). Son günlük, sorun incelemesi için kurulum günlüğünün yanına
+    # kopyalanır; o klasör kişisel veri tutmaz ve yalnızca yöneticiler yazabilir.
+    if (-not (Get-Service $ServiceName -ErrorAction SilentlyContinue)) {
+        $serviceLogs = Join-Path $env:ProgramData 'WPods\logs'
+        foreach ($log in @(Get-ChildItem -LiteralPath $serviceLogs -Filter 'service*.log' -File -ErrorAction SilentlyContinue)) {
+            try {
+                Copy-Item -LiteralPath $log.FullName -Destination (Join-Path $LogDir ('kaldirilan-' + $log.Name)) -Force
+                Note "Servis günlüğü saklandı: $(Join-Path $LogDir ('kaldirilan-' + $log.Name))"
+            } catch {
+                Note "Servis günlüğü saklanamadı: $($_.Exception.Message)"
+            }
+        }
+        Remove-Folder (Join-Path $env:ProgramData 'WPods') | Out-Null
+    }
     if ($left.Count -gt 0) { Note "Silinemeyen klasörler (yeniden başlatmadan sonra elle silinebilir): $($left -join ', ')" }
     Note 'Kayıtlar ve dosyalar silindi. Kişisel ayarlar (%LOCALAPPDATA%\PodPanel) yerinde bırakıldı.'
 

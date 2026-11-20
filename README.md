@@ -214,7 +214,20 @@ usbip'in sanal USB denetleyicisinin bağlantı noktası ölü kalır ve açılı
 adaptörü kendisi çıkardıysa uyku bildirimi için bekler, uyurken adaptörü takmaz, taktıktan sonra Windows'tan istek
 gelmezse usbip denetleyicisini yeniden başlatır.
 
-- `kurulum\4-uyku-duzeltmesi.ps1`: kurulu servisi bu sürüme günceller ve denetleyiciyi yeniden başlatma yolunu sınar.
+Servisin `.noupdate.7` sürümü bir adım daha atar: gerçek adaptör bilgisayar kapalıyken durumunu kaybettiği için, açılışta
+Windows'un Bluetooth sürücüsü kapanıştan kalan sanal adaptörde hata veriyor ve Bluetooth yaklaşık 20 saniye sonra USB
+çıkarma/takma sesleriyle geri geliyordu. Artık Windows kimse oturum açık değilken uyuyorsa (Hızlı Başlangıç'la
+"Kapat") sanal adaptör uykudan önce çıkarılır ve açılışta oturum açılmadan yeniden takılır. Oturum açıkken uyku
+eskisi gibidir; uyanınca Windows sanal adaptörde hata bildirirse adaptör hemen yeniden takılır.
+
+Asıl neden `.noupdate.9`'da bulundu: usbip-win2'nin kurulumu "USBip Detach All On Reboot Or Shutdown" adlı bir zamanlanmış
+görev ekler. Kapatma istendiğinde (Sistem günlüğü: User32 1074 ya da Kernel-Power 109) `usbip detach --all=closeonly`
+çalıştırır: sanal adaptörün bağlantısını kapatır ama aygıtı takılı bırakır. Servis başlarken bu görevi devre dışı
+bırakır, kaldırılırken yeniden açar; adaptör hazırda bekletme boyunca takılı kalır. `.7` ve `.8`'deki "kapanışta
+çıkar" davranışı kaldırıldı. Bağlantıyı neyin kestiğini bulmak için kullanılan izleme: `kurulum\iz-baslat.ps1` ve
+`kurulum\iz-durdur.ps1` (Windows'un TCP ve süreç olayları).
+
+- `kurulum\4-uyku-duzeltmesi.ps1`: kurulu servisi günceller ve denetleyiciyi yeniden başlatma yolunu sınar.
 - `kurulum\bluetooth-onar.ps1`: Bluetooth yine de gelmediyse elle onarır (bozuk aygıt kaydını siler, yetmezse
   denetleyiciyi kapatıp açar). Tam bir **Yeniden başlat** da aynı işi görür; "Kapat" görmez.
 

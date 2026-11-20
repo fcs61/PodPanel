@@ -548,7 +548,9 @@ public sealed class PodMonitor : IDisposable
         List<EndpointInfo> endpoints, ulong address, bool connected, AapSnapshot aap, string name)
     {
         EndpointInfo? virtualMic = endpoints.FirstOrDefault(IsBridgeMic);
-        if (!_settings.BridgeMic)
+        // Köprü servisi bu bilgisayarda kurulu değilse (köprüsüz sürüm ya da kaldırılmış köprü) mikrofon köprüsü de
+        // olamaz: önceden kapatılmış el-serbest servisi ve varsayılan mikrofon geri alınır.
+        if (!_settings.BridgeMic || !BridgeServiceInstalled())
         {
             _mic.Configure(false, 0, "");
             RevertBridgeMic(endpoints, address);
@@ -629,6 +631,26 @@ public sealed class PodMonitor : IDisposable
     }
 
     /// <summary>Köprünün Windows'ta değiştirdiklerini geri alır: varsayılan mikrofon, sanal mikrofonun görünürlüğü, el-serbest.</summary>
+    private DateTime _bridgeCheckedAt = DateTime.MinValue;
+    private bool _bridgeInstalled;
+
+    /// <summary>Köprü servisi kayıtlı mı (yarım dakikada bir yeniden bakılır).</summary>
+    private bool BridgeServiceInstalled()
+    {
+        if ((DateTime.Now - _bridgeCheckedAt).TotalSeconds < 30) return _bridgeInstalled;
+        _bridgeCheckedAt = DateTime.Now;
+        try
+        {
+            using Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\WPodsService");
+            _bridgeInstalled = key != null;
+        }
+        catch (Exception e) when (e is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+        {
+            _bridgeInstalled = true;
+        }
+        return _bridgeInstalled;
+    }
+
     private void RevertBridgeMic(List<EndpointInfo> endpoints, ulong address)
     {
         // Yalnızca köprüyü kuran kopya geri alır.

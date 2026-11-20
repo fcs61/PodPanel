@@ -46,6 +46,10 @@ internal sealed class Engine
     private volatile bool _resumeRestart;
     // Local change: the last session ended without a single request from Windows; see RadioDriver.RestartVhci.
     private volatile bool _vhciSuspect;
+    // Local change: Windows' instance ID of the plugged-in virtual adapter (null when unknown), and when a user last logged off (Environment.TickCount64, 0 = not since the service started).
+    private string? _virtualId;
+    private long _logoffAt;
+    private static readonly TimeSpan LogoffBeforeShutdown = TimeSpan.FromMinutes(2);
     private RadioLink? _link;
     private IDisposable? _removedWatch;
     // Real adapter resets requested by the vendor driver, oldest first.
@@ -265,6 +269,8 @@ internal sealed class Engine
     {
         KeepAdapterOnStop = false;
         WaitsForRestart = false;
+        // Local change: see UsbIpServer.SetDetachTask.
+        UsbIpServer.SetDetachTask(enabled: false);
         DataFolder.Protect();
         _ = _status.RunAsync(_stop.Token);
         // Local change: no self-update, so nothing is installed before the takeover.
@@ -307,10 +313,31 @@ internal sealed class Engine
         }
     }
 
+    /// <summary>Local change: a user session logged off; see <see cref="OnSuspend"/>.</summary>
+    public void OnLogoff(int session)
+    {
+        Log.Info("engine", $"session {session} logged off");
+        Volatile.Write(ref _logoffAt, Environment.TickCount64);
+    }
+
     public void OnSuspend()
     {
         Log.Info("engine", "going to sleep");
         Volatile.Write(ref _suspended, true);
+        // Local change. With Fast Startup, "Shut down" logs every user off and hibernates Windows while this service keeps
+        // running. The real adapter loses its state while the PC is off, so at power-on Windows' Bluetooth driver failed on
+        // the virtual adapter it had before the shutdown (BTHUSB 17) and Bluetooth was gone until the adapter was plugged
+        // in again, with the USB disconnect and connect sounds (seen 2026-11-17 to 11-19, about 20 s every time). So when
+        // Windows sleeps with nobody logged on, unplug the virtual adapter first; Supervise plugs it in again once Windows
+        // is back, before anyone logs on. A sleep with a user logged on keeps the adapter as it is.
+        // (.noupdate.9) The cause was found: usbip-win2's installer registers a scheduled task that runs
+        // "usbip detach --all=closeonly" when a shutdown is requested (see UsbIpServer.SetDetachTask). With that task
+        // disabled the virtual adapter stays plugged in through the hibernation and works at once after power-on, so
+        // the adapter is no longer unplugged here. The session state is only logged.
+        long logoff = Volatile.Read(ref _logoffAt);
+        bool loggedOff = logoff != 0 && Environment.TickCount64 - logoff < (long)LogoffBeforeShutdown.TotalMilliseconds;
+        Log.Info("engine", loggedOff ? "a user just logged off: Windows is shutting down with Fast Startup"
+            : Sessions.AnyUserLoggedOn() ? "a user is logged on: an ordinary sleep" : "nobody is logged on");
     }
 
     /// <summary>
@@ -330,6 +357,11 @@ internal sealed class Engine
         }
         Log.Info("engine", $"resumed from sleep: watching the adapter for {ResumeWatch.TotalSeconds:F0} s");
         long until = Environment.TickCount64 + (long)ResumeWatch.TotalMilliseconds;
+        // Local change: Windows' own view of the virtual adapter. Its Bluetooth driver can give up on the adapter at once
+        // without leaving a command unanswered; the device then reports a problem.
+        string? virtualId = Volatile.Read(ref _virtualId);
+        string? lastState = null;
+        long problemSince = 0;
         string? trouble = null;
         void OnTrouble(string reason) => Volatile.Write(ref trouble, reason);
         _hci.ControllerTrouble += OnTrouble;
@@ -341,6 +373,31 @@ internal sealed class Engine
                 {
                     string? reason = Volatile.Read(ref trouble)
                         ?? (_hci.UnansweredMs > UnansweredLimit.TotalMilliseconds ? $"a command unanswered for {_hci.UnansweredMs} ms" : null);
+                    if (reason is null && virtualId is not null)
+                    {
+                        (bool present, uint problem) = RadioDriver.DevnodeState(virtualId);
+                        string state = !present ? "not present" : problem == 0 ? "running" : $"problem {problem}";
+                        if (state != lastState)
+                        {
+                            Log.Info("engine", $"after the wake: Windows' virtual adapter {state}");
+                            lastState = state;
+                        }
+                        if (present && problem != 0)
+                        {
+                            if (problemSince == 0)
+                            {
+                                problemSince = Environment.TickCount64;
+                            }
+                            else if (Environment.TickCount64 - problemSince >= 1000)
+                            {
+                                reason = $"Windows' Bluetooth driver failed on the virtual adapter (problem {problem})";
+                            }
+                        }
+                        else
+                        {
+                            problemSince = 0;
+                        }
+                    }
                     if (reason is not null)
                     {
                         Log.Info("engine", $"after the wake: {reason}: plugging the virtual adapter in again");
@@ -733,6 +790,10 @@ internal sealed class Engine
             else
             {
                 Volatile.Write(ref _link, current);
+                // Local change: see OnResume.
+                Volatile.Write(ref _virtualId, device.Serial is { } shown && !RadioDriver.IsFunction(id)
+                    ? id[..(id.LastIndexOf('\\') + 1)] + shown
+                    : null);
                 // Local change: usbip reports the attach as done even when the controller's port is dead. Windows then
                 // never sends a request; end such a session so that the next one restarts the controller.
                 using var startWatch = new Timer(_ =>
