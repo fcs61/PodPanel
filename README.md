@@ -3,6 +3,8 @@
 AirPods için Windows görev çubuğu paneli. Çekirdek özellikler sürücü gerektirmez; dinleme modu, gecikme ayarı ve
 mikrofon köprüsü, köprü servisi kuruluysa çalışır.
 
+<img src="docs/podpanel-en.png" width="620" alt="PodPanel: battery, listening modes, latency, volume and settings, in dark and light theme">
+
 **İndir:** [son sürüm](https://github.com/fcs61/PodPanel/releases/latest) sayfasındaki `PodPanel-Kurulum-<sürüm>.exe`.
 Yanındaki `.sha256.txt` dosyası indirdiğin dosyanın özetini doğrulamak içindir.
 

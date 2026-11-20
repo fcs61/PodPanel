@@ -135,10 +135,13 @@ internal static class Snapshot
 
     private static PodState Mock(string name)
     {
+        // Windows aygıt adlarını kendi dilinde verir; örnek veri de seçili dile uyar.
+        bool turkish = Loc.Language == "tr";
+        string micName = turkish ? "Mikrofon (Arctis Nova 7P)" : "Microphone (Arctis Nova 7P)";
         var mics = new List<MicOption>
         {
-            new() { Id = "a", Name = "Mikrofon (Arctis Nova 7P)", Selected = true },
-            new() { Id = "b", Name = "Mikrofon (USB masa mikrofonu)" },
+            new() { Id = "a", Name = micName, Selected = true },
+            new() { Id = "b", Name = turkish ? "Mikrofon (USB masa mikrofonu)" : "Microphone (USB desk microphone)" },
         };
         var processes = new List<string> { "cs2", "TslGame" };
         var labels = new List<string> { "Counter-Strike 2", "PUBG: BATTLEGROUNDS" };
@@ -148,16 +151,16 @@ internal static class Snapshot
             "nodevice" => new PodState { TelemetryAvailable = true, AutoGameProcesses = processes, AutoGameLabels = labels },
             "disconnected" => new PodState
             {
-                DeviceFound = true, DeviceName = "Fatih (AirPods Pro)", ModelName = "AirPods Pro 3", Connected = false,
-                HasMic = true, DefaultOutputName = "Hoparlör", DefaultMicName = "Mikrofon (Arctis Nova 7P)",
+                DeviceFound = true, DeviceName = "AirPods Pro", ModelName = "AirPods Pro 3", Connected = false,
+                HasMic = true, DefaultOutputName = turkish ? "Hoparlör" : "Speakers", DefaultMicName = micName,
                 BatteryKnown = true, BatteryLeft = 80, BatteryRight = 70, BatteryCase = 60, ChargingLeft = true, ChargingRight = true,
                 BothInCase = true, BatteryAgeSeconds = 400, TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000, DelayMs = 150,
                 LinkFromCache = true, SpatialSupported = true, AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics, BridgeAvailable = true,
             },
             "normal" => new PodState
             {
-                DeviceFound = true, DeviceName = "Fatih (AirPods Pro)", ModelName = "AirPods Pro 3", Connected = true,
-                IsDefaultOutput = true, HasMic = true, DefaultMicName = "Headset (A2DP, Fatih (AirPods Pro))", Playing = true,
+                DeviceFound = true, DeviceName = "AirPods Pro", ModelName = "AirPods Pro 3", Connected = true,
+                IsDefaultOutput = true, HasMic = true, DefaultMicName = "Headset (A2DP, AirPods Pro)", Playing = true,
                 BatteryKnown = true, BatteryLeft = 96, BatteryRight = 94, BatteryCase = 71, ChargingCase = true,
                 InEarLeft = true, InEarRight = true, BatteryAgeSeconds = 1, Activity = "Ses çalıyor", TelemetryAvailable = true,
                 Codec = "AAC", SampleRate = 48000, DelayMs = 60, SpatialSupported = true, SpatialOn = true, SpatialFormat = "Dolby Atmos", SpatialAtmosAvailable = true,
@@ -168,7 +171,7 @@ internal static class Snapshot
             },
             "mono" => new PodState
             {
-                DeviceFound = true, DeviceName = "Fatih (AirPods Pro)", ModelName = "AirPods Pro 3", Connected = true,
+                DeviceFound = true, DeviceName = "AirPods Pro", ModelName = "AirPods Pro 3", Connected = true,
                 IsDefaultOutput = true, HasMic = true, IsDefaultMic = true, MicUsers = new[] { "cs2", "Discord" }, Playing = true,
                 BatteryKnown = true, BatteryLeft = 90, BatteryRight = 80, InEarLeft = true, InEarRight = true, BatteryAgeSeconds = 2,
                 Activity = "Arama", TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000, DelayMs = 150, HfpCodec = "mSBC (16 kHz)",
@@ -178,14 +181,14 @@ internal static class Snapshot
             },
             "game" => new PodState
             {
-                DeviceFound = true, DeviceName = "Fatih (AirPods Pro)", ModelName = "AirPods Pro 3", Connected = true,
+                DeviceFound = true, DeviceName = "AirPods Pro", ModelName = "AirPods Pro 3", Connected = true,
                 IsDefaultOutput = false, DefaultOutputName = "MSI MAG272CQR (NVIDIA High Definition Audio)", HasMic = true, MicDisabled = true,
-                DefaultMicName = "Mikrofon (Arctis Nova 7P)", Playing = true,
+                DefaultMicName = micName, Playing = true,
                 BatteryKnown = true, BatteryLeft = 100, BatteryRight = 90, BatteryCase = 50,
                 BatteryAgeSeconds = 1, Activity = "Ses çalıyor", TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000,
                 DelayMs = 150, SpatialSupported = true, SpatialOn = true, SpatialFormat = "Dolby Atmos", SpatialAtmosAvailable = true,
                 GameModeManual = false, GameModeActive = true, GameModeReason = Loc.T("game_running", "Counter-Strike 2"), LockMic = true, AutoGame = true, AutoPause = true,
-                AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics, GameMicName = "Mikrofon (Arctis Nova 7P)",
+                AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics, GameMicName = micName,
                 BridgeAvailable = true, ControlOpen = true, BatteryExact = true, Worn = false,
                 ListeningMode = PodPanel.Core.Bridge.ListeningMode.NoiseCancellation,
                 BridgeMicOn = true, BridgeMicReady = true, BridgeMicCapturing = true, BridgeMicStreaming = true, BridgeMicIsDefault = true,
