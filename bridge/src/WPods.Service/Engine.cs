@@ -19,6 +19,8 @@ internal sealed class Engine
     // wait for a sleep or shutdown notice after Windows unplugged the adapter by itself.
     private static readonly TimeSpan StartLimit = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan CloseSettle = TimeSpan.FromSeconds(30);
+    // Local change (.noupdate.11): how long after its start the service looks for the adapter every half second.
+    private static readonly TimeSpan AdapterAppearWait = TimeSpan.FromSeconds(30);
     private const string ClosedByWindows = "USB/IP connection closed";
 
     private readonly HciProxy _hci = new();
@@ -541,6 +543,7 @@ internal sealed class Engine
     private void Supervise()
     {
         var failures = new Queue<DateTime>();
+        long supervisingSince = Environment.TickCount64;
         while (!_stop.IsCancellationRequested)
         {
             if (GuardTripped)
@@ -566,8 +569,15 @@ internal sealed class Engine
             }
             if (RadioDriver.Find(out string reason) is not { } id)
             {
-                SetState(ServiceState.Unsupported, reason);
-                WaitRetry(TimeSpan.FromSeconds(10));
+                // Local change (.noupdate.11). On the first start after an install no adapter is stored yet, so it is
+                // found through the radio interface of Windows' own Bluetooth driver. On 2026-11-20 this service
+                // started 40 ms after that driver, the interface was not there yet, and the 10 s wait let Windows
+                // bring its whole Bluetooth stack up (paired devices, audio endpoints): taking the adapter away from
+                // it then took 66 s instead of 15. So look again every half second while the service is young.
+                bool early = reason == RadioDriver.NoAdapter
+                    && Environment.TickCount64 - supervisingSince < AdapterAppearWait.TotalMilliseconds;
+                SetState(early ? ServiceState.Starting : ServiceState.Unsupported, early ? "waiting for the Bluetooth adapter to appear" : reason);
+                WaitRetry(early ? TimeSpan.FromMilliseconds(500) : TimeSpan.FromSeconds(10));
                 continue;
             }
             if (RadioDriver.IsDisabled(id))

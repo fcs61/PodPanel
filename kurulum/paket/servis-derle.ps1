@@ -17,7 +17,7 @@ if (-not $Ozet) { $Ozet = Join-Path $repo 'kurulum\servis.sha256' }
 # Sürüm etiketi: üst projenin sürümü + alındığı commit + bu depodaki değişiklik sırası. Servisin kaynağı her
 # değiştiğinde son sayı artırılır ve bridge\CHANGES.md dosyasına bir satır eklenir.
 $Surum = '0.3.2'
-$Etiket = '0.3.2+f02e957.noupdate.10'
+$Etiket = '0.3.2+f02e957.noupdate.11'
 
 if (-not $Dotnet) {
     $local = Join-Path $env:USERPROFILE 'PodPanel\tools\dotnet10\dotnet.exe'
