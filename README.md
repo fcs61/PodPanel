@@ -3,6 +3,12 @@
 AirPods için Windows görev çubuğu paneli. Çekirdek özellikler sürücü gerektirmez; dinleme modu, gecikme ayarı ve
 mikrofon köprüsü, köprü servisi kuruluysa çalışır.
 
+**İndir:** [son sürüm](https://github.com/fcs61/PodPanel/releases/latest) sayfasındaki `PodPanel-Kurulum-<sürüm>.exe`.
+Yanındaki `.sha256.txt` dosyası indirdiğin dosyanın özetini doğrulamak içindir.
+
+PodPanel bağımsız bir projedir; Apple tarafından yapılmamış, onaylanmamış ya da desteklenmemiştir. AirPods, Apple Inc.
+şirketinin ticari markasıdır.
+
 ## Kurulum
 
 `PodPanel-Kurulum-<sürüm>.exe` tek dosyadır; paneli, köprü servisini ve (kurulu değilse) usbip-win2 sürücüsünü kurar.
@@ -265,3 +271,13 @@ Get-ChildItem $kok -Recurse -File | ForEach-Object { "$((Get-FileHash $_.FullNam
 - Oyun modu kapatıldığında ya da uygulamadan çıkıldığında mikrofon ayarları önceki haline döner.
 - "Windows ile başlat" seçeneği `PodPanel.exe` dosyasının o anki yolunu kaydeder; dosyayı taşırsan seçeneği
   yeniden işaretle.
+
+## Lisans
+
+PodPanel GNU Genel Kamu Lisansı sürüm 3 (GPL-3.0) ile dağıtılır; tam metni [LICENSE](LICENSE) dosyasındadır. Yazılım
+olduğu gibi sunulur, hiçbir garanti verilmez.
+
+Köprü servisi, [WPods](https://github.com/FPNDev/WPods) projesinin (GPL-3.0) servis bölümünün değiştirilmiş bir
+kopyasıdır; yapılan değişiklikler [bridge/CHANGES.md](bridge/CHANGES.md) dosyasında listelenir. Kurulum paketindeki
+diğer bileşenler (usbip-win2, FFmpeg, .NET çalışma zamanı) ve lisansları
+[kurulum/paket/UCUNCU-TARAFLAR.txt](kurulum/paket/UCUNCU-TARAFLAR.txt) dosyasında yazılıdır.
