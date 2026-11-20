@@ -58,7 +58,8 @@ sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
 - **Oyun modu:** varsayılan mikrofonu AirPods'tan uzak tutar, böylece kulaklık stereo kalır. İstenirse AirPods
   mikrofonunu tamamen kilitler ve seçilen oyunlar çalışırken kendiliğinden açılır. Oyun eklemek için oyunu aç,
   Ayarlar'da "Oyun ekle"ye bas ve açık uygulamalar listesinden seç; `.exe` adı yazmak gerekmez.
-- Windows Sonic uzamsal sesi açıp kapatır.
+- Uzamsal sesi açıp kapatır: Dolby Access kuruluysa (lisans ya da deneme süresi geçerliyken) Dolby Atmos for
+  Headphones'u, değilse Windows Sonic'i kullanır. Açık olan biçim Ayarlar'da ve kutunun ipucunda görünür.
 - Bağlantı bilgisini gösterir: kullanılan codec, kulaklığın bildirdiği gecikme, mikrofonu hangi uygulamanın açtığı.
 
 Panel sade tutulur: üstte ad ve tek satır durum, pil, dinleme modu, gecikme ve üç aç/kapa kutusu (Mikrofon, Uzamsal,

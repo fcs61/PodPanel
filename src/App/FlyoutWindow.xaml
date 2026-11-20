@@ -357,7 +357,7 @@
                                   ToolTip="AirPods mikrofonunu köprü üzerinden kullanır; konuşurken ses stereo kalır." />
                     <ToggleButton Style="{StaticResource Tile}" Tag="&#xE7F5;" Content="Uzamsal" IsChecked="{Binding SpatialOn, Mode=TwoWay}"
                                   IsEnabled="{Binding SpatialEnabled}"
-                                  ToolTip="Windows Sonic uzamsal sesi açar." />
+                                  ToolTip="{Binding SpatialTip}" ToolTipService.ShowOnDisabled="True" />
                     <ToggleButton Tag="&#xE7FC;" Content="Oyun modu" IsChecked="{Binding GameMode, Mode=TwoWay}" ToolTip="{Binding GameTip}">
                         <ToggleButton.Style>
                             <Style TargetType="ToggleButton" BasedOn="{StaticResource Tile}">
@@ -395,6 +395,7 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
                         <TextBlock Text="Ses" Style="{StaticResource Label}" Margin="0,2" />
                         <TextBlock Grid.Column="1" Text="{Binding AudioModeText}" Style="{StaticResource Value}" Margin="0,2" />
@@ -402,6 +403,8 @@
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DelayText}" Style="{StaticResource Value}" Margin="0,2" />
                         <TextBlock Grid.Row="2" Text="Mikrofon" Style="{StaticResource Label}" Margin="0,2" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MicText}" Style="{StaticResource Value}" Margin="0,2" />
+                        <TextBlock Grid.Row="3" Text="Uzamsal" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SpatialText}" Style="{StaticResource Value}" Margin="0,2" />
                     </Grid>
                     <TextBlock Text="{Binding LinkNote}" Foreground="{DynamicResource WarnBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
                                Visibility="{Binding LinkNote, Converter={StaticResource TextToVis}}" />

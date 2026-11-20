@@ -232,6 +232,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private bool _spatialEnabled;
     public bool SpatialEnabled { get => _spatialEnabled; private set => Set(ref _spatialEnabled, value); }
 
+    private string _spatialTip = "";
+    /// <summary>Uzamsal kutusunun ipucu: hangi biçimin açık olduğu ya da açılacağı.</summary>
+    public string SpatialTip { get => _spatialTip; private set => Set(ref _spatialTip, value); }
+
+    private string _spatialText = "—";
+    /// <summary>Ayarlar bölümündeki satır: açık olan uzamsal ses biçimi.</summary>
+    public string SpatialText { get => _spatialText; private set => Set(ref _spatialText, value); }
+
     // ---- Gecikme tamponu ----
     private bool _isJitterDefault = true;
     public bool IsJitterDefault { get => _isJitterDefault; private set => Set(ref _isJitterDefault, value); }
@@ -488,6 +496,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
             GameModeAuto = s.GameModeActive && !s.GameModeManual;
             GameTip = GameModeAuto ? "Kendiliğinden açık: " + s.GameModeReason : GameTipDefault;
             SpatialEnabled = s.Connected && s.SpatialSupported;
+            SpatialText = !s.Connected ? "—" : s.SpatialOn ? s.SpatialFormat : "Kapalı";
+            SpatialTip = s.SpatialOn
+                ? "Açık: " + s.SpatialFormat
+                  + (s.SpatialAtmosAvailable && s.SpatialFormat != "Dolby Atmos" ? ". Dolby Atmos'a geçmek için kapatıp aç." : "")
+                : s.SpatialAtmosAvailable ? "Dolby Atmos'u açar."
+                : "Windows Sonic'i açar. Dolby Access kuruluysa Dolby Atmos kullanılır.";
 
             ShowModes = s.Connected && s.ControlOpen;
             ModesEnabled = ShowModes && s.Worn;

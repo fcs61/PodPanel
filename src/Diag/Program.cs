@@ -44,7 +44,7 @@ string Summary(PodState s) =>
     $"mikrofon={(s.IsDefaultMic ? "AirPods" : s.DefaultMicName)} mikKapalı={s.MicDisabled} mikKullanan=[{string.Join(",", s.MicUsers)}] " +
     $"pil={s.BatteryLeft}/{s.BatteryRight}/{s.BatteryCase} kulakta={s.InEarLeft}/{s.InEarRight} etkinlik='{s.Activity}' " +
     $"codec={s.Codec} {s.SampleRate}Hz gecikme={s.DelayMs} hfp={s.HfpCodec} önbellek={s.LinkFromCache} " +
-    $"uzamsal={s.SpatialOn}({s.SpatialFormat}) oyun={s.GameModeActive}({s.GameModeReason}) altMik={s.GameMicName} " +
+    $"uzamsal={s.SpatialOn}({s.SpatialFormat}) atmos={s.SpatialAtmosAvailable} oyun={s.GameModeActive}({s.GameModeReason}) altMik={s.GameMicName} " +
     $"köprü={s.BridgeAvailable} kanal={s.ControlOpen} mod={s.ListeningMode} bekleyen={s.ListeningModePending} takılı={s.Worn} kesinPil={s.BatteryExact} " +
     $"köprüMik={s.BridgeMicOn} hazır={s.BridgeMicReady} kayıt={s.BridgeMicCapturing} akış={s.BridgeMicStreaming} varsayılan={s.BridgeMicIsDefault} not='{s.BridgeMicNote}'";
 

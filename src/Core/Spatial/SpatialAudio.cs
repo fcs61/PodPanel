@@ -2,27 +2,45 @@ using Windows.Media.Audio;
 
 namespace PodPanel.Core.Spatial;
 
-/// <summary>Windows'un uzamsal ses (Windows Sonic vb.) ayarını uç nokta bazında okur ve değiştirir.</summary>
+/// <summary>Windows'un uzamsal ses (Dolby Atmos, Windows Sonic) ayarını uç nokta bazında okur ve değiştirir.</summary>
 public static class SpatialAudio
 {
     private const string RenderInterfaceClass = "{e6327cad-dcec-4949-ae8a-991e976a79d2}";
 
     private static string InterfacePath(string endpointId) => @"\\?\SWD#MMDEVAPI#" + endpointId + "#" + RenderInterfaceClass;
 
-    public static (bool Supported, string ActiveFormat) Get(string endpointId)
+    /// <summary>
+    /// Atmos: bu uç noktada Dolby Atmos for Headphones kullanılabiliyor (Dolby Access kurulu); açarken o seçilir.
+    /// </summary>
+    public static (bool Supported, string ActiveFormat, bool Atmos) Get(string endpointId)
     {
         var configuration = SpatialAudioDeviceConfiguration.GetForDeviceId(InterfacePath(endpointId));
-        return (configuration.IsSpatialAudioSupported, configuration.ActiveSpatialAudioFormat ?? "");
+        return (configuration.IsSpatialAudioSupported, configuration.ActiveSpatialAudioFormat ?? "",
+            configuration.IsSpatialAudioFormatSupported(SpatialAudioFormatSubtype.DolbyAtmosForHeadphones));
     }
 
-    /// <summary>Windows Sonic'i açar ya da uzamsal sesi kapatır; sonucu metin olarak döndürür.</summary>
+    /// <summary>
+    /// Uzamsal sesi açar ya da kapatır; sonucu metin olarak döndürür. Açarken Dolby Atmos for Headphones
+    /// kullanılabiliyorsa o seçilir; yoksa ya da Windows reddederse (ör. lisans süresi dolmuş) Windows Sonic.
+    /// </summary>
     public static string Set(string endpointId, bool on)
     {
         var configuration = SpatialAudioDeviceConfiguration.GetForDeviceId(InterfacePath(endpointId));
-        string format = on ? SpatialAudioFormatSubtype.WindowsSonic : Guid.Empty.ToString("B");
-        var result = configuration.SetDefaultSpatialAudioFormatAsync(format).AsTask().GetAwaiter().GetResult();
-        return result.Status.ToString();
+        if (!on) return Apply(configuration, Guid.Empty.ToString("B")).ToString();
+
+        string atmos = SpatialAudioFormatSubtype.DolbyAtmosForHeadphones;
+        if (configuration.IsSpatialAudioFormatSupported(atmos))
+        {
+            var status = Apply(configuration, atmos);
+            if (status == SetDefaultSpatialAudioFormatStatus.Succeeded) return "Dolby Atmos: " + status;
+            var fallback = Apply(configuration, SpatialAudioFormatSubtype.WindowsSonic);
+            return $"Dolby Atmos: {status}; Windows Sonic: {fallback}";
+        }
+        return "Windows Sonic: " + Apply(configuration, SpatialAudioFormatSubtype.WindowsSonic);
     }
+
+    private static SetDefaultSpatialAudioFormatStatus Apply(SpatialAudioDeviceConfiguration configuration, string format) =>
+        configuration.SetDefaultSpatialAudioFormatAsync(format).AsTask().GetAwaiter().GetResult().Status;
 
     /// <summary>Tanı için ham değerler.</summary>
     public static string Describe(string endpointId)
@@ -30,7 +48,9 @@ public static class SpatialAudio
         var configuration = SpatialAudioDeviceConfiguration.GetForDeviceId(InterfacePath(endpointId));
         return $"destek={configuration.IsSpatialAudioSupported} etkin='{configuration.ActiveSpatialAudioFormat}' " +
                $"varsayılan='{configuration.DefaultSpatialAudioFormat}' sonic='{SpatialAudioFormatSubtype.WindowsSonic}' " +
-               $"sonicDestek={configuration.IsSpatialAudioFormatSupported(SpatialAudioFormatSubtype.WindowsSonic)}";
+               $"sonicDestek={configuration.IsSpatialAudioFormatSupported(SpatialAudioFormatSubtype.WindowsSonic)} " +
+               $"atmosDestek={configuration.IsSpatialAudioFormatSupported(SpatialAudioFormatSubtype.DolbyAtmosForHeadphones)} " +
+               $"dtsDestek={configuration.IsSpatialAudioFormatSupported(SpatialAudioFormatSubtype.DTSHeadphoneX)}";
     }
 
     /// <summary>Windows "kapalı" durumunu boş dizgi yerine sıfır GUID ile bildirir.</summary>

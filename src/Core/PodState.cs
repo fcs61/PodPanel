@@ -104,6 +104,8 @@ public sealed class PodState
     public bool SpatialSupported { get; init; }
     public bool SpatialOn { get; init; }
     public string SpatialFormat { get; init; } = "";
+    /// <summary>Dolby Atmos for Headphones bu çıkışta kullanılabiliyor; Uzamsal kutusu onu açar.</summary>
+    public bool SpatialAtmosAvailable { get; init; }
 
     // Oyun modu
     public bool GameModeManual { get; init; }

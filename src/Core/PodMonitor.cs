@@ -52,7 +52,7 @@ public sealed class PodMonitor : IDisposable
     private DateTime _connectedAt = DateTime.MinValue;
     private DateTime _lastBurst = DateTime.MinValue;
     private DateTime _lastSpatial = DateTime.MinValue;
-    private (bool Supported, string Active) _spatial;
+    private (bool Supported, string Active, bool Atmos) _spatial;
 
     public event Action<PodState>? StateChanged;
 
@@ -536,6 +536,7 @@ public sealed class PodMonitor : IDisposable
             SpatialSupported = _spatial.Supported,
             SpatialOn = connected && SpatialAudio.IsOn(_spatial.Active),
             SpatialFormat = SpatialAudio.FormatName(_spatial.Active),
+            SpatialAtmosAvailable = _spatial.Atmos,
 
             GameModeManual = _settings.GameMode,
             GameModeActive = game.Active,
