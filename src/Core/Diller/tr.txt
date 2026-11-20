@@ -1,0 +1,116 @@
+# PodPanel dil dosyası: Türkçe (asıl metin).
+# Biçim: anahtar = metin. Anahtarlar değiştirilmez; {0}, {1} yer tutucuları korunur.
+# Panel dardır (yaklaşık 310 piksel): düğme ve etiket metinleri kısa tutulmalıdır.
+_name = Türkçe
+
+# Başlık
+connect = Bağlan
+searching = AirPods aranıyor…
+not_found = AirPods bulunamadı
+no_paired = Eşleştirilmiş AirPods yok
+not_connected = Bağlı değil
+connected = Bağlı
+place_both = kulakta
+place_one = tek kulakta
+place_case = kutuda
+place_out = kulakta değil
+
+# Pil
+left = Sol
+right = Sağ
+case = Kutu
+battery_waiting = Pil bilgisi bekleniyor
+percent = %{0}
+battery_age = {0} dk önce okundu
+
+# Dinleme modu ve gecikme
+mode_transparency = Şeffaf
+mode_adaptive = Uyarlanabilir
+mode_nc = Gürültü Engelleme
+mode_off = Kapalı
+mode_unknown = bilinmiyor ({0})
+tip_modes = Dinleme modu. Kulaklık yalnızca kulaktayken değiştirir.
+latency = Gecikme
+tip_latency = Kulaklığın ses tamponu (ms). Küçüldükçe ses oyunlarda daha erken gelir; ses takılırsa bir üst değere çık.
+
+# Kutular
+mic = Mikrofon
+tip_mic = AirPods mikrofonunu köprü üzerinden kullanır; konuşurken ses stereo kalır.
+spatial = Uzamsal
+game_mode = Oyun modu
+game_tip_default = Varsayılan mikrofonu AirPods'tan uzak tutar; böylece kulaklık mono moda düşmez.
+game_auto_on = Kendiliğinden açık: {0}
+game_manual = elle açıldı
+game_running = {0} çalışıyor
+on = Açık
+off = Kapalı
+spatial_on_tip = Açık: {0}
+spatial_switch_atmos = Dolby Atmos'a geçmek için kapatıp aç.
+spatial_tip_atmos = Dolby Atmos'u açar.
+spatial_tip_sonic = Windows Sonic'i açar. Dolby Access kuruluysa Dolby Atmos kullanılır.
+
+# Ses düzeyi
+volume = Ses düzeyi
+mute = Sesi kapat
+unmute = Sesi aç
+
+# Alt satır ve ayarlar
+settings = Ayarlar
+exit = Çıkış
+audio = Ses
+stereo = Stereo
+mono_handsfree = Mono · el-serbest
+mono = mono
+mic_bridge = AirPods · köprü
+mic_used_by = Kullanan: {0}
+mic_locked = AirPods kilitli
+mic_handsfree = AirPods · el-serbest
+link_no_telemetry = Codec ve gecikme okunamıyor (sürücü telemetrisi kapalı)
+link_trouble = Bağlantıda {0} tıkanma görüldü
+game_mic = Oyun modunda mikrofon
+lock_mic = Oyun modunda AirPods mikrofonunu kilitle
+tip_lock_mic = Oyun modu açıkken hiçbir uygulama AirPods'un el-serbest mikrofonunu açamaz.
+auto_game = Bu oyunlar açılınca oyun modunu aç
+tip_auto_game = Listedeki oyunlardan biri çalışırken oyun modu kendiliğinden açılır, oyun kapanınca kapanır.
+remove_from_list = Listeden çıkar
+no_games = Henüz oyun eklenmedi
+add_game = Oyun ekle
+tip_add_game = Oyunu aç, sonra buradan seç.
+open_apps = Açık uygulamalar
+open_game_first = Önce oyunu aç, sonra buradan seç.
+auto_pause = Kulaktan çıkınca durdur, takınca devam ettir
+tip_auto_pause = Bir kulaklığı çıkarınca çalan müzik ya da video durur; 10 dakika içinde geri takınca devam eder.
+start_with_windows = Windows ile başlat
+disconnect = Bağlantıyı kes
+language = Dil
+language_auto = Windows'un dili
+
+# Uyarı satırı
+banner_other_output = Ses başka aygıttan çıkıyor
+banner_take = AirPods'a al
+banner_mono = Ses mono · mikrofonu kullanan: {0}
+banner_mono_tip = Bir uygulama AirPods'un el-serbest mikrofonunu açtı. Mikrofon ya da Oyun modu kutusu bunu önler.
+banner_mic_waiting = Mikrofon: kulaklıktan ses bekleniyor
+banner_mic_wear = Mikrofon için kulaklığı tak
+banner_gave_up = Köprü Bluetooth'u devralamadı
+retry = Yeniden dene
+banner_gave_up_tip = Servis üç kez denedi ve adaptörü Windows'a geri verdi. Kulaklık çalışır; dinleme modu, gecikme ve mikrofon çalışmaz.
+banner_not_usb = Bluetooth adaptörü USB değil; köprü çalışamaz
+banner_usbip_missing = usbip-win2 kurulu değil; köprü çalışamaz
+banner_no_adapter = Köprü bir Bluetooth adaptörü bulamadı
+banner_stopped = Köprü servisi çalışmıyor
+banner_stopped_tip = Dinleme modu, gecikme ve mikrofon köprü servisi üzerinden çalışır. Kurulumdan sonra bilgisayarı yeniden başlat.
+
+# Mikrofon köprüsü hataları
+hf_not_found = Windows bu kulaklığı eşleşmiş aygıtlar arasında bulamadı
+hf_cant_enable = Windows el-serbest servisini açamadı (hata {0})
+hf_cant_disable = Windows el-serbest servisini kapatamadı (hata {0})
+hf_state_unknown = El-serbest servisinin durumu okunamadı
+ffmpeg_missing = FFmpeg kitaplıkları bulunamadı (uygulamanın yanında "ffmpeg" klasörü bekleniyor)
+ffmpeg_failed = FFmpeg yüklenemedi: {0}
+
+# Bildirim alanı
+open_panel = Paneli aç
+tray_not_found = PodPanel — AirPods bulunamadı
+tray_not_connected = {0} — bağlı değil
+tray_battery = {0} — Sol {1}, Sağ {2}

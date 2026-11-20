@@ -32,6 +32,7 @@ public sealed class PodMonitor : IDisposable
     private readonly MicBridge _mic;
     private readonly BridgeStatusClient _bridgeStatus = new();
     private readonly EarPause _earPause = new();
+    private readonly EndpointVolume _volume = new();
     private bool? _handsFreeOn;
     private DateTime _handsFreeCheckedAt = DateTime.MinValue;
     private string _bridgeMicNote = "";
@@ -56,6 +57,12 @@ public sealed class PodMonitor : IDisposable
     private (bool Supported, string Active, bool Atmos) _spatial;
 
     public event Action<PodState>? StateChanged;
+
+    /// <summary>
+    /// Kulaklığın ses düzeyi (0-100) ya da sessize alma başka bir yerden değişti: Windows'un ses çubuğu, klavye,
+    /// kulaklığın sapı. Bir COM iş parçacığında çağrılır; durum yenilenmesini beklemeden gelir.
+    /// </summary>
+    public event Action<int, bool>? VolumeChanged;
 
     public PodState Current { get; private set; } = new();
 
@@ -92,6 +99,7 @@ public sealed class PodMonitor : IDisposable
         _mic = new MicBridge(_aap);
         _mic.Changed += () => _wake.Set();
         _bridgeStatus.Changed += () => _wake.Set();
+        _volume.Changed += (level, muted) => VolumeChanged?.Invoke((int)Math.Round(level * 100), muted);
     }
 
     public void Start() => _thread.Start();
@@ -103,6 +111,17 @@ public sealed class PodMonitor : IDisposable
     public void SetGameMode(bool on) => Post(() =>
     {
         _settings.GameMode = on;
+        _settings.Save();
+    });
+
+    /// <summary>Kulaklığın Windows'taki ses düzeyini ayarlar (0-100). Beklemez; izleyici iş parçacığını kullanmaz.</summary>
+    public void SetVolume(int percent) => _volume.Set(percent / 100f);
+
+    public void SetMuted(bool muted) => _volume.SetMute(muted);
+
+    public void SetLanguage(string code) => Post(() =>
+    {
+        _settings.Language = code;
         _settings.Save();
     });
 
@@ -283,6 +302,7 @@ public sealed class PodMonitor : IDisposable
         _telemetry?.Dispose();
         _ble?.Dispose();
         _audio?.Dispose();
+        _volume.Dispose();
     }
 
     private void Refresh()
@@ -306,6 +326,7 @@ public sealed class PodMonitor : IDisposable
             _wasConnected = false;
             _aap.Update(0, false);
             _earPause.Reset();
+            _volume.Attach(null);
             _mic.Configure(false, 0, "");
             var idle = MaintainGameMode(endpoints, null);
             Publish(new PodState
@@ -348,6 +369,8 @@ public sealed class PodMonitor : IDisposable
             Log.Write($"{render.DeviceName} bağlantısı kesildi");
         }
         _wasConnected = connected;
+        _volume.Attach(connected ? render.Id : null);
+        var endpointVolume = connected ? _volume.Get() : null;
 
         // Windows ses yönlendirmesi
         string? defaultRender = audio.GetDefaultId(DataFlow.Render, Role.Console);
@@ -553,6 +576,8 @@ public sealed class PodMonitor : IDisposable
             SpatialOn = connected && SpatialAudio.IsOn(_spatial.Active),
             SpatialFormat = SpatialAudio.FormatName(_spatial.Active),
             SpatialAtmosAvailable = _spatial.Atmos,
+            Volume = endpointVolume is { } current ? (int)Math.Round(current.Level * 100) : null,
+            Muted = endpointVolume?.Muted ?? false,
 
             GameModeManual = _settings.GameMode,
             GameModeActive = game.Active,
@@ -634,7 +659,7 @@ public sealed class PodMonitor : IDisposable
                 }
                 else if (_handsFreeOn == null)
                 {
-                    _bridgeMicNote = "El-serbest servisinin durumu okunamadı";
+                    _bridgeMicNote = Loc.T("hf_state_unknown");
                 }
             }
         }
@@ -747,7 +772,7 @@ public sealed class PodMonitor : IDisposable
     {
         string? running = _settings.AutoGame ? FindRunning(_settings.AutoGameProcesses) : null;
         bool want = _settings.GameMode || running != null;
-        string reason = _settings.GameMode ? "elle açıldı" : running != null ? _settings.LabelFor(running) + " çalışıyor" : "";
+        string reason = _settings.GameMode ? Loc.T("game_manual") : running != null ? Loc.T("game_running", _settings.LabelFor(running)) : "";
         EndpointInfo? alt = capture != null ? PickAltMic(endpoints, capture) : null;
 
         if (want) ApplyGameMode(capture, alt);

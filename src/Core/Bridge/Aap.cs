@@ -90,11 +90,11 @@ public static class Aap
 
     public static string ModeName(ListeningMode mode) => mode switch
     {
-        ListeningMode.Off => "Kapalı",
-        ListeningMode.NoiseCancellation => "Gürültü Engelleme",
-        ListeningMode.Transparency => "Şeffaf",
-        ListeningMode.Adaptive => "Uyarlanabilir",
-        _ => $"bilinmiyor ({(byte)mode})",
+        ListeningMode.Off => Loc.T("mode_off"),
+        ListeningMode.NoiseCancellation => Loc.T("mode_nc"),
+        ListeningMode.Transparency => Loc.T("mode_transparency"),
+        ListeningMode.Adaptive => Loc.T("mode_adaptive"),
+        _ => Loc.T("mode_unknown", (byte)mode),
     };
 
     public static string EarName(byte state) => state switch

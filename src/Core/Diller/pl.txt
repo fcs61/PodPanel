@@ -1,0 +1,115 @@
+# Plik językowy PodPanel: polski.
+# Format: klucz = tekst. Kluczy nie wolno zmieniać; zachowaj symbole zastępcze {0}, {1}.
+# Panel jest wąski (około 310 pikseli): teksty przycisków i etykiet powinny być krótkie.
+_name = Polski
+
+# Nagłówek
+connect = Połącz
+searching = Szukanie AirPods…
+not_found = Nie znaleziono AirPods
+no_paired = Brak sparowanych AirPods
+not_connected = Nie połączono
+connected = Połączono
+place_both = w uszach
+place_one = jedna w uchu
+place_case = w etui
+place_out = poza uszami
+
+# Bateria
+left = Lewa
+right = Prawa
+case = Etui
+battery_waiting = Oczekiwanie na informacje o baterii
+battery_age = Odczyt {0} min temu
+
+# Tryb słuchania i opóźnienie
+mode_transparency = Kontakt
+mode_adaptive = Adaptacyjny
+mode_nc = Redukcja hałasu
+mode_off = Wyłączone
+mode_unknown = nieznany ({0})
+tip_modes = Tryb słuchania. AirPods przełączają tryb tylko wtedy, gdy są w uszach.
+latency = Opóźnienie
+tip_latency = Bufor dźwięku AirPods (ms). Mniejsza wartość oznacza szybszy dźwięk w grach; jeśli dźwięk się zacina, wybierz wartość o stopień wyższą.
+
+# Kafelki
+mic = Mikrofon
+tip_mic = Używa mikrofonu AirPods przez mostek; podczas rozmowy dźwięk pozostaje stereo.
+spatial = Przestrzenny
+game_mode = Tryb gry
+game_tip_default = Trzyma domyślny mikrofon z dala od AirPods, dzięki czemu nie przechodzą w mono.
+game_auto_on = Włączono automatycznie: {0}
+game_manual = włączono ręcznie
+game_running = {0} działa
+on = Włączone
+off = Wyłączone
+spatial_on_tip = Włączone: {0}
+spatial_switch_atmos = Wyłącz i włącz ponownie, aby przełączyć na Dolby Atmos.
+spatial_tip_atmos = Włącza Dolby Atmos.
+spatial_tip_sonic = Włącza Windows Sonic. Jeśli zainstalowano Dolby Access, używany jest Dolby Atmos.
+
+# Głośność
+volume = Głośność
+mute = Wycisz
+unmute = Włącz dźwięk
+
+# Dolny wiersz i ustawienia
+settings = Ustawienia
+exit = Zakończ
+audio = Dźwięk
+stereo = Stereo
+mono_handsfree = Mono · zestaw głośnomówiący
+mono = mono
+mic_bridge = AirPods · mostek
+mic_used_by = Używa: {0}
+mic_locked = AirPods zablokowane
+mic_handsfree = AirPods · zestaw głośnomówiący
+link_no_telemetry = Nie można odczytać kodeka ani opóźnienia (telemetria sterownika jest wyłączona)
+link_trouble = Wykryte zacięcia połączenia: {0}
+game_mic = Mikrofon w trybie gry
+lock_mic = Blokuj mikrofon AirPods w trybie gry
+tip_lock_mic = Gdy tryb gry jest włączony, żadna aplikacja nie może otworzyć mikrofonu zestawu głośnomówiącego AirPods.
+auto_game = Włączaj tryb gry, gdy działają te gry
+tip_auto_game = Tryb gry włącza się sam, gdy działa jedna z gier z listy, i wyłącza się po jej zamknięciu.
+remove_from_list = Usuń z listy
+no_games = Nie dodano jeszcze żadnych gier
+add_game = Dodaj grę
+tip_add_game = Uruchom grę, a potem wybierz ją tutaj.
+open_apps = Otwarte aplikacje
+open_game_first = Najpierw uruchom grę, a potem wybierz ją tutaj.
+auto_pause = Wstrzymuj po wyjęciu, wznawiaj po włożeniu
+tip_auto_pause = Wyjęcie słuchawki wstrzymuje odtwarzaną muzykę lub film; włożenie jej z powrotem w ciągu 10 minut wznawia odtwarzanie.
+start_with_windows = Uruchamiaj z systemem Windows
+disconnect = Rozłącz
+language = Język
+language_auto = Język systemu Windows
+
+# Wiersz powiadomień
+banner_other_output = Dźwięk jest odtwarzany na innym urządzeniu
+banner_take = Przenieś na AirPods
+banner_mono = Dźwięk mono · mikrofonu używa: {0}
+banner_mono_tip = Aplikacja otworzyła mikrofon zestawu głośnomówiącego AirPods. Zapobiega temu kafelek Mikrofon lub Tryb gry.
+banner_mic_waiting = Mikrofon: oczekiwanie na dźwięk z AirPods
+banner_mic_wear = Włóż AirPods, aby użyć mikrofonu
+banner_gave_up = Mostek nie mógł przejąć Bluetooth
+retry = Ponów próbę
+banner_gave_up_tip = Usługa próbowała trzy razy i oddała adapter systemowi Windows. AirPods działają; tryby słuchania, opóźnienie i mikrofon nie działają.
+banner_not_usb = Adapter Bluetooth nie jest urządzeniem USB; mostek nie może działać
+banner_usbip_missing = Nie zainstalowano usbip-win2; mostek nie może działać
+banner_no_adapter = Mostek nie znalazł adaptera Bluetooth
+banner_stopped = Usługa mostka nie działa
+banner_stopped_tip = Tryby słuchania, opóźnienie i mikrofon działają przez usługę mostka. Po instalacji uruchom komputer ponownie.
+
+# Błędy mostka mikrofonu
+hf_not_found = System Windows nie znalazł tych AirPods wśród sparowanych urządzeń
+hf_cant_enable = System Windows nie mógł włączyć usługi zestawu głośnomówiącego (błąd {0})
+hf_cant_disable = System Windows nie mógł wyłączyć usługi zestawu głośnomówiącego (błąd {0})
+hf_state_unknown = Nie udało się odczytać stanu usługi zestawu głośnomówiącego
+ffmpeg_missing = Nie znaleziono bibliotek FFmpeg (obok aplikacji powinien być folder "ffmpeg")
+ffmpeg_failed = Nie udało się załadować FFmpeg: {0}
+
+# Obszar powiadomień
+open_panel = Otwórz panel
+tray_not_found = PodPanel — nie znaleziono AirPods
+tray_not_connected = {0} — nie połączono
+tray_battery = {0} — lewa {1}, prawa {2}

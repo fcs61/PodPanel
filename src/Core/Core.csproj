@@ -7,4 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Arayüz dilleri: her dosya "dil.<kod>.txt" adıyla derlemeye gömülür (bkz. Loc.cs). -->
+    <EmbeddedResource Include="Diller\*.txt" LogicalName="dil.%(Filename).txt" />
+  </ItemGroup>
 </Project>

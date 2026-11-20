@@ -1,0 +1,115 @@
+# PodPanel 语言文件：简体中文。
+# 格式：键 = 文本。请勿更改键；保留 {0}、{1} 占位符。
+# 面板较窄（约 310 像素）：按钮和标签文本请保持简短。
+_name = 简体中文
+
+# 标题栏
+connect = 连接
+searching = 正在查找 AirPods…
+not_found = 未找到 AirPods
+no_paired = 没有已配对的 AirPods
+not_connected = 未连接
+connected = 已连接
+place_both = 佩戴中
+place_one = 单耳佩戴
+place_case = 在充电盒中
+place_out = 未佩戴
+
+# 电量
+left = 左
+right = 右
+case = 充电盒
+battery_waiting = 正在等待电量信息
+battery_age = {0} 分钟前读取
+
+# 聆听模式和延迟
+mode_transparency = 通透模式
+mode_adaptive = 自适应
+mode_nc = 降噪
+mode_off = 关闭
+mode_unknown = 未知（{0}）
+tip_modes = 聆听模式。仅当 AirPods 戴在耳中时才会切换。
+latency = 延迟
+tip_latency = AirPods 的音频缓冲（毫秒）。数值越小，游戏中的声音来得越早；如果声音卡顿，请调高一档。
+
+# 磁贴
+mic = 麦克风
+tip_mic = 通过桥接使用 AirPods 麦克风；说话时音频仍保持立体声。
+spatial = 空间音效
+game_mode = 游戏模式
+game_tip_default = 不让 AirPods 成为默认麦克风，以免音频降为单声道。
+game_auto_on = 已自动开启：{0}
+game_manual = 手动开启
+game_running = {0} 正在运行
+on = 开
+off = 关
+spatial_on_tip = 已开启：{0}
+spatial_switch_atmos = 关闭后重新开启，即可切换到 Dolby Atmos。
+spatial_tip_atmos = 开启 Dolby Atmos。
+spatial_tip_sonic = 开启 Windows Sonic。如果已安装 Dolby Access，则使用 Dolby Atmos。
+
+# 音量
+volume = 音量
+mute = 静音
+unmute = 取消静音
+
+# 底部一行和设置
+settings = 设置
+exit = 退出
+audio = 音频
+stereo = 立体声
+mono_handsfree = 单声道 · 免提
+mono = 单声道
+mic_bridge = AirPods · 桥接
+mic_used_by = 正在使用：{0}
+mic_locked = AirPods 已锁定
+mic_handsfree = AirPods · 免提
+link_no_telemetry = 无法读取编解码器和延迟（驱动程序遥测已关闭）
+link_trouble = 连接出现了 {0} 次卡顿
+game_mic = 游戏模式下的麦克风
+lock_mic = 游戏模式下锁定 AirPods 麦克风
+tip_lock_mic = 游戏模式开启期间，任何应用都无法打开 AirPods 的免提麦克风。
+auto_game = 运行这些游戏时开启游戏模式
+tip_auto_game = 列表中的任一游戏运行时，游戏模式会自动开启，游戏关闭后自动关闭。
+remove_from_list = 从列表中移除
+no_games = 尚未添加游戏
+add_game = 添加游戏
+tip_add_game = 先启动游戏，然后在此处选择。
+open_apps = 打开的应用
+open_game_first = 请先启动游戏，然后在此处选择。
+auto_pause = 摘下时暂停，戴回时继续
+tip_auto_pause = 摘下一只耳机会暂停正在播放的音乐或视频；10 分钟内戴回即可继续播放。
+start_with_windows = 随 Windows 启动
+disconnect = 断开连接
+language = 语言
+language_auto = Windows 语言
+
+# 通知行
+banner_other_output = 声音正在其他设备上播放
+banner_take = 切换到 AirPods
+banner_mono = 音频为单声道 · 麦克风正被使用：{0}
+banner_mono_tip = 有应用打开了 AirPods 的免提麦克风。使用麦克风或游戏模式磁贴可以避免这种情况。
+banner_mic_waiting = 麦克风：正在等待来自 AirPods 的音频
+banner_mic_wear = 请戴上 AirPods 以使用麦克风
+banner_gave_up = 桥接无法接管 蓝牙
+retry = 重试
+banner_gave_up_tip = 服务已尝试三次，并将适配器交还给 Windows。AirPods 可以使用，但聆听模式、延迟和麦克风不可用。
+banner_not_usb = 蓝牙 适配器不是 USB 设备，桥接无法工作
+banner_usbip_missing = 未安装 usbip-win2，桥接无法工作
+banner_no_adapter = 桥接未找到 蓝牙 适配器
+banner_stopped = 桥接服务未运行
+banner_stopped_tip = 聆听模式、延迟和麦克风通过桥接服务工作。安装后请重新启动计算机。
+
+# 麦克风桥接错误
+hf_not_found = Windows 未在已配对设备中找到这副 AirPods
+hf_cant_enable = Windows 无法开启免提服务（错误 {0}）
+hf_cant_disable = Windows 无法关闭免提服务（错误 {0}）
+hf_state_unknown = 无法读取免提服务的状态
+ffmpeg_missing = 未找到 FFmpeg 库（应用旁边应有一个 "ffmpeg" 文件夹）
+ffmpeg_failed = 无法加载 FFmpeg：{0}
+
+# 通知区域
+open_panel = 打开面板
+tray_not_found = PodPanel — 未找到 AirPods
+tray_not_connected = {0} — 未连接
+tray_battery = {0} — 左 {1}，右 {2}

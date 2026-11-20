@@ -1,0 +1,115 @@
+# PodPanel-Sprachdatei: Deutsch.
+# Format: Schlüssel = Text. Schlüssel dürfen nicht geändert werden; die Platzhalter {0}, {1} beibehalten.
+# Das Panel ist schmal (etwa 310 Pixel): Texte für Schaltflächen und Beschriftungen kurz halten.
+_name = Deutsch
+
+# Kopfzeile
+connect = Verbinden
+searching = AirPods werden gesucht…
+not_found = AirPods nicht gefunden
+no_paired = Keine gekoppelten AirPods
+not_connected = Nicht verbunden
+connected = Verbunden
+place_both = im Ohr
+place_one = einer im Ohr
+place_case = im Case
+place_out = nicht im Ohr
+
+# Akku
+left = Links
+right = Rechts
+case = Case
+battery_waiting = Warte auf Akkustand
+battery_age = Vor {0} Min. gelesen
+
+# Hörmodus und Latenz
+mode_transparency = Transparenz
+mode_adaptive = Adaptiv
+mode_nc = Geräuschunterdrückung
+mode_off = Aus
+mode_unknown = unbekannt ({0})
+tip_modes = Hörmodus. Die AirPods wechseln nur, solange sie im Ohr sind.
+latency = Latenz
+tip_latency = Audiopuffer der AirPods (ms). Ein kleinerer Wert bringt den Ton in Spielen früher; wenn der Ton stockt, eine Stufe höher gehen.
+
+# Kacheln
+mic = Mikrofon
+tip_mic = Nutzt das AirPods-Mikrofon über die Brücke; der Ton bleibt beim Sprechen in Stereo.
+spatial = Räumlich
+game_mode = Spielmodus
+game_tip_default = Hält das Standardmikrofon von den AirPods fern, damit sie nicht auf Mono zurückfallen.
+game_auto_on = Automatisch ein: {0}
+game_manual = von Hand eingeschaltet
+game_running = {0} läuft
+on = Ein
+off = Aus
+spatial_on_tip = Ein: {0}
+spatial_switch_atmos = Aus- und wieder einschalten, um zu Dolby Atmos zu wechseln.
+spatial_tip_atmos = Schaltet Dolby Atmos ein.
+spatial_tip_sonic = Schaltet Windows Sonic ein. Dolby Atmos wird verwendet, wenn Dolby Access installiert ist.
+
+# Lautstärke
+volume = Lautstärke
+mute = Stumm
+unmute = Ton ein
+
+# Untere Zeile und Einstellungen
+settings = Einstellungen
+exit = Beenden
+audio = Audio
+stereo = Stereo
+mono_handsfree = Mono · Freisprechen
+mono = mono
+mic_bridge = AirPods · Brücke
+mic_used_by = Verwendet von: {0}
+mic_locked = AirPods gesperrt
+mic_handsfree = AirPods · Freisprechen
+link_no_telemetry = Codec und Latenz nicht lesbar (Treibertelemetrie ist aus)
+link_trouble = {0} Stockungen in der Verbindung erkannt
+game_mic = Mikrofon im Spielmodus
+lock_mic = AirPods-Mikrofon im Spielmodus sperren
+tip_lock_mic = Solange der Spielmodus ein ist, kann keine App das Freisprechmikrofon der AirPods öffnen.
+auto_game = Spielmodus einschalten, wenn diese Spiele laufen
+tip_auto_game = Der Spielmodus schaltet sich von selbst ein, solange eines der aufgeführten Spiele läuft, und aus, wenn es beendet wird.
+remove_from_list = Aus der Liste entfernen
+no_games = Noch keine Spiele hinzugefügt
+add_game = Spiel hinzufügen
+tip_add_game = Spiel starten, dann hier auswählen.
+open_apps = Geöffnete Apps
+open_game_first = Zuerst das Spiel starten, dann hier auswählen.
+auto_pause = Beim Herausnehmen pausieren, beim Einsetzen fortsetzen
+tip_auto_pause = Wird ein Ohrhörer herausgenommen, pausiert die laufende Musik oder das Video; wird er innerhalb von 10 Minuten wieder eingesetzt, geht es weiter.
+start_with_windows = Mit Windows starten
+disconnect = Trennen
+language = Sprache
+language_auto = Windows-Sprache
+
+# Hinweiszeile
+banner_other_output = Ton läuft über ein anderes Gerät
+banner_take = Zu AirPods wechseln
+banner_mono = Ton ist mono · Mikrofon verwendet von: {0}
+banner_mono_tip = Eine App hat das Freisprechmikrofon der AirPods geöffnet. Die Kachel Mikrofon oder Spielmodus verhindert das.
+banner_mic_waiting = Mikrofon: Warte auf Ton von den AirPods
+banner_mic_wear = AirPods für das Mikrofon einsetzen
+banner_gave_up = Die Brücke konnte Bluetooth nicht übernehmen
+retry = Wiederholen
+banner_gave_up_tip = Der Dienst hat es dreimal versucht und den Adapter an Windows zurückgegeben. Die AirPods funktionieren; Hörmodi, Latenz und Mikrofon nicht.
+banner_not_usb = Der Bluetooth-Adapter ist kein USB-Gerät; die Brücke kann nicht arbeiten
+banner_usbip_missing = usbip-win2 ist nicht installiert; die Brücke kann nicht arbeiten
+banner_no_adapter = Die Brücke hat keinen Bluetooth-Adapter gefunden
+banner_stopped = Der Brückendienst läuft nicht
+banner_stopped_tip = Hörmodi, Latenz und Mikrofon laufen über den Brückendienst. Nach der Installation den Computer neu starten.
+
+# Fehler der Mikrofonbrücke
+hf_not_found = Windows hat diese AirPods nicht unter den gekoppelten Geräten gefunden
+hf_cant_enable = Windows konnte den Freisprechdienst nicht einschalten (Fehler {0})
+hf_cant_disable = Windows konnte den Freisprechdienst nicht ausschalten (Fehler {0})
+hf_state_unknown = Der Status des Freisprechdienstes konnte nicht gelesen werden
+ffmpeg_missing = FFmpeg-Bibliotheken nicht gefunden (neben der App wird ein Ordner "ffmpeg" erwartet)
+ffmpeg_failed = FFmpeg konnte nicht geladen werden: {0}
+
+# Infobereich
+open_panel = Panel öffnen
+tray_not_found = PodPanel — AirPods nicht gefunden
+tray_not_connected = {0} — nicht verbunden
+tray_battery = {0} — Links {1}, Rechts {2}

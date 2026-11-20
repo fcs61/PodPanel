@@ -113,7 +113,7 @@ internal sealed unsafe class FfmpegLibrary
                 string? directory = Candidates().FirstOrDefault(d => System.IO.Directory.Exists(d) && System.IO.Directory.GetFiles(d, "avcodec-*.dll").Length > 0);
                 if (directory == null)
                 {
-                    _error = "FFmpeg kitaplıkları bulunamadı (uygulamanın yanında \"ffmpeg\" klasörü bekleniyor)";
+                    _error = Loc.T("ffmpeg_missing");
                 }
                 else
                 {
@@ -123,7 +123,7 @@ internal sealed unsafe class FfmpegLibrary
                     }
                     catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException or IOException)
                     {
-                        _error = "FFmpeg yüklenemedi: " + e.Message;
+                        _error = Loc.T("ffmpeg_failed", e.Message);
                     }
                 }
             }

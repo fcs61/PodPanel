@@ -68,8 +68,11 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Chrome" CornerRadius="6" Background="Transparent" Padding="2,7">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border x:Name="Chrome" CornerRadius="6" Background="Transparent" Padding="7,7">
+                            <!-- Uzun çevirilerde metin kırpılmaz, sığacak kadar küçülür (yalnızca küçülür, büyümez). -->
+                            <Viewbox StretchDirection="DownOnly" Stretch="Uniform">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Viewbox>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -116,7 +119,9 @@
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="17"
                                            HorizontalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
-                                <ContentPresenter HorizontalAlignment="Center" Margin="0,6,0,0" />
+                                <Viewbox StretchDirection="DownOnly" Stretch="Uniform" Margin="5,6,5,0" MaxHeight="18">
+                                    <ContentPresenter HorizontalAlignment="Center" />
+                                </Viewbox>
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -200,7 +205,13 @@
                                            Foreground="{DynamicResource OnAccentBrush}" HorizontalAlignment="Center"
                                            VerticalAlignment="Center" Visibility="Collapsed" />
                             </Border>
-                            <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Top" />
+                            <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Top">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
@@ -209,6 +220,50 @@
                                 <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Ses çubuğu: ince iz, vurgu renginde dolu kısım, yuvarlak tutamak -->
+        <Style x:Key="VolumeTrackButton" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent" Height="18">
+                            <Border Height="4" CornerRadius="2" Background="{TemplateBinding Background}" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="Volume" TargetType="Slider">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Track x:Name="PART_Track" Height="18">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource VolumeTrackButton}" Command="Slider.DecreaseLarge"
+                                              Background="{DynamicResource AccentBrush}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource VolumeTrackButton}" Command="Slider.IncreaseLarge"
+                                              Background="{DynamicResource HoverBrush}" />
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Width="14" Height="14">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Fill="{DynamicResource AccentBrush}" Stroke="{DynamicResource BgBrush}" StrokeThickness="2" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -255,7 +310,7 @@
                                    Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
                         <TextBlock Text="{Binding StatusText}" Style="{StaticResource Muted}" Margin="0,1,0,0" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource Pill}" Content="Bağlan" Command="{Binding ToggleConnectionCommand}"
+                    <Button Grid.Column="1" Style="{StaticResource Pill}" Content="{local:T connect}" Command="{Binding ToggleConnectionCommand}"
                             VerticalAlignment="Center" Margin="8,0,0,0"
                             Visibility="{Binding ShowConnect, Converter={StaticResource BoolToVis}}" />
                 </Grid>
@@ -269,7 +324,7 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="Sol" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{local:T left}" Style="{StaticResource Label}" HorizontalAlignment="Center" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
                             <TextBlock Text="{Binding BatteryLeftText}" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                             <TextBlock Text="&#xE945;" Style="{StaticResource Icon}" FontSize="11" Margin="3,2,0,0" Foreground="{DynamicResource OkBrush}"
@@ -277,7 +332,7 @@
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Sağ" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{local:T right}" Style="{StaticResource Label}" HorizontalAlignment="Center" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
                             <TextBlock Text="{Binding BatteryRightText}" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                             <TextBlock Text="&#xE945;" Style="{StaticResource Icon}" FontSize="11" Margin="3,2,0,0" Foreground="{DynamicResource OkBrush}"
@@ -285,7 +340,7 @@
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Kutu" Style="{StaticResource Label}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{local:T case}" Style="{StaticResource Label}" HorizontalAlignment="Center" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
                             <TextBlock Text="{Binding BatteryCaseText}" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                             <TextBlock Text="&#xE945;" Style="{StaticResource Icon}" FontSize="11" Margin="3,2,0,0" Foreground="{DynamicResource OkBrush}"
@@ -314,30 +369,25 @@
                 <!-- Dinleme modu -->
                 <Border Style="{StaticResource SegmentTrack}" Margin="0,14,0,0"
                         Visibility="{Binding ShowModes, Converter={StaticResource BoolToVis}}"
-                        ToolTip="Dinleme modu. Kulaklık yalnızca kulaktayken değiştirir.">
-                    <Grid IsEnabled="{Binding ModesEnabled}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*" />
-                            <ColumnDefinition Width="5*" />
-                            <ColumnDefinition Width="7*" />
-                        </Grid.ColumnDefinitions>
-                        <Button Style="{StaticResource Segment}" Content="Şeffaf" Tag="{Binding IsModeTransparency}"
+                        ToolTip="{local:T tip_modes}">
+                    <local:ShareRow IsEnabled="{Binding ModesEnabled}">
+                        <Button Style="{StaticResource Segment}" Content="{local:T mode_transparency}" Tag="{Binding IsModeTransparency}"
                                 Command="{Binding SetModeCommand}" CommandParameter="transparency" />
-                        <Button Grid.Column="1" Style="{StaticResource Segment}" Content="Uyarlanabilir" Tag="{Binding IsModeAdaptive}"
+                        <Button Style="{StaticResource Segment}" Content="{local:T mode_adaptive}" Tag="{Binding IsModeAdaptive}"
                                 Command="{Binding SetModeCommand}" CommandParameter="adaptive" />
-                        <Button Grid.Column="2" Style="{StaticResource Segment}" Content="Gürültü Engelleme" Tag="{Binding IsModeNoiseCancellation}"
+                        <Button Style="{StaticResource Segment}" Content="{local:T mode_nc}" Tag="{Binding IsModeNoiseCancellation}"
                                 Command="{Binding SetModeCommand}" CommandParameter="nc" />
-                    </Grid>
+                    </local:ShareRow>
                 </Border>
 
                 <!-- Gecikme -->
                 <Grid Margin="0,8,0,0" Visibility="{Binding ShowModes, Converter={StaticResource BoolToVis}}"
-                      ToolTip="Kulaklığın ses tamponu (ms). Küçüldükçe ses oyunlarda daha erken gelir; ses takılırsa bir üst değere çık.">
+                      ToolTip="{local:T tip_latency}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Gecikme" Style="{StaticResource Label}" Margin="2,0,12,0" />
+                    <TextBlock Text="{local:T latency}" Style="{StaticResource Label}" Margin="2,0,12,0" />
                     <Border Grid.Column="1" Style="{StaticResource SegmentTrack}">
                         <UniformGrid Rows="1">
                             <Button Style="{StaticResource Segment}" Content="150" Tag="{Binding IsJitterDefault}"
@@ -352,13 +402,13 @@
 
                 <!-- Aç/kapa kutuları -->
                 <UniformGrid Rows="1" Margin="-3,12,-3,0" Visibility="{Binding IsFound, Converter={StaticResource BoolToVis}}">
-                    <ToggleButton Style="{StaticResource Tile}" Tag="&#xE720;" Content="Mikrofon" IsChecked="{Binding BridgeMic, Mode=TwoWay}"
+                    <ToggleButton Style="{StaticResource Tile}" Tag="&#xE720;" Content="{local:T mic}" IsChecked="{Binding BridgeMic, Mode=TwoWay}"
                                   Visibility="{Binding ShowBridgeMic, Converter={StaticResource BoolToVis}}"
-                                  ToolTip="AirPods mikrofonunu köprü üzerinden kullanır; konuşurken ses stereo kalır." />
-                    <ToggleButton Style="{StaticResource Tile}" Tag="&#xE7F5;" Content="Uzamsal" IsChecked="{Binding SpatialOn, Mode=TwoWay}"
+                                  ToolTip="{local:T tip_mic}" />
+                    <ToggleButton Style="{StaticResource Tile}" Tag="&#xE7F5;" Content="{local:T spatial}" IsChecked="{Binding SpatialOn, Mode=TwoWay}"
                                   IsEnabled="{Binding SpatialEnabled}"
                                   ToolTip="{Binding SpatialTip}" ToolTipService.ShowOnDisabled="True" />
-                    <ToggleButton Tag="&#xE7FC;" Content="Oyun modu" IsChecked="{Binding GameMode, Mode=TwoWay}" ToolTip="{Binding GameTip}">
+                    <ToggleButton Tag="&#xE7FC;" Content="{local:T game_mode}" IsChecked="{Binding GameMode, Mode=TwoWay}" ToolTip="{Binding GameTip}">
                         <ToggleButton.Style>
                             <Style TargetType="ToggleButton" BasedOn="{StaticResource Tile}">
                                 <Style.Triggers>
@@ -371,15 +421,34 @@
                     </ToggleButton>
                 </UniformGrid>
 
+                <!-- Ses düzeyi: Windows'un ses çubuğuyla aynı değer -->
+                <Grid Margin="0,12,0,0" Visibility="{Binding ShowVolume, Converter={StaticResource BoolToVis}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource Link}" Command="{Binding ToggleMuteCommand}" ToolTip="{Binding MuteTip}"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding VolumeGlyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="15"
+                                   Margin="2,0,10,0" />
+                    </Button>
+                    <Slider x:Name="VolumeSlider" Grid.Column="1" Style="{StaticResource Volume}" Minimum="0" Maximum="100"
+                            Value="{Binding Volume, Mode=TwoWay}" SmallChange="2" LargeChange="10" IsMoveToPointEnabled="True" IsSnapToTickEnabled="True" TickFrequency="1"
+                            VerticalAlignment="Center" ToolTip="{local:T volume}" />
+                    <TextBlock Grid.Column="2" Text="{Binding VolumeText}" Style="{StaticResource Value}" MinWidth="26"
+                               TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
+                </Grid>
+
                 <!-- Alt satır -->
                 <Grid Margin="0,12,0,0">
                     <Button Style="{StaticResource Link}" Command="{Binding ToggleDetailsCommand}" HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Ayarlar" />
+                            <TextBlock Text="{local:T settings}" />
                             <TextBlock Text="{Binding DetailsGlyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="9" Margin="6,3,0,0" />
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource Link}" Content="Çıkış" Command="{Binding ExitCommand}" HorizontalAlignment="Right" />
+                    <Button Style="{StaticResource Link}" Content="{local:T exit}" Command="{Binding ExitCommand}" HorizontalAlignment="Right" />
                 </Grid>
 
                 <!-- Ayarlar: kapalı gelir -->
@@ -397,20 +466,20 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Ses" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Text="{local:T audio}" Style="{StaticResource Label}" Margin="0,2" />
                         <TextBlock Grid.Column="1" Text="{Binding AudioModeText}" Style="{StaticResource Value}" Margin="0,2" />
-                        <TextBlock Grid.Row="1" Text="Gecikme" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Row="1" Text="{local:T latency}" Style="{StaticResource Label}" Margin="0,2" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DelayText}" Style="{StaticResource Value}" Margin="0,2" />
-                        <TextBlock Grid.Row="2" Text="Mikrofon" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Row="2" Text="{local:T mic}" Style="{StaticResource Label}" Margin="0,2" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MicText}" Style="{StaticResource Value}" Margin="0,2" />
-                        <TextBlock Grid.Row="3" Text="Uzamsal" Style="{StaticResource Label}" Margin="0,2" />
+                        <TextBlock Grid.Row="3" Text="{local:T spatial}" Style="{StaticResource Label}" Margin="0,2" />
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SpatialText}" Style="{StaticResource Value}" Margin="0,2" />
                     </Grid>
                     <TextBlock Text="{Binding LinkNote}" Foreground="{DynamicResource WarnBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
                                Visibility="{Binding LinkNote, Converter={StaticResource TextToVis}}" />
 
                     <StackPanel Margin="0,10,0,0" Visibility="{Binding HasMics, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="Oyun modunda mikrofon" Style="{StaticResource Label}" Margin="0,0,0,2" />
+                        <TextBlock Text="{local:T game_mic}" Style="{StaticResource Label}" Margin="0,0,0,2" />
                         <ItemsControl ItemsSource="{Binding Mics}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -432,10 +501,10 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <CheckBox Style="{StaticResource Check}" Content="Oyun modunda AirPods mikrofonunu kilitle" IsChecked="{Binding LockMic, Mode=TwoWay}"
-                              Margin="0,10,0,0" ToolTip="Oyun modu açıkken hiçbir uygulama AirPods'un el-serbest mikrofonunu açamaz." />
-                    <CheckBox Style="{StaticResource Check}" Content="Bu oyunlar açılınca oyun modunu aç" IsChecked="{Binding AutoGame, Mode=TwoWay}"
-                              Margin="0,8,0,0" ToolTip="Listedeki oyunlardan biri çalışırken oyun modu kendiliğinden açılır, oyun kapanınca kapanır." />
+                    <CheckBox Style="{StaticResource Check}" Content="{local:T lock_mic}" IsChecked="{Binding LockMic, Mode=TwoWay}"
+                              Margin="0,10,0,0" ToolTip="{local:T tip_lock_mic}" />
+                    <CheckBox Style="{StaticResource Check}" Content="{local:T auto_game}" IsChecked="{Binding AutoGame, Mode=TwoWay}"
+                              Margin="0,8,0,0" ToolTip="{local:T tip_auto_game}" />
                     <StackPanel Margin="24,4,0,0">
                         <!-- Eklenmiş oyunlar: ad ve çıkarma düğmesi -->
                         <ItemsControl ItemsSource="{Binding Games}">
@@ -447,7 +516,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding Label}" Style="{StaticResource Value}" VerticalAlignment="Center" />
-                                        <Button Grid.Column="1" Style="{StaticResource Link}" ToolTip="Listeden çıkar"
+                                        <Button Grid.Column="1" Style="{StaticResource Link}" ToolTip="{local:T remove_from_list}"
                                                 Command="{Binding DataContext.RemoveGameCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                 CommandParameter="{Binding Name}">
                                             <TextBlock Text="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10"
@@ -457,15 +526,15 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Text="Henüz oyun eklenmedi" Style="{StaticResource Muted}" Margin="0,2"
+                        <TextBlock Text="{local:T no_games}" Style="{StaticResource Muted}" Margin="0,2"
                                    Visibility="{Binding NoGames, Converter={StaticResource BoolToVis}}" />
 
                         <Button Style="{StaticResource Link}" Command="{Binding TogglePickerCommand}" HorizontalAlignment="Left"
                                 Foreground="{DynamicResource AccentBrush}" Margin="0,3,0,0"
-                                ToolTip="Oyunu aç, sonra buradan seç.">
+                                ToolTip="{local:T tip_add_game}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE710;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10" Margin="0,3,6,0" />
-                                <TextBlock Text="Oyun ekle" />
+                                <TextBlock Text="{local:T add_game}" />
                             </StackPanel>
                         </Button>
 
@@ -473,7 +542,7 @@
                         <Border CornerRadius="8" Background="{DynamicResource CardBrush}" Padding="6,6,6,5" Margin="0,5,0,0"
                                 Visibility="{Binding ShowPicker, Converter={StaticResource BoolToVis}}">
                             <StackPanel>
-                                <TextBlock Text="Açık uygulamalar" Style="{StaticResource Label}" Margin="4,0,0,3" />
+                                <TextBlock Text="{local:T open_apps}" Style="{StaticResource Label}" Margin="4,0,0,3" />
                                 <ItemsControl ItemsSource="{Binding OpenApps}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -490,18 +559,54 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <TextBlock Text="Önce oyunu aç, sonra buradan seç." Style="{StaticResource Muted}" Margin="4,0,4,2" TextWrapping="Wrap"
+                                <TextBlock Text="{local:T open_game_first}" Style="{StaticResource Muted}" Margin="4,0,4,2" TextWrapping="Wrap"
                                            Visibility="{Binding PickerEmpty, Converter={StaticResource BoolToVis}}" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                    <CheckBox Style="{StaticResource Check}" Content="Kulaktan çıkınca durdur, takınca devam ettir"
+                    <CheckBox Style="{StaticResource Check}" Content="{local:T auto_pause}"
                               IsChecked="{Binding AutoPause, Mode=TwoWay}" Margin="0,10,0,0"
                               Visibility="{Binding ShowBridgeMic, Converter={StaticResource BoolToVis}}"
-                              ToolTip="Bir kulaklığı çıkarınca çalan müzik ya da video durur; 10 dakika içinde geri takınca devam eder." />
-                    <CheckBox Style="{StaticResource Check}" Content="Windows ile başlat" IsChecked="{Binding StartWithWindows, Mode=TwoWay}"
+                              ToolTip="{local:T tip_auto_pause}" />
+                    <CheckBox Style="{StaticResource Check}" Content="{local:T start_with_windows}" IsChecked="{Binding StartWithWindows, Mode=TwoWay}"
                               Margin="0,10,0,0" />
-                    <Button Style="{StaticResource Link}" Content="Bağlantıyı kes" Command="{Binding ToggleConnectionCommand}"
+                    <Button Style="{StaticResource Link}" Command="{Binding ToggleLanguagesCommand}" HorizontalAlignment="Left"
+                            Margin="0,10,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xF2B7;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Margin="0,2,7,0" />
+                            <TextBlock Text="{Binding LanguageLabel}" />
+                            <TextBlock Text="{Binding LanguagesGlyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="9"
+                                       Margin="6,3,0,0" />
+                        </StackPanel>
+                    </Button>
+                    <Border CornerRadius="8" Background="{DynamicResource CardBrush}" Padding="6" Margin="0,5,0,0"
+                            Visibility="{Binding ShowLanguages, Converter={StaticResource BoolToVis}}">
+                        <ItemsControl ItemsSource="{Binding Languages}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource Row}"
+                                            Command="{Binding DataContext.SelectLanguageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding Code}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1" />
+                                                <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentBrush}"
+                                                         Visibility="{Binding IsSelected, Converter={StaticResource BoolToVis}}" />
+                                            </Grid>
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="110" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    <Button Style="{StaticResource Link}" Content="{local:T disconnect}" Command="{Binding ToggleConnectionCommand}"
                             HorizontalAlignment="Left" Margin="0,10,0,0"
                             Visibility="{Binding IsConnected, Converter={StaticResource BoolToVis}}" />
                 </StackPanel>

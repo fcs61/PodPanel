@@ -1,0 +1,115 @@
+# PodPanel-taalbestand: Nederlands.
+# Indeling: sleutel = tekst. Sleutels mogen niet worden gewijzigd; behoud de plaatsaanduidingen {0}, {1}.
+# Het paneel is smal (ongeveer 310 pixels): houd teksten voor knoppen en labels kort.
+_name = Nederlands
+
+# Kop
+connect = Verbinden
+searching = AirPods zoeken…
+not_found = AirPods niet gevonden
+no_paired = Geen gekoppelde AirPods
+not_connected = Niet verbonden
+connected = Verbonden
+place_both = in de oren
+place_one = in één oor
+place_case = in de case
+place_out = niet in de oren
+
+# Batterij
+left = Links
+right = Rechts
+case = Case
+battery_waiting = Wachten op batterijgegevens
+battery_age = {0} min geleden gelezen
+
+# Luistermodus en latentie
+mode_transparency = Transparantie
+mode_adaptive = Adaptief
+mode_nc = Ruisonderdrukking
+mode_off = Uit
+mode_unknown = onbekend ({0})
+tip_modes = Luistermodus. De AirPods schakelen alleen als ze in je oren zitten.
+latency = Latentie
+tip_latency = De audiobuffer van de AirPods (ms). Een kleinere waarde brengt het geluid in games sneller; ga één stap omhoog als het geluid hapert.
+
+# Tegels
+mic = Microfoon
+tip_mic = Gebruikt de AirPods-microfoon via de brug; het geluid blijft stereo terwijl je praat.
+spatial = Ruimtelijk
+game_mode = Gamemodus
+game_tip_default = Houdt de standaardmicrofoon weg bij de AirPods, zodat ze niet naar mono terugvallen.
+game_auto_on = Automatisch aan: {0}
+game_manual = handmatig ingeschakeld
+game_running = {0} is actief
+on = Aan
+off = Uit
+spatial_on_tip = Aan: {0}
+spatial_switch_atmos = Zet het uit en weer aan om over te schakelen naar Dolby Atmos.
+spatial_tip_atmos = Schakelt Dolby Atmos in.
+spatial_tip_sonic = Schakelt Windows Sonic in. Dolby Atmos wordt gebruikt als Dolby Access is geïnstalleerd.
+
+# Volume
+volume = Volume
+mute = Dempen
+unmute = Geluid aan
+
+# Onderste rij en instellingen
+settings = Instellingen
+exit = Afsluiten
+audio = Audio
+stereo = Stereo
+mono_handsfree = Mono · handsfree
+mono = mono
+mic_bridge = AirPods · brug
+mic_used_by = In gebruik door: {0}
+mic_locked = AirPods vergrendeld
+mic_handsfree = AirPods · handsfree
+link_no_telemetry = Codec en latentie kunnen niet worden gelezen (telemetrie van het stuurprogramma staat uit)
+link_trouble = {0} haperingen op de verbinding gezien
+game_mic = Microfoon in gamemodus
+lock_mic = AirPods-microfoon vergrendelen in gamemodus
+tip_lock_mic = Zolang de gamemodus aan staat, kan geen enkele app de handsfree-microfoon van de AirPods openen.
+auto_game = Gamemodus inschakelen als deze games draaien
+tip_auto_game = De gamemodus gaat vanzelf aan zolang een van de games uit de lijst draait, en uit wanneer die wordt afgesloten.
+remove_from_list = Uit de lijst verwijderen
+no_games = Nog geen games toegevoegd
+add_game = Game toevoegen
+tip_add_game = Start de game en kies die dan hier.
+open_apps = Geopende apps
+open_game_first = Start eerst de game en kies die dan hier.
+auto_pause = Pauzeren bij uitnemen, hervatten bij terugplaatsen
+tip_auto_pause = Als je een oortje uitneemt, pauzeert de muziek of video die speelt; plaats je het binnen 10 minuten terug, dan gaat die verder.
+start_with_windows = Starten met Windows
+disconnect = Verbreken
+language = Taal
+language_auto = Taal van Windows
+
+# Meldingsregel
+banner_other_output = Het geluid speelt af op een ander apparaat
+banner_take = Naar AirPods
+banner_mono = Geluid is mono · microfoon in gebruik door: {0}
+banner_mono_tip = Een app heeft de handsfree-microfoon van de AirPods geopend. De tegel Microfoon of Gamemodus voorkomt dit.
+banner_mic_waiting = Microfoon: wachten op geluid van de AirPods
+banner_mic_wear = Doe de AirPods in voor de microfoon
+banner_gave_up = De brug kon Bluetooth niet overnemen
+retry = Opnieuw
+banner_gave_up_tip = De service heeft het drie keer geprobeerd en de adapter teruggegeven aan Windows. De AirPods werken; luistermodi, latentie en de microfoon niet.
+banner_not_usb = De Bluetooth-adapter is geen USB-adapter; de brug kan niet werken
+banner_usbip_missing = usbip-win2 is niet geïnstalleerd; de brug kan niet werken
+banner_no_adapter = De brug heeft geen Bluetooth-adapter gevonden
+banner_stopped = De brugservice draait niet
+banner_stopped_tip = Luistermodi, latentie en de microfoon werken via de brugservice. Start de computer opnieuw op na de installatie.
+
+# Fouten van de microfoonbrug
+hf_not_found = Windows heeft deze AirPods niet gevonden tussen de gekoppelde apparaten
+hf_cant_enable = Windows kon de handsfree-service niet inschakelen (fout {0})
+hf_cant_disable = Windows kon de handsfree-service niet uitschakelen (fout {0})
+hf_state_unknown = De status van de handsfree-service kon niet worden gelezen
+ffmpeg_missing = FFmpeg-bibliotheken niet gevonden (naast de app wordt een map "ffmpeg" verwacht)
+ffmpeg_failed = FFmpeg kon niet worden geladen: {0}
+
+# Systeemvak
+open_panel = Paneel openen
+tray_not_found = PodPanel — AirPods niet gevonden
+tray_not_connected = {0} — niet verbonden
+tray_battery = {0} — Links {1}, Rechts {2}

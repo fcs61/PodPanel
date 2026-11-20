@@ -176,6 +176,42 @@ internal interface IAudioMeterInformation
     [PreserveSig] int GetPeakValue(out float peak);
 }
 
+/// <summary>IAudioEndpointVolumeCallback.OnNotify'a gelen veri (ilk kanalın düzeyine kadar).</summary>
+[StructLayout(LayoutKind.Sequential)]
+internal struct AUDIO_VOLUME_NOTIFICATION_DATA
+{
+    public Guid EventContext;
+    public int Muted;
+    public float MasterVolume;
+    public uint Channels;
+    public float ChannelVolume0;
+}
+
+[ComImport, Guid("657804FA-D6AD-4496-8A60-352752AF4F89"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioEndpointVolumeCallback
+{
+    [PreserveSig] int OnNotify(IntPtr data);
+}
+
+/// <summary>Bir ses çıkışının ana ses düzeyi: Windows'un ses çubuğunun kullandığı arayüz.</summary>
+[ComImport, Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioEndpointVolume
+{
+    [PreserveSig] int RegisterControlChangeNotify(IAudioEndpointVolumeCallback notify);
+    [PreserveSig] int UnregisterControlChangeNotify(IAudioEndpointVolumeCallback notify);
+    [PreserveSig] int GetChannelCount(out uint count);
+    [PreserveSig] int SetMasterVolumeLevel(float levelDb, ref Guid context);
+    [PreserveSig] int SetMasterVolumeLevelScalar(float level, ref Guid context);
+    [PreserveSig] int GetMasterVolumeLevel(out float levelDb);
+    [PreserveSig] int GetMasterVolumeLevelScalar(out float level);
+    [PreserveSig] int SetChannelVolumeLevel(uint channel, float levelDb, ref Guid context);
+    [PreserveSig] int SetChannelVolumeLevelScalar(uint channel, float level, ref Guid context);
+    [PreserveSig] int GetChannelVolumeLevel(uint channel, out float levelDb);
+    [PreserveSig] int GetChannelVolumeLevelScalar(uint channel, out float level);
+    [PreserveSig] int SetMute([MarshalAs(UnmanagedType.Bool)] bool mute, ref Guid context);
+    [PreserveSig] int GetMute([MarshalAs(UnmanagedType.Bool)] out bool mute);
+}
+
 /// <summary>Belgelenmemiş ama yaygın kullanılan arayüz: ses menüsünden aygıt seçmekle aynı işi yapar.</summary>
 [ComImport, Guid("f8679f50-850a-41cf-9c72-430f290290c8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 internal interface IPolicyConfig

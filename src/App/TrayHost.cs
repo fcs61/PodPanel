@@ -38,15 +38,15 @@ internal sealed class TrayHost : IDisposable
             viewModel.ShowDetails = false;
         };
 
-        _gameItem = new ToolStripMenuItem("Oyun modu");
+        _gameItem = new ToolStripMenuItem(Loc.T("game_mode"));
         _gameItem.Click += (_, _) => viewModel.GameMode = !viewModel.GameMode;
 
         // Dinleme modu kısayolları: kontrol kanalı kapalıyken gizli, kulaklık kulakta değilken soluk.
         _modeItems = new[]
         {
-            new ToolStripMenuItem("Şeffaf") { Tag = "transparency" },
-            new ToolStripMenuItem("Uyarlanabilir") { Tag = "adaptive" },
-            new ToolStripMenuItem("Gürültü Engelleme") { Tag = "nc" },
+            new ToolStripMenuItem(Loc.T("mode_transparency")) { Tag = "transparency" },
+            new ToolStripMenuItem(Loc.T("mode_adaptive")) { Tag = "adaptive" },
+            new ToolStripMenuItem(Loc.T("mode_nc")) { Tag = "nc" },
         };
         foreach (ToolStripMenuItem item in _modeItems)
         {
@@ -55,13 +55,24 @@ internal sealed class TrayHost : IDisposable
         var modeSeparator = new ToolStripSeparator();
 
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Paneli aç", null, (_, _) => ShowFlyout());
+        var openItem = new ToolStripMenuItem(Loc.T("open_panel"));
+        openItem.Click += (_, _) => ShowFlyout();
+        var exitItem = new ToolStripMenuItem(Loc.T("exit"));
+        exitItem.Click += (_, _) => exit();
+        menu.Items.Add(openItem);
         menu.Items.Add(modeSeparator);
         menu.Items.AddRange(_modeItems);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(_gameItem);
         menu.Opening += (_, _) =>
         {
+            // Metinler her açılışta seçili dilden alınır.
+            openItem.Text = Loc.T("open_panel");
+            exitItem.Text = Loc.T("exit");
+            _gameItem.Text = Loc.T("game_mode");
+            _modeItems[0].Text = Loc.T("mode_transparency");
+            _modeItems[1].Text = Loc.T("mode_adaptive");
+            _modeItems[2].Text = Loc.T("mode_nc");
             modeSeparator.Visible = viewModel.ShowModes;
             _modeItems[0].Checked = viewModel.IsModeTransparency;
             _modeItems[1].Checked = viewModel.IsModeAdaptive;
@@ -73,7 +84,7 @@ internal sealed class TrayHost : IDisposable
             }
         };
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Çıkış", null, (_, _) => exit());
+        menu.Items.Add(exitItem);
 
         _icon = new NotifyIcon { Text = "PodPanel", ContextMenuStrip = menu };
         _icon.MouseClick += (_, e) =>

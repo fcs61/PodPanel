@@ -58,11 +58,11 @@ public static class SpatialAudio
 
     public static string FormatName(string subtype)
     {
-        if (!IsOn(subtype)) return "Kapalı";
+        if (!IsOn(subtype)) return Loc.T("off");
         if (Same(subtype, SpatialAudioFormatSubtype.WindowsSonic)) return "Windows Sonic";
         if (Same(subtype, SpatialAudioFormatSubtype.DolbyAtmosForHeadphones)) return "Dolby Atmos";
         if (Same(subtype, SpatialAudioFormatSubtype.DTSHeadphoneX)) return "DTS Headphone:X";
-        return "Açık";
+        return Loc.T("on");
     }
 
     private static bool Same(string a, string b) =>

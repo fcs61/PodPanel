@@ -25,6 +25,7 @@ public partial class App : Application
         string? snapshotPath = ArgValue(e.Args, "--snapshot");
         if (snapshotPath != null)
         {
+            Loc.Use(ArgValue(e.Args, "--lang"));
             Snapshot.Run(this, snapshotPath, ArgValue(e.Args, "--mock") ?? "live", ArgValue(e.Args, "--theme") ?? "system");
             return;
         }
@@ -47,6 +48,7 @@ public partial class App : Application
         }
 
         Settings settings = Settings.Load();
+        Loc.Use(settings.Language);
         OfferAutostart(settings);
         _monitor = new PodMonitor(settings);
         var viewModel = new MainViewModel(_monitor, Dispatcher);

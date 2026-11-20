@@ -27,6 +27,12 @@ public partial class FlyoutWindow : Window
         {
             if (e.Key == Key.Escape) HideFlyout();
         };
+        // Fare tekerleği ses çubuğunu ikişer ikişer oynatır.
+        VolumeSlider.PreviewMouseWheel += (_, e) =>
+        {
+            VolumeSlider.Value += e.Delta > 0 ? 2 : -2;
+            e.Handled = true;
+        };
         SourceInitialized += (_, _) =>
         {
             // Alt+Tab listesinde görünmesin.

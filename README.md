@@ -13,8 +13,10 @@ PodPanel bağımsız bir projedir; Apple tarafından yapılmamış, onaylanmamı
 > listening modes (Transparency, Adaptive, Noise Cancellation), sets the audio latency, lets the AirPods microphone be
 > used while audio stays in stereo, turns on a game mode when chosen games run, toggles spatial sound, and pauses media
 > when an earbud is taken out. The listening modes, latency, microphone and auto-pause need the bundled bridge service
-> (a modified copy of [WPods](https://github.com/FPNDev/WPods)' service) and the usbip-win2 driver. The interface and
-> the rest of this README are in Turkish. Download the installer from the
+> (a modified copy of [WPods](https://github.com/FPNDev/WPods)' service) and the usbip-win2 driver. The panel follows
+> the Windows display language and can be switched in its settings (English, Türkçe, Deutsch, Español, Français,
+> Italiano, Nederlands, Polski, Português, Русский, 日本語, 한국어, 简体中文); the installer and the rest of this README
+> are still in Turkish. Download the installer from the
 > [latest release](https://github.com/fcs61/PodPanel/releases/latest); see [Code signing policy](#code-signing-policy)
 > and [Lisans](#lisans) (GPL-3.0). PodPanel is an independent project and is not affiliated with Apple.
 
@@ -78,6 +80,13 @@ sonra `C:\Program Files\PodPanel\kurulum` klasöründe durur ve okunabilir.
 - **Kulaktan çıkınca durdur:** bir kulaklık çıkarılınca çalan medyayı (Spotify, tarayıcı gibi Windows medya
   oturumu olan oynatıcılar) durdurur; 10 dakika içinde geri takılınca yalnızca kendi durdurduklarını devam ettirir.
   Oyunlara dokunmaz. Varsayılan açıktır, Ayarlar'dan kapatılır; köprü servisinin kontrol kanalı gerekir.
+- **Ses çubuğu:** kulaklığın Windows'taki ses düzeyini gösterir ve değiştirir. Windows'un kendi ses çubuğuyla aynı
+  değeri kullanır: orada, klavyeden ya da kulaklığın sapından yapılan değişiklik panele hemen yansır.
+- **Diller:** panel Windows'un görüntüleme dilinde açılır; Ayarlar'dan değiştirilebilir. On üç dil vardır; asıl metin
+  İngilizcedir ve bir çeviride eksik kalan metin İngilizce gösterilir. Çeviriler `src/Core/Diller` klasöründeki
+  `kod.txt` dosyalarıdır (`anahtar = metin`); İngilizce ve Türkçe dışındakiler makine çevirisidir ve ana dili o olan
+  biri tarafından gözden geçirilmemiştir. Düzeltmeler için dosyayı düzenleyip çekme isteği göndermek yeterlidir.
+  Kurulum programı şimdilik yalnızca Türkçedir.
 - Bağlantı bilgisini gösterir: kullanılan codec, kulaklığın bildirdiği gecikme, mikrofonu hangi uygulamanın açtığı.
 
 Panel sade tutulur: üstte ad ve tek satır durum, pil, dinleme modu, gecikme ve üç aç/kapa kutusu (Mikrofon, Uzamsal,

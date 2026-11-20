@@ -1,0 +1,115 @@
+# Archivo de idioma de PodPanel: español.
+# Formato: clave = texto. Las claves no se deben cambiar; conserva los marcadores {0}, {1}.
+# El panel es estrecho (unos 310 píxeles): los textos de botones y etiquetas deben ser cortos.
+_name = Español
+
+# Encabezado
+connect = Conectar
+searching = Buscando AirPods…
+not_found = AirPods no encontrados
+no_paired = No hay AirPods emparejados
+not_connected = Sin conexión
+connected = Conectados
+place_both = puestos
+place_one = uno puesto
+place_case = en el estuche
+place_out = no puestos
+
+# Batería
+left = Izq.
+right = Der.
+case = Estuche
+battery_waiting = Esperando información de la batería
+battery_age = Lectura: hace {0} min
+
+# Modo de escucha y latencia
+mode_transparency = Transparencia
+mode_adaptive = Adaptativo
+mode_nc = Cancelación de ruido
+mode_off = Desactivado
+mode_unknown = desconocido ({0})
+tip_modes = Modo de escucha. Los AirPods solo cambian de modo mientras los llevas puestos.
+latency = Latencia
+tip_latency = Búfer de audio de los AirPods (ms). Un valor menor hace que el sonido llegue antes en los juegos; si el audio se entrecorta, sube un paso.
+
+# Mosaicos
+mic = Micrófono
+tip_mic = Usa el micrófono de los AirPods a través del puente; el audio sigue en estéreo mientras hablas.
+spatial = Espacial
+game_mode = Modo juego
+game_tip_default = Mantiene el micrófono predeterminado lejos de los AirPods para que no pasen a mono.
+game_auto_on = Activado automáticamente: {0}
+game_manual = activado a mano
+game_running = {0} está en ejecución
+on = Activado
+off = Desactivado
+spatial_on_tip = Activado: {0}
+spatial_switch_atmos = Desactívalo y vuelve a activarlo para cambiar a Dolby Atmos.
+spatial_tip_atmos = Activa Dolby Atmos.
+spatial_tip_sonic = Activa Windows Sonic. Si Dolby Access está instalado, se usa Dolby Atmos.
+
+# Volumen
+volume = Volumen
+mute = Silenciar
+unmute = Activar sonido
+
+# Fila inferior y ajustes
+settings = Ajustes
+exit = Salir
+audio = Audio
+stereo = Estéreo
+mono_handsfree = Mono · manos libres
+mono = mono
+mic_bridge = AirPods · puente
+mic_used_by = En uso por: {0}
+mic_locked = AirPods bloqueados
+mic_handsfree = AirPods · manos libres
+link_no_telemetry = No se pueden leer el códec ni la latencia (la telemetría del controlador está desactivada)
+link_trouble = Se detectaron {0} interrupciones en la conexión
+game_mic = Micrófono en modo juego
+lock_mic = Bloquear el micrófono de los AirPods en modo juego
+tip_lock_mic = Con el modo juego activado, ninguna aplicación puede abrir el micrófono manos libres de los AirPods.
+auto_game = Activar el modo juego cuando se ejecuten estos juegos
+tip_auto_game = El modo juego se activa solo mientras uno de los juegos de la lista está en ejecución y se desactiva cuando se cierra.
+remove_from_list = Quitar de la lista
+no_games = Aún no se han añadido juegos
+add_game = Añadir juego
+tip_add_game = Inicia el juego y luego elígelo aquí.
+open_apps = Aplicaciones abiertas
+open_game_first = Primero inicia el juego y luego elígelo aquí.
+auto_pause = Pausar al quitarlos y reanudar al ponerlos
+tip_auto_pause = Al quitarte un auricular se pausa la música o el video en reproducción; si te lo vuelves a poner en menos de 10 minutos, se reanuda.
+start_with_windows = Iniciar con Windows
+disconnect = Desconectar
+language = Idioma
+language_auto = Idioma de Windows
+
+# Fila de avisos
+banner_other_output = El sonido se reproduce en otro dispositivo
+banner_take = Pasar a los AirPods
+banner_mono = Audio en mono · micrófono en uso por: {0}
+banner_mono_tip = Una aplicación abrió el micrófono manos libres de los AirPods. El botón Micrófono o Modo juego lo evita.
+banner_mic_waiting = Micrófono: esperando audio de los AirPods
+banner_mic_wear = Ponte los AirPods para usar el micrófono
+banner_gave_up = El puente no pudo tomar el control de Bluetooth
+retry = Reintentar
+banner_gave_up_tip = El servicio lo intentó tres veces y devolvió el adaptador a Windows. Los AirPods funcionan; los modos de escucha, la latencia y el micrófono no.
+banner_not_usb = El adaptador Bluetooth no es USB; el puente no puede funcionar
+banner_usbip_missing = usbip-win2 no está instalado; el puente no puede funcionar
+banner_no_adapter = El puente no encontró ningún adaptador Bluetooth
+banner_stopped = El servicio del puente no está en ejecución
+banner_stopped_tip = Los modos de escucha, la latencia y el micrófono funcionan a través del servicio del puente. Reinicia el equipo después de instalar.
+
+# Errores del puente del micrófono
+hf_not_found = Windows no encontró estos AirPods entre los dispositivos emparejados
+hf_cant_enable = Windows no pudo activar el servicio manos libres (error {0})
+hf_cant_disable = Windows no pudo desactivar el servicio manos libres (error {0})
+hf_state_unknown = No se pudo leer el estado del servicio manos libres
+ffmpeg_missing = No se encontraron las bibliotecas de FFmpeg (se espera una carpeta "ffmpeg" junto a la aplicación)
+ffmpeg_failed = No se pudo cargar FFmpeg: {0}
+
+# Área de notificación
+open_panel = Abrir panel
+tray_not_found = PodPanel — AirPods no encontrados
+tray_not_connected = {0} — sin conexión
+tray_battery = {0} — izq. {1}, der. {2}

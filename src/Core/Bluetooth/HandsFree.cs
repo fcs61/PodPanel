@@ -47,7 +47,7 @@ public static unsafe class BluetoothServices
             byte* device = stackalloc byte[DeviceInfoSize];
             if (!FillDevice(radio, address, device))
             {
-                error = "Windows bu kulaklığı eşleşmiş aygıtlar arasında bulamadı";
+                error = Loc.T("hf_not_found");
                 return false;
             }
             if (Query(radio, device, service) == enabled) return true;
@@ -56,7 +56,7 @@ public static unsafe class BluetoothServices
             if (result is ErrorSuccess or EInvalidArg) return true;
             if (result == ErrorInvalidParameter && Query(radio, device, service) == enabled) return true;
             if (Query(radio, device, service) == enabled) return true;
-            error = $"Windows servisi {(enabled ? "açamadı" : "kapatamadı")} (hata {result})";
+            error = Loc.T(enabled ? "hf_cant_enable" : "hf_cant_disable", result);
             return false;
         }
         finally

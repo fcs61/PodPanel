@@ -167,6 +167,37 @@ switch (command)
         Console.WriteLine("SONRA: " + Summary(monitor.Current));
         break;
     }
+    case "voltest":
+    {
+        // Ses düzeyi eşlemesi: başka bir kaynaktan yapılan değişiklik bildirilmeli, kendi değişikliğimiz bildirilmemeli.
+        // Düzeyi yüzde 4 oynatır ve geri alır.
+        monitor.Start();
+        Wait(4);
+        string id = monitor.Current.OutputEndpointId;
+        using var watcher = new PodPanel.Core.Audio.EndpointVolume();
+        using var other = new PodPanel.Core.Audio.EndpointVolume();
+        int notices = 0;
+        watcher.Changed += (level, muted) =>
+        {
+            notices++;
+            Console.WriteLine($"  bildirim: {level * 100:0} sessiz={muted}");
+        };
+        watcher.Attach(id);
+        other.Attach(id);
+        var before = watcher.Get();
+        Console.WriteLine($"önce: {before?.Level * 100:0} sessiz={before?.Muted} izleyici={monitor.Current.Volume}");
+        if (before is { } start)
+        {
+            float target = start.Level > 0.5f ? start.Level - 0.04f : start.Level + 0.04f;
+            other.Set(target);
+            Wait(1);
+            Console.WriteLine($"başka kaynak değiştirdi: {watcher.Get()?.Level * 100:0}, bildirim sayısı {notices} (1 olmalı)");
+            watcher.Set(start.Level);
+            Wait(3);
+            Console.WriteLine($"kendimiz geri aldık: {watcher.Get()?.Level * 100:0}, bildirim sayısı {notices} (yine 1 olmalı), izleyici={monitor.Current.Volume}");
+        }
+        break;
+    }
     case "spatialraw":
     {
         monitor.Start();

@@ -1,0 +1,115 @@
+# PodPanel 言語ファイル: 日本語。
+# 形式: キー = テキスト。キーは変更しないでください。{0}、{1} のプレースホルダーはそのまま残します。
+# パネルは幅が狭い (約 310 ピクセル) ため、ボタンやラベルのテキストは短くしてください。
+_name = 日本語
+
+# ヘッダー
+connect = 接続
+searching = AirPods を探しています…
+not_found = AirPods が見つかりません
+no_paired = ペアリング済みの AirPods がありません
+not_connected = 未接続
+connected = 接続済み
+place_both = 装着中
+place_one = 片耳装着
+place_case = ケース内
+place_out = 未装着
+
+# バッテリー
+left = 左
+right = 右
+case = ケース
+battery_waiting = バッテリー情報を待っています
+battery_age = {0} 分前に取得
+
+# リスニングモードと遅延
+mode_transparency = 外部音取り込み
+mode_adaptive = 適応型
+mode_nc = ノイズキャンセリング
+mode_off = オフ
+mode_unknown = 不明 ({0})
+tip_modes = リスニングモードです。AirPods を耳に装着している間だけ切り替わります。
+latency = 遅延
+tip_latency = AirPods のオーディオバッファ (ms) です。値が小さいほどゲームで音が早く届きます。音が途切れる場合は 1 段階上げてください。
+
+# タイル
+mic = マイク
+tip_mic = ブリッジ経由で AirPods のマイクを使います。話している間も音声はステレオのままです。
+spatial = 立体音響
+game_mode = ゲームモード
+game_tip_default = 既定のマイクを AirPods 以外に保ち、音声がモノラルに落ちるのを防ぎます。
+game_auto_on = 自動でオン: {0}
+game_manual = 手動でオン
+game_running = {0} が実行中
+on = オン
+off = オフ
+spatial_on_tip = オン: {0}
+spatial_switch_atmos = Dolby Atmos に切り替えるには、一度オフにしてからオンにしてください。
+spatial_tip_atmos = Dolby Atmos をオンにします。
+spatial_tip_sonic = Windows Sonic をオンにします。Dolby Access がインストールされている場合は Dolby Atmos を使います。
+
+# 音量
+volume = 音量
+mute = ミュート
+unmute = ミュート解除
+
+# 下段と設定
+settings = 設定
+exit = 終了
+audio = オーディオ
+stereo = ステレオ
+mono_handsfree = モノラル · ハンズフリー
+mono = モノラル
+mic_bridge = AirPods · ブリッジ
+mic_used_by = 使用中: {0}
+mic_locked = AirPods ロック中
+mic_handsfree = AirPods · ハンズフリー
+link_no_telemetry = コーデックと遅延を読み取れません (ドライバーのテレメトリがオフです)
+link_trouble = 接続で {0} 回の途切れを検出しました
+game_mic = ゲームモード時のマイク
+lock_mic = ゲームモード中は AirPods のマイクをロックする
+tip_lock_mic = ゲームモードがオンの間は、どのアプリも AirPods のハンズフリーマイクを開けません。
+auto_game = これらのゲームの実行中はゲームモードをオンにする
+tip_auto_game = 一覧のゲームが実行されている間はゲームモードが自動でオンになり、ゲームを終了するとオフになります。
+remove_from_list = 一覧から削除
+no_games = ゲームはまだ追加されていません
+add_game = ゲームを追加
+tip_add_game = ゲームを起動してから、ここで選んでください。
+open_apps = 実行中のアプリ
+open_game_first = 先にゲームを起動してから、ここで選んでください。
+auto_pause = 外すと一時停止、着け直すと再開
+tip_auto_pause = イヤホンを片方外すと、再生中の音楽やビデオが一時停止します。10 分以内に着け直すと再開します。
+start_with_windows = Windows の起動時に開始
+disconnect = 接続解除
+language = 言語
+language_auto = Windows の言語
+
+# 通知行
+banner_other_output = 別のデバイスで音が再生されています
+banner_take = AirPods に切替
+banner_mono = 音声はモノラル · マイク使用中: {0}
+banner_mono_tip = アプリが AirPods のハンズフリーマイクを開きました。マイクまたはゲームモードのタイルでこれを防げます。
+banner_mic_waiting = マイク: AirPods からの音声を待っています
+banner_mic_wear = マイクを使うには AirPods を装着してください
+banner_gave_up = ブリッジが Bluetooth を引き継げませんでした
+retry = 再試行
+banner_gave_up_tip = サービスは 3 回試行したあと、アダプターを Windows に戻しました。AirPods は使えますが、リスニングモード、遅延、マイクは使えません。
+banner_not_usb = Bluetooth アダプターが USB ではないため、ブリッジは動作できません
+banner_usbip_missing = usbip-win2 がインストールされていないため、ブリッジは動作できません
+banner_no_adapter = ブリッジが Bluetooth アダプターを見つけられませんでした
+banner_stopped = ブリッジサービスが実行されていません
+banner_stopped_tip = リスニングモード、遅延、マイクはブリッジサービス経由で動作します。インストール後にコンピューターを再起動してください。
+
+# マイクブリッジのエラー
+hf_not_found = Windows のペアリング済みデバイスにこの AirPods が見つかりませんでした
+hf_cant_enable = Windows がハンズフリーサービスをオンにできませんでした (エラー {0})
+hf_cant_disable = Windows がハンズフリーサービスをオフにできませんでした (エラー {0})
+hf_state_unknown = ハンズフリーサービスの状態を読み取れませんでした
+ffmpeg_missing = FFmpeg ライブラリが見つかりません (アプリと同じ場所に "ffmpeg" フォルダーが必要です)
+ffmpeg_failed = FFmpeg を読み込めませんでした: {0}
+
+# 通知領域
+open_panel = パネルを開く
+tray_not_found = PodPanel — AirPods が見つかりません
+tray_not_connected = {0} — 未接続
+tray_battery = {0} — 左 {1}、右 {2}

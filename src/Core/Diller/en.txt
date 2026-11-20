@@ -1,0 +1,116 @@
+# PodPanel language file: English.
+# Format: key = text. Keys must not be changed; keep the {0}, {1} placeholders.
+# The panel is narrow (about 310 pixels): keep button and label texts short.
+_name = English
+
+# Header
+connect = Connect
+searching = Looking for AirPods…
+not_found = AirPods not found
+no_paired = No paired AirPods
+not_connected = Not connected
+connected = Connected
+place_both = in ears
+place_one = one in ear
+place_case = in case
+place_out = not in ears
+
+# Battery
+left = Left
+right = Right
+case = Case
+battery_waiting = Waiting for battery information
+percent = {0}%
+battery_age = Read {0} min ago
+
+# Listening mode and latency
+mode_transparency = Transparency
+mode_adaptive = Adaptive
+mode_nc = Noise Cancellation
+mode_off = Off
+mode_unknown = unknown ({0})
+tip_modes = Listening mode. The AirPods only switch while they are in your ears.
+latency = Latency
+tip_latency = The AirPods' audio buffer (ms). A smaller value brings sound sooner in games; if the audio stutters, go one step up.
+
+# Tiles
+mic = Microphone
+tip_mic = Uses the AirPods microphone through the bridge; audio stays in stereo while you talk.
+spatial = Spatial
+game_mode = Game mode
+game_tip_default = Keeps the default microphone away from the AirPods, so they do not drop to mono.
+game_auto_on = On automatically: {0}
+game_manual = turned on by hand
+game_running = {0} is running
+on = On
+off = Off
+spatial_on_tip = On: {0}
+spatial_switch_atmos = Turn it off and on again to switch to Dolby Atmos.
+spatial_tip_atmos = Turns on Dolby Atmos.
+spatial_tip_sonic = Turns on Windows Sonic. Dolby Atmos is used when Dolby Access is installed.
+
+# Volume
+volume = Volume
+mute = Mute
+unmute = Unmute
+
+# Bottom row and settings
+settings = Settings
+exit = Exit
+audio = Audio
+stereo = Stereo
+mono_handsfree = Mono · hands-free
+mono = mono
+mic_bridge = AirPods · bridge
+mic_used_by = Used by: {0}
+mic_locked = AirPods locked
+mic_handsfree = AirPods · hands-free
+link_no_telemetry = Codec and latency cannot be read (driver telemetry is off)
+link_trouble = {0} stalls seen on the connection
+game_mic = Microphone in game mode
+lock_mic = Lock the AirPods microphone in game mode
+tip_lock_mic = While game mode is on, no app can open the AirPods' hands-free microphone.
+auto_game = Turn on game mode when these games run
+tip_auto_game = Game mode turns on by itself while one of the listed games is running and off when it closes.
+remove_from_list = Remove from the list
+no_games = No games added yet
+add_game = Add a game
+tip_add_game = Start the game, then pick it here.
+open_apps = Open apps
+open_game_first = Start the game first, then pick it here.
+auto_pause = Pause when taken out, resume when put back
+tip_auto_pause = Taking an earbud out pauses the music or video that is playing; putting it back within 10 minutes resumes it.
+start_with_windows = Start with Windows
+disconnect = Disconnect
+language = Language
+language_auto = Windows language
+
+# Notice row
+banner_other_output = Sound is playing on another device
+banner_take = Move to AirPods
+banner_mono = Audio is mono · microphone used by: {0}
+banner_mono_tip = An app opened the AirPods' hands-free microphone. The Microphone or Game mode tile prevents this.
+banner_mic_waiting = Microphone: waiting for audio from the AirPods
+banner_mic_wear = Put the AirPods in for the microphone
+banner_gave_up = The bridge could not take over Bluetooth
+retry = Try again
+banner_gave_up_tip = The service tried three times and gave the adapter back to Windows. The AirPods work; listening modes, latency and the microphone do not.
+banner_not_usb = The Bluetooth adapter is not USB; the bridge cannot work
+banner_usbip_missing = usbip-win2 is not installed; the bridge cannot work
+banner_no_adapter = The bridge found no Bluetooth adapter
+banner_stopped = The bridge service is not running
+banner_stopped_tip = Listening modes, latency and the microphone work through the bridge service. Restart the computer after installing.
+
+# Microphone bridge errors
+hf_not_found = Windows did not find these AirPods among the paired devices
+hf_cant_enable = Windows could not turn on the hands-free service (error {0})
+hf_cant_disable = Windows could not turn off the hands-free service (error {0})
+hf_state_unknown = The state of the hands-free service could not be read
+ffmpeg_missing = FFmpeg libraries not found (an "ffmpeg" folder is expected next to the app)
+ffmpeg_failed = FFmpeg could not be loaded: {0}
+
+# Notification area
+open_panel = Open panel
+tray_not_found = PodPanel — AirPods not found
+tray_not_connected = {0} — not connected
+tray_battery = {0} — Left {1}, Right {2}

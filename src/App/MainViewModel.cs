@@ -19,6 +19,14 @@ public sealed class MicItem
     public bool IsSelected { get; init; }
 }
 
+/// <summary>Dil seçicideki bir satır; boş kod "Windows'un dili" demektir.</summary>
+public sealed class LanguageItem
+{
+    public string Code { get; init; } = "";
+    public string Name { get; init; } = "";
+    public bool IsSelected { get; init; }
+}
+
 /// <summary>Oyun modu listesindeki ya da eklenebilecek açık uygulamalardaki bir satır.</summary>
 public sealed class GameItem
 {
@@ -31,7 +39,6 @@ public sealed class GameItem
 /// <summary>Panelin bağlandığı görünüm modeli: PodState'i metne çevirir, tıklamaları izleyiciye iletir.</summary>
 public sealed class MainViewModel : INotifyPropertyChanged
 {
-    private const string GameTipDefault = "Varsayılan mikrofonu AirPods'tan uzak tutar; böylece kulaklık mono moda düşmez.";
 
     private enum BannerKind { None, OtherOutput, Mono, Mic, BridgeGaveUp, BridgeUnsupported, BridgeStopped }
 
@@ -43,6 +50,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private DateTime _userActionAt = DateTime.MinValue;
     private DateTime _modeActionAt = DateTime.MinValue;
     private DateTime _jitterActionAt = DateTime.MinValue;
+    private DateTime _volumeActionAt = DateTime.MinValue;
     private string _micSignature = "";
     private string _lastGames = "";
     private bool _bridgeInstalled;
@@ -65,7 +73,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ToggleDetailsCommand = new RelayCommand(_ =>
         {
             ShowDetails = !ShowDetails;
-            if (!ShowDetails) ClosePicker();
+            if (!ShowDetails)
+            {
+                ClosePicker();
+                ShowLanguages = false;
+            }
+        });
+        ToggleLanguagesCommand = new RelayCommand(_ => ShowLanguages = !ShowLanguages);
+        SelectLanguageCommand = new RelayCommand(parameter =>
+        {
+            if (parameter is not string code) return;
+            ShowLanguages = false;
+            Loc.Use(code);
+            _monitor?.SetLanguage(Loc.Requested);
+            RefreshLanguages();
+        });
+        ToggleMuteCommand = new RelayCommand(_ =>
+        {
+            _volumeActionAt = DateTime.Now;
+            Muted = !Muted;
+            _monitor?.SetMuted(Muted);
         });
         TogglePickerCommand = new RelayCommand(_ =>
         {
@@ -107,9 +134,18 @@ public sealed class MainViewModel : INotifyPropertyChanged
             _monitor?.SetListeningMode(wanted);
         });
         _startWithWindows = StartupRegistration.IsEnabled();
+        // Dil değişince hesaplanan metinler (durum, ipuçları, uyarı satırı) son durumdan yeniden üretilir.
+        Loc.Changed += () => dispatcher.BeginInvoke(new Action(() =>
+        {
+            RefreshLanguages();
+            NotifyVolume();
+            Apply(_state);
+        }));
+        RefreshLanguages();
         if (monitor != null)
         {
             monitor.StateChanged += state => dispatcher.BeginInvoke(new Action(() => Apply(state)));
+            monitor.VolumeChanged += (level, muted) => dispatcher.BeginInvoke(new Action(() => ShowSystemVolume(level, muted)));
         }
     }
 
@@ -125,6 +161,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public ICommand TogglePickerCommand { get; }
     public ICommand AddGameCommand { get; }
     public ICommand RemoveGameCommand { get; }
+    public ICommand ToggleLanguagesCommand { get; }
+    public ICommand SelectLanguageCommand { get; }
+    public ICommand ToggleMuteCommand { get; }
 
     private ICommand? _exitCommand;
     public ICommand? ExitCommand
@@ -136,7 +175,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public ObservableCollection<MicItem> Mics { get; } = new();
 
     // ---- Başlık ----
-    private string _deviceTitle = "AirPods aranıyor…";
+    private string _deviceTitle = Loc.T("searching");
     public string DeviceTitle { get => _deviceTitle; private set => Set(ref _deviceTitle, value); }
 
     private string _statusText = "";
@@ -226,7 +265,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     /// <summary>Oyun modu elle değil, listedeki bir uygulama çalıştığı için açık.</summary>
     public bool GameModeAuto { get => _gameModeAuto; private set => Set(ref _gameModeAuto, value); }
 
-    private string _gameTip = GameTipDefault;
+    private string _gameTip = Loc.T("game_tip_default");
     public string GameTip { get => _gameTip; private set => Set(ref _gameTip, value); }
 
     private bool _spatialEnabled;
@@ -446,6 +485,104 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    // ---- Ses düzeyi (Windows'un ses çubuğuyla aynı değer) ----
+    private bool _showVolume;
+    public bool ShowVolume { get => _showVolume; private set => Set(ref _showVolume, value); }
+
+    private double _volume;
+    public double Volume
+    {
+        get => _volume;
+        set
+        {
+            double level = Math.Round(Math.Clamp(value, 0, 100));
+            if (!Set(ref _volume, level)) return;
+            NotifyVolume();
+            if (_applying) return;
+            _volumeActionAt = DateTime.Now;
+            _monitor?.SetVolume((int)level);
+            // Windows'un çubuğundaki gibi: düzeyi değiştirmek sessizi kaldırır.
+            if (Muted && level > 0)
+            {
+                Muted = false;
+                _monitor?.SetMuted(false);
+            }
+        }
+    }
+
+    private bool _muted;
+    public bool Muted
+    {
+        get => _muted;
+        private set
+        {
+            if (Set(ref _muted, value)) NotifyVolume();
+        }
+    }
+
+    public string VolumeText => ((int)_volume).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>Hoparlör simgesi: sessizde üstü çizili, yoksa düzeye göre dalga sayısı.</summary>
+    public string VolumeGlyph => ((char)(_muted ? 0xE74F : _volume <= 0 ? 0xE992 : _volume < 34 ? 0xE993 : _volume < 67 ? 0xE994 : 0xE995)).ToString();
+
+    public string MuteTip => Loc.T(_muted ? "unmute" : "mute");
+
+    private void NotifyVolume()
+    {
+        Notify(nameof(VolumeText));
+        Notify(nameof(VolumeGlyph));
+        Notify(nameof(MuteTip));
+    }
+
+    /// <summary>Düzey başka bir yerden değişti: Windows'un çubuğu, klavye tuşları ya da kulaklığın sapı.</summary>
+    private void ShowSystemVolume(int level, bool muted)
+    {
+        if ((DateTime.Now - _volumeActionAt).TotalMilliseconds < 400) return;
+        bool applying = _applying;
+        _applying = true;
+        try
+        {
+            Volume = level;
+            Muted = muted;
+        }
+        finally
+        {
+            _applying = applying;
+        }
+    }
+
+    // ---- Dil ----
+    public ObservableCollection<LanguageItem> Languages { get; } = new();
+
+    private bool _showLanguages;
+    public bool ShowLanguages
+    {
+        get => _showLanguages;
+        set
+        {
+            if (Set(ref _showLanguages, value)) Notify(nameof(LanguagesGlyph));
+        }
+    }
+
+    public string LanguagesGlyph => ((char)(_showLanguages ? 0xE70E : 0xE70D)).ToString();
+
+    /// <summary>"Dil: Türkçe" ya da "Dil: Windows'un dili".</summary>
+    public string LanguageLabel => Loc.T("language") + ": "
+        + (Loc.Requested.Length == 0 ? Loc.T("language_auto") : Loc.Languages.FirstOrDefault(l => l.Code == Loc.Requested).Name ?? Loc.Requested);
+
+    private void RefreshLanguages()
+    {
+        Languages.Clear();
+        Languages.Add(new LanguageItem { Code = "", Name = Loc.T("language_auto"), IsSelected = Loc.Requested.Length == 0 });
+        foreach (var (code, name) in Loc.Languages)
+        {
+            Languages.Add(new LanguageItem { Code = code, Name = name, IsSelected = Loc.Requested == code });
+        }
+        Notify(nameof(LanguageLabel));
+    }
+
+    private void Notify(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
     private bool _startWithWindows;
     public bool StartWithWindows
     {
@@ -471,10 +608,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
             ShowConnect = s.DeviceFound && !s.Connected;
 
             bool batteryFresh = s.BatteryKnown && s.BatteryAgeSeconds <= 180;
-            DeviceTitle = s.DeviceFound ? s.DeviceName : "AirPods bulunamadı";
-            StatusText = !s.DeviceFound ? "Eşleştirilmiş AirPods yok"
-                : !s.Connected ? "Bağlı değil"
-                : "Bağlı" + Place(s, s.ControlOpen || batteryFresh);
+            DeviceTitle = s.DeviceFound ? s.DeviceName : Loc.T("not_found");
+            StatusText = !s.DeviceFound ? Loc.T("no_paired")
+                : !s.Connected ? Loc.T("not_connected")
+                : Loc.T("connected") + Place(s, s.ControlOpen || batteryFresh);
 
             BatteryLeftText = Percent(s.BatteryLeft);
             BatteryRightText = Percent(s.BatteryRight);
@@ -483,37 +620,37 @@ public sealed class MainViewModel : INotifyPropertyChanged
             IsChargingRight = batteryFresh && s.ChargingRight && s.BatteryRight != null;
             IsChargingCase = batteryFresh && s.ChargingCase && s.BatteryCase != null;
             BatteryTip = !s.DeviceFound ? null
-                : !s.BatteryKnown ? "Pil bilgisi bekleniyor"
-                : s.BatteryAgeSeconds > 180 ? $"{s.BatteryAgeSeconds / 60} dk önce okundu"
+                : !s.BatteryKnown ? Loc.T("battery_waiting")
+                : s.BatteryAgeSeconds > 180 ? Loc.T("battery_age", s.BatteryAgeSeconds / 60)
                 : null;
 
             ApplyBanner(s);
 
             AudioModeText = !s.Connected ? "—"
-                : s.MonoMode ? "Mono · el-serbest" + (s.HfpCodec != null ? " · " + s.HfpCodec : "")
-                : "Stereo" + (s.Codec != null ? " · " + s.Codec : "") + (s.SampleRate != null ? $" {s.SampleRate / 1000.0:0.#} kHz" : "")
+                : s.MonoMode ? Loc.T("mono_handsfree") + (s.HfpCodec != null ? " · " + s.HfpCodec : "")
+                : Loc.T("stereo") + (s.Codec != null ? " · " + s.Codec : "") + (s.SampleRate != null ? $" {s.SampleRate / 1000.0:0.#} kHz" : "")
                   + (s.AudioKbps != null ? $" · {s.AudioKbps} kbps" : "");
             DelayText = s.DelayMs != null ? $"{s.DelayMs} ms" : "—";
-            MicText = s.BridgeMicOn && s.BridgeMicReady ? "AirPods · köprü"
+            MicText = s.BridgeMicOn && s.BridgeMicReady ? Loc.T("mic_bridge")
                 : !s.HasMic ? "—"
-                : s.MonoMode ? "Kullanan: " + string.Join(", ", s.MicUsers)
-                : s.MicDisabled ? "AirPods kilitli"
-                : s.IsDefaultMic ? "AirPods · el-serbest"
+                : s.MonoMode ? Loc.T("mic_used_by", string.Join(", ", s.MicUsers))
+                : s.MicDisabled ? Loc.T("mic_locked")
+                : s.IsDefaultMic ? Loc.T("mic_handsfree")
                 : s.DefaultMicName;
-            LinkNote = !s.TelemetryAvailable ? "Codec ve gecikme okunamıyor (sürücü telemetrisi kapalı)"
-                : s.LinkTroubleCount > 0 ? $"Bağlantıda {s.LinkTroubleCount} tıkanma görüldü"
+            LinkNote = !s.TelemetryAvailable ? Loc.T("link_no_telemetry")
+                : s.LinkTroubleCount > 0 ? Loc.T("link_trouble", s.LinkTroubleCount)
                 : "";
 
             ShowBridgeMic = s.DeviceFound && s.BridgeAvailable;
             GameModeAuto = s.GameModeActive && !s.GameModeManual;
-            GameTip = GameModeAuto ? "Kendiliğinden açık: " + s.GameModeReason : GameTipDefault;
+            GameTip = GameModeAuto ? Loc.T("game_auto_on", s.GameModeReason) : Loc.T("game_tip_default");
             SpatialEnabled = s.Connected && s.SpatialSupported;
-            SpatialText = !s.Connected ? "—" : s.SpatialOn ? s.SpatialFormat : "Kapalı";
+            SpatialText = !s.Connected ? "—" : s.SpatialOn ? s.SpatialFormat : Loc.T("off");
             SpatialTip = s.SpatialOn
-                ? "Açık: " + s.SpatialFormat
-                  + (s.SpatialAtmosAvailable && s.SpatialFormat != "Dolby Atmos" ? ". Dolby Atmos'a geçmek için kapatıp aç." : "")
-                : s.SpatialAtmosAvailable ? "Dolby Atmos'u açar."
-                : "Windows Sonic'i açar. Dolby Access kuruluysa Dolby Atmos kullanılır.";
+                ? Loc.T("spatial_on_tip", s.SpatialFormat)
+                  + (s.SpatialAtmosAvailable && s.SpatialFormat != "Dolby Atmos" ? ". " + Loc.T("spatial_switch_atmos") : "")
+                : s.SpatialAtmosAvailable ? Loc.T("spatial_tip_atmos")
+                : Loc.T("spatial_tip_sonic");
 
             ShowModes = s.Connected && s.ControlOpen;
             ModesEnabled = ShowModes && s.Worn;
@@ -537,12 +674,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             UpdateGames(s);
 
+            ShowVolume = s.Connected && s.Volume != null;
+            // Kullanıcı az önce çubuğu sürüklediyse, ondan önce okunmuş bir durum çubuğu geri çekmesin.
+            if (s.Volume is { } level && (DateTime.Now - _volumeActionAt).TotalMilliseconds > 1000)
+            {
+                Volume = level;
+                Muted = s.Muted;
+            }
+
             UpdateMics(s.Mics);
 
-            TrayTooltip = !s.DeviceFound ? "PodPanel — AirPods bulunamadı"
-                : !s.Connected ? $"{s.DeviceName} — bağlı değil"
-                : $"{s.DeviceName} — Sol {Percent(s.BatteryLeft)}, Sağ {Percent(s.BatteryRight)}"
-                  + (s.ListeningMode is { } shown ? " · " + Aap.ModeName(shown) : "") + (s.MonoMode ? " · mono" : "");
+            TrayTooltip = !s.DeviceFound ? Loc.T("tray_not_found")
+                : !s.Connected ? Loc.T("tray_not_connected", s.DeviceName)
+                : Loc.T("tray_battery", s.DeviceName, Percent(s.BatteryLeft), Percent(s.BatteryRight))
+                  + (s.ListeningMode is { } shown ? " · " + Aap.ModeName(shown) : "") + (s.MonoMode ? " · " + Loc.T("mono") : "");
         }
         finally
         {
@@ -559,15 +704,15 @@ public sealed class MainViewModel : INotifyPropertyChanged
         if (s.Connected && !s.IsDefaultOutput)
         {
             kind = BannerKind.OtherOutput;
-            text = "Ses başka aygıttan çıkıyor";
-            action = "AirPods'a al";
+            text = Loc.T("banner_other_output");
+            action = Loc.T("banner_take");
             tip = s.DefaultOutputName.Length > 0 ? s.DefaultOutputName : null;
         }
         else if (s.MonoMode)
         {
             kind = BannerKind.Mono;
-            text = "Ses mono · mikrofonu kullanan: " + string.Join(", ", s.MicUsers);
-            tip = "Bir uygulama AirPods'un el-serbest mikrofonunu açtı. Mikrofon ya da Oyun modu kutusu bunu önler.";
+            text = Loc.T("banner_mono", string.Join(", ", s.MicUsers));
+            tip = Loc.T("banner_mono_tip");
         }
         else if (s.BridgeMicOn && s.BridgeMicNote.Length > 0)
         {
@@ -577,30 +722,30 @@ public sealed class MainViewModel : INotifyPropertyChanged
         else if (s.BridgeMicOn && s.BridgeMicCapturing && !s.BridgeMicStreaming)
         {
             kind = BannerKind.Mic;
-            text = s.Worn ? "Mikrofon: kulaklıktan ses bekleniyor" : "Mikrofon için kulaklığı tak";
+            text = Loc.T(s.Worn ? "banner_mic_waiting" : "banner_mic_wear");
         }
         else if (s.DeviceFound && s.BridgeState == BridgeServiceState.Native)
         {
             kind = BannerKind.BridgeGaveUp;
-            text = "Köprü Bluetooth'u devralamadı";
-            action = "Yeniden dene";
-            tip = "Servis üç kez denedi ve adaptörü Windows'a geri verdi. Kulaklık çalışır; dinleme modu, gecikme ve mikrofon çalışmaz.";
+            text = Loc.T("banner_gave_up");
+            action = Loc.T("retry");
+            tip = Loc.T("banner_gave_up_tip");
         }
         else if (s.DeviceFound && s.BridgeState == BridgeServiceState.Unsupported)
         {
             kind = BannerKind.BridgeUnsupported;
             text = s.BridgeDetail switch
             {
-                "not-usb" => "Bluetooth adaptörü USB değil; köprü çalışamaz",
-                "usbip-missing" => "usbip-win2 kurulu değil; köprü çalışamaz",
-                _ => "Köprü bir Bluetooth adaptörü bulamadı",
+                "not-usb" => Loc.T("banner_not_usb"),
+                "usbip-missing" => Loc.T("banner_usbip_missing"),
+                _ => Loc.T("banner_no_adapter"),
             };
         }
         else if (s.Connected && !s.BridgeAvailable && BridgeInstalled())
         {
             kind = BannerKind.BridgeStopped;
-            text = "Köprü servisi çalışmıyor";
-            tip = "Dinleme modu, gecikme ve mikrofon köprü servisi üzerinden çalışır. Kurulumdan sonra bilgisayarı yeniden başlat.";
+            text = Loc.T("banner_stopped");
+            tip = Loc.T("banner_stopped_tip");
         }
         _bannerKind = kind;
         BannerText = text;
@@ -635,16 +780,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
         HasMics = Mics.Count > 0;
     }
 
-    private static string Percent(int? value) => value == null ? "—" : "%" + value;
+    private static string Percent(int? value) => value == null ? "—" : Loc.T("percent", value);
 
     /// <summary>Kulaklıkların yeri, durum satırına eklenecek biçimde; bilinmiyorsa boş.</summary>
     private static string Place(PodState s, bool known)
     {
         if (!known) return "";
-        if (s.InEarLeft && s.InEarRight) return " · kulakta";
-        if (s.InEarLeft || s.InEarRight || s.Worn) return " · tek kulakta";
-        if (s.BothInCase) return " · kutuda";
-        return " · kulakta değil";
+        if (s.InEarLeft && s.InEarRight) return " · " + Loc.T("place_both");
+        if (s.InEarLeft || s.InEarRight || s.Worn) return " · " + Loc.T("place_one");
+        if (s.BothInCase) return " · " + Loc.T("place_case");
+        return " · " + Loc.T("place_out");
     }
 
     private bool Set<T>(ref T field, T value, [CallerMemberName] string? name = null)

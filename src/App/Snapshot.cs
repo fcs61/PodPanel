@@ -21,7 +21,12 @@ internal static class Snapshot
     public static void Run(App app, string path, string mock, string theme)
     {
         var viewModel = new MainViewModel(null, app.Dispatcher);
-        const string detailsSuffix = "+ayarlar", pickerSuffix = "+secici", addedSuffix = "+eklendi";
+        const string detailsSuffix = "+ayarlar", pickerSuffix = "+secici", addedSuffix = "+eklendi", languagesSuffix = "+diller";
+        bool languages = mock.EndsWith(languagesSuffix, StringComparison.Ordinal);
+        if (languages)
+        {
+            mock = mock[..^languagesSuffix.Length] + detailsSuffix;
+        }
         bool added = mock.EndsWith(addedSuffix, StringComparison.Ordinal);
         bool picker = added || mock.EndsWith(pickerSuffix, StringComparison.Ordinal);
         if (picker)
@@ -77,6 +82,7 @@ internal static class Snapshot
                     new("cs2", "Counter-Strike 2"),
                 });
             }
+            if (languages) viewModel.ToggleLanguagesCommand.Execute(null);
             if (added)
             {
                 viewModel.AddGameCommand.Execute(viewModel.OpenApps[0]);
@@ -158,7 +164,7 @@ internal static class Snapshot
                 AutoGame = true, AutoPause = true, AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics,
                 BridgeAvailable = true, ControlOpen = true, BatteryExact = true, Worn = true,
                 ListeningMode = PodPanel.Core.Bridge.ListeningMode.NoiseCancellation,
-                BridgeMicOn = true, BridgeMicReady = true, BridgeMicIsDefault = true, AudioKbps = 265, JitterMs = 60,
+                BridgeMicOn = true, BridgeMicReady = true, BridgeMicIsDefault = true, AudioKbps = 265, JitterMs = 60, Volume = 64,
             },
             "mono" => new PodState
             {
@@ -178,12 +184,12 @@ internal static class Snapshot
                 BatteryKnown = true, BatteryLeft = 100, BatteryRight = 90, BatteryCase = 50,
                 BatteryAgeSeconds = 1, Activity = "Ses çalıyor", TelemetryAvailable = true, Codec = "AAC", SampleRate = 48000,
                 DelayMs = 150, SpatialSupported = true, SpatialOn = true, SpatialFormat = "Dolby Atmos", SpatialAtmosAvailable = true,
-                GameModeManual = false, GameModeActive = true, GameModeReason = "cs2 çalışıyor", LockMic = true, AutoGame = true, AutoPause = true,
+                GameModeManual = false, GameModeActive = true, GameModeReason = Loc.T("game_running", "Counter-Strike 2"), LockMic = true, AutoGame = true, AutoPause = true,
                 AutoGameProcesses = processes, AutoGameLabels = labels, Mics = mics, GameMicName = "Mikrofon (Arctis Nova 7P)",
                 BridgeAvailable = true, ControlOpen = true, BatteryExact = true, Worn = false,
                 ListeningMode = PodPanel.Core.Bridge.ListeningMode.NoiseCancellation,
                 BridgeMicOn = true, BridgeMicReady = true, BridgeMicCapturing = true, BridgeMicStreaming = true, BridgeMicIsDefault = true,
-                AudioKbps = 256, JitterMs = 60,
+                AudioKbps = 256, JitterMs = 60, Volume = 30, Muted = true,
             },
             _ => new PodState(),
         };

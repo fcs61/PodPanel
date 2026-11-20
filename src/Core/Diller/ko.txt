@@ -1,0 +1,115 @@
+# PodPanel 언어 파일: 한국어.
+# 형식: 키 = 텍스트. 키는 변경하지 마세요. {0}, {1} 자리 표시자는 그대로 유지합니다.
+# 패널이 좁으므로(약 310픽셀) 버튼과 레이블 텍스트는 짧게 유지하세요.
+_name = 한국어
+
+# 헤더
+connect = 연결
+searching = AirPods 찾는 중…
+not_found = AirPods를 찾을 수 없습니다
+no_paired = 페어링된 AirPods가 없습니다
+not_connected = 연결 안 됨
+connected = 연결됨
+place_both = 착용 중
+place_one = 한쪽 착용
+place_case = 케이스 안
+place_out = 착용 안 함
+
+# 배터리
+left = 왼쪽
+right = 오른쪽
+case = 케이스
+battery_waiting = 배터리 정보를 기다리는 중
+battery_age = {0}분 전에 읽음
+
+# 듣기 모드 및 지연 시간
+mode_transparency = 주변음 허용
+mode_adaptive = 적응형
+mode_nc = 노이즈 캔슬링
+mode_off = 끔
+mode_unknown = 알 수 없음({0})
+tip_modes = 듣기 모드입니다. AirPods를 귀에 착용하고 있을 때만 전환됩니다.
+latency = 지연 시간
+tip_latency = AirPods의 오디오 버퍼(ms)입니다. 값이 작을수록 게임에서 소리가 더 빨리 들립니다. 소리가 끊기면 한 단계 올리세요.
+
+# 타일
+mic = 마이크
+tip_mic = 브리지를 통해 AirPods 마이크를 사용합니다. 말하는 동안에도 오디오가 스테레오로 유지됩니다.
+spatial = 공간 음향
+game_mode = 게임 모드
+game_tip_default = 기본 마이크가 AirPods로 잡히지 않게 하여 오디오가 모노로 떨어지지 않도록 합니다.
+game_auto_on = 자동으로 켜짐: {0}
+game_manual = 수동으로 켬
+game_running = {0} 실행 중
+on = 켬
+off = 끔
+spatial_on_tip = 켬: {0}
+spatial_switch_atmos = Dolby Atmos로 전환하려면 껐다가 다시 켜세요.
+spatial_tip_atmos = Dolby Atmos를 켭니다.
+spatial_tip_sonic = Windows Sonic을 켭니다. Dolby Access가 설치되어 있으면 Dolby Atmos를 사용합니다.
+
+# 볼륨
+volume = 볼륨
+mute = 음소거
+unmute = 음소거 해제
+
+# 아래쪽 줄 및 설정
+settings = 설정
+exit = 종료
+audio = 오디오
+stereo = 스테레오
+mono_handsfree = 모노 · 핸즈프리
+mono = 모노
+mic_bridge = AirPods · 브리지
+mic_used_by = 사용 중: {0}
+mic_locked = AirPods 잠김
+mic_handsfree = AirPods · 핸즈프리
+link_no_telemetry = 코덱과 지연 시간을 읽을 수 없습니다(드라이버 원격 분석이 꺼져 있음)
+link_trouble = 연결에서 끊김이 {0}회 감지되었습니다
+game_mic = 게임 모드의 마이크
+lock_mic = 게임 모드에서 AirPods 마이크 잠그기
+tip_lock_mic = 게임 모드가 켜져 있는 동안에는 어떤 앱도 AirPods의 핸즈프리 마이크를 열 수 없습니다.
+auto_game = 이 게임이 실행되면 게임 모드 켜기
+tip_auto_game = 목록의 게임이 실행되는 동안 게임 모드가 자동으로 켜지고, 게임을 닫으면 꺼집니다.
+remove_from_list = 목록에서 제거
+no_games = 아직 추가된 게임이 없습니다
+add_game = 게임 추가
+tip_add_game = 게임을 실행한 다음 여기에서 선택하세요.
+open_apps = 실행 중인 앱
+open_game_first = 먼저 게임을 실행한 다음 여기에서 선택하세요.
+auto_pause = 빼면 일시 정지, 다시 끼면 재생
+tip_auto_pause = 이어버드를 한쪽 빼면 재생 중인 음악이나 비디오가 일시 정지되고, 10분 안에 다시 끼면 이어서 재생됩니다.
+start_with_windows = Windows 시작 시 실행
+disconnect = 연결 해제
+language = 언어
+language_auto = Windows 언어
+
+# 알림 줄
+banner_other_output = 다른 장치에서 소리가 재생되고 있습니다
+banner_take = AirPods로 전환
+banner_mono = 오디오가 모노입니다 · 마이크 사용 중: {0}
+banner_mono_tip = 앱이 AirPods의 핸즈프리 마이크를 열었습니다. 마이크 또는 게임 모드 타일로 이를 방지할 수 있습니다.
+banner_mic_waiting = 마이크: AirPods의 오디오를 기다리는 중
+banner_mic_wear = 마이크를 사용하려면 AirPods를 착용하세요
+banner_gave_up = 브리지가 블루투스를 넘겨받지 못했습니다
+retry = 다시 시도
+banner_gave_up_tip = 서비스가 세 번 시도한 뒤 어댑터를 Windows에 돌려주었습니다. AirPods는 작동하지만 듣기 모드, 지연 시간, 마이크는 작동하지 않습니다.
+banner_not_usb = 블루투스 어댑터가 USB가 아니어서 브리지가 작동할 수 없습니다
+banner_usbip_missing = usbip-win2가 설치되어 있지 않아 브리지가 작동할 수 없습니다
+banner_no_adapter = 브리지가 블루투스 어댑터를 찾지 못했습니다
+banner_stopped = 브리지 서비스가 실행되고 있지 않습니다
+banner_stopped_tip = 듣기 모드, 지연 시간, 마이크는 브리지 서비스를 통해 작동합니다. 설치 후 컴퓨터를 다시 시작하세요.
+
+# 마이크 브리지 오류
+hf_not_found = Windows가 페어링된 장치에서 이 AirPods를 찾지 못했습니다
+hf_cant_enable = Windows가 핸즈프리 서비스를 켜지 못했습니다(오류 {0})
+hf_cant_disable = Windows가 핸즈프리 서비스를 끄지 못했습니다(오류 {0})
+hf_state_unknown = 핸즈프리 서비스의 상태를 읽을 수 없습니다
+ffmpeg_missing = FFmpeg 라이브러리를 찾을 수 없습니다(앱 옆에 "ffmpeg" 폴더가 있어야 합니다)
+ffmpeg_failed = FFmpeg를 불러오지 못했습니다: {0}
+
+# 알림 영역
+open_panel = 패널 열기
+tray_not_found = PodPanel — AirPods를 찾을 수 없습니다
+tray_not_connected = {0} — 연결 안 됨
+tray_battery = {0} — 왼쪽 {1}, 오른쪽 {2}
